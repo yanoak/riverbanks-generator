@@ -94,6 +94,89 @@ export function canMerge(cells: number[], grid: GridSpec): MergeCheck {
 	return { ok: true };
 }
 
+/** A grid panel as derived from cell ownership; `source` names whose properties it takes. */
+export interface DerivedPanel {
+	id: string;
+	cells: number[];
+	/** The stored panel it copies style from; null for a cell nobody (valid) owns. */
+	source: string | null;
+	/** True when the id is synthetic: the stored document has no panel under it. */
+	derived: boolean;
+}
+
+const cellKey = (cell: number, grid: GridSpec) =>
+	`${Math.floor(cell / grid.cols)},${cell % grid.cols}`;
+
+/** 4-connected components of a cell set, each sorted, ordered by first cell. */
+function components(cells: number[], grid: GridSpec): number[][] {
+	const set = new Set(cells);
+	const seen = new Set<number>();
+	const out: number[][] = [];
+	for (const start of [...set].sort((a, b) => a - b)) {
+		if (seen.has(start)) continue;
+		const part: number[] = [];
+		const stack = [start];
+		while (stack.length) {
+			const c = stack.pop()!;
+			if (seen.has(c)) continue;
+			seen.add(c);
+			part.push(c);
+			for (const n of neighbours(c, grid)) if (set.has(n) && !seen.has(n)) stack.push(n);
+		}
+		out.push(part.sort((a, b) => a - b));
+	}
+	return out;
+}
+
+/** Horizontal runs of consecutive cells within each row: always valid panels. */
+function rowRuns(cells: number[], grid: GridSpec): number[][] {
+	const runs: number[][] = [];
+	for (const c of cells) {
+		const run = runs.at(-1);
+		const last = run?.at(-1);
+		if (run && last === c - 1 && Math.floor(last / grid.cols) === Math.floor(c / grid.cols)) {
+			run.push(c);
+		} else runs.push([c]);
+	}
+	return runs;
+}
+
+/**
+ * Grid panels from per-cell ownership, which concurrent edits can leave in any state: every
+ * cell is covered exactly once by construction, and each owner's cells are cut into valid
+ * panels. The piece holding the owner's first cell keeps its id; other pieces get ids derived
+ * from their first cell (`<id>~row,col`), so every replica derives the same page, and two
+ * replicas writing a derived panel back write the same key.
+ */
+export function derivePanels(
+	grid: GridSpec,
+	ownerOf: (cell: number) => string | undefined,
+	exists: (id: string) => boolean
+): DerivedPanel[] {
+	const byOwner = new Map<string, number[]>();
+	const out: DerivedPanel[] = [];
+	for (let cell = 0; cell < grid.rows * grid.cols; cell++) {
+		const owner = ownerOf(cell);
+		if (owner === undefined || !exists(owner)) {
+			out.push({ id: `~${cellKey(cell, grid)}`, cells: [cell], source: null, derived: true });
+		} else byOwner.set(owner, [...(byOwner.get(owner) ?? []), cell]);
+	}
+	for (const [owner, cells] of byOwner) {
+		const pieces = components(cells, grid).flatMap((part) =>
+			hasHoles(part, grid) ? rowRuns(part, grid) : [part]
+		);
+		pieces.forEach((part, i) =>
+			out.push({
+				id: i === 0 ? owner : `${owner}~${cellKey(part[0], grid)}`,
+				cells: part,
+				source: owner,
+				derived: i > 0
+			})
+		);
+	}
+	return out.sort((a, b) => a.cells[0] - b.cells[0]);
+}
+
 type LatticeEdge = { from: [number, number]; to: [number, number] };
 
 /**

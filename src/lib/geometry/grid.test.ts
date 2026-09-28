@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { canMerge, cellRect, hasHoles, isContiguous, panelOutline, polygonBBox } from './grid';
+import {
+	canMerge,
+	cellRect,
+	derivePanels,
+	hasHoles,
+	isContiguous,
+	panelOutline,
+	polygonBBox
+} from './grid';
 import type { GridSpec } from '$lib/model/types';
 
 // 4 cols × 3 rows on a 1020 × 780 page: cell 220 wide, 220 tall with margin 40 and gutter 20.
@@ -119,5 +127,73 @@ describe('polygonBBox', () => {
 			w: 460,
 			h: 460
 		});
+	});
+});
+
+describe('derivePanels', () => {
+	// Owner ids per cell, row-major, for the 4×3 test grid.
+	const own = (ids: (string | undefined)[]) => (cell: number) => ids[cell];
+	const has = (known: string[]) => (id: string) => known.includes(id);
+	const all = 'a b c d e f g h i j k l'.split(' ');
+
+	it('a normal partition comes back unchanged, ordered by first cell', () => {
+		const ids = ['a', 'a', 'c', 'd', 'a', 'a', 'g', 'h', 'i', 'j', 'k', 'l'];
+		const out = derivePanels(grid, own(ids), has(all));
+		expect(out.map((p) => [p.id, p.cells])).toEqual([
+			['a', [0, 1, 4, 5]],
+			['c', [2]],
+			['d', [3]],
+			['g', [6]],
+			['h', [7]],
+			['i', [8]],
+			['j', [9]],
+			['k', [10]],
+			['l', [11]]
+		]);
+		expect(out.every((p) => p.source === p.id && !p.derived)).toBe(true);
+	});
+
+	it('a disconnected owner becomes one panel per component; extras get derived ids', () => {
+		const ids = ['a', 'b', 'a', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+		const out = derivePanels(grid, own(ids), has(all));
+		const a = out.filter((p) => p.source === 'a');
+		expect(a.map((p) => [p.id, p.cells, p.derived])).toEqual([
+			['a', [0], false],
+			['a~0,2', [2], true]
+		]);
+	});
+
+	it('a holed ring is split into row runs, all hole-free', () => {
+		// a owns everything except cell 5, which b owns: a ring around b.
+		const ids = ['a', 'a', 'a', 'd', 'a', 'b', 'a', 'h', 'a', 'a', 'a', 'l'];
+		const out = derivePanels(grid, own(ids), has(['a', 'b', 'd', 'h', 'l']));
+		const a = out.filter((p) => p.source === 'a');
+		expect(a.map((p) => [p.id, p.cells])).toEqual([
+			['a', [0, 1, 2]],
+			['a~1,0', [4]],
+			['a~1,2', [6]],
+			['a~2,0', [8, 9, 10]]
+		]);
+		for (const p of out) expect(canMerge(p.cells, grid)).toEqual({ ok: true });
+	});
+
+	it('a cell with no owner, or an owner with no panel, becomes a default single panel', () => {
+		const ids = ['a', undefined, 'gone', ...all.slice(3)];
+		const out = derivePanels(grid, own(ids), has(all));
+		expect(out.find((p) => p.cells[0] === 1)).toEqual({
+			id: '~0,1',
+			cells: [1],
+			source: null,
+			derived: true
+		});
+		expect(out.find((p) => p.cells[0] === 2)?.source).toBeNull();
+	});
+
+	it('every cell is covered exactly once', () => {
+		const ids = ['a', 'b', 'a', 'b', 'b', 'a', 'b', 'a', undefined, 'a', 'x', 'a'];
+		const out = derivePanels(grid, own(ids), has(['a', 'b']));
+		const cells = out.flatMap((p) => p.cells).sort((x, y) => x - y);
+		expect(cells).toEqual([...Array(12).keys()]);
+		for (const p of out) expect(canMerge(p.cells, grid)).toEqual({ ok: true });
 	});
 });

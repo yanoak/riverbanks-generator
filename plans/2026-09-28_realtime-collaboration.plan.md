@@ -98,11 +98,27 @@ Keying by `"r,c"` rather than a row-major index keeps a concurrent `setGrid` (ro
 from reassigning everybody's cells. Out-of-range keys are ignored, and a cell with no entry
 becomes its own single panel.
 
-### Commands become Yjs transactions; undo becomes Y.UndoManager
+### Edits are draft diffs; undo becomes Y.UndoManager
 
-Each existing command class is rewritten as a function that runs inside
-`doc.transact(fn, LOCAL)`. `HistoryManager` is replaced by a `Y.UndoManager` scoped to the
-comic, with `trackedOrigins = {LOCAL}` so undo never reverts a collaborator's edit.
+**Revised while building stage 1: edits work on a draft, and only the difference is written.**
+Every edit, from the editor or MCP alike, runs in three steps:
+
+1. `projectComic(doc)` gives the current `Comic`.
+2. The edit mutates a clone of it.
+3. `applyComic(doc, before, after)` writes only the keys that differ, addressed by page, panel
+   and balloon id, in one transaction.
+
+The command logic survives as plain draft mutators (`model/panels.ts`). The MCP ops, which
+already mutated a draft, barely change, and the UI keeps rendering the `Comic` shape. Minimal
+writes are what make concurrent edits merge. Moving a page only renumbers it, and a merge only
+rewrites the cells that change owner (tested). `DOC_VERSION` stays 1: the JSON projection keeps
+the v1 shape.
+
+This replaces rewriting every command class as a hand-written Yjs transaction, which would have
+touched every command and duplicated the model logic.
+
+`HistoryManager` is replaced by a `Y.UndoManager` scoped to the comic, with
+`trackedOrigins = {LOCAL}` so undo never reverts a collaborator's edit.
 `captureTimeout: 500` groups typing the way TipTap does today, and every command calls
 `um.stopCapturing()` after its transaction, so one command is still one undo step (verified in
 the spike). The step's description
@@ -291,10 +307,11 @@ limits and the TipTap-Svelte binding.
 
 **Stage 1: Y.Doc underneath**
 
-- [ ] `model/ydoc.ts`: schema helpers, `jsonToYDoc` (v1 → v2), `yDocToJson`; `DOC_VERSION = 2`
-      and the v1→v2 step in `migrate()`
-- [ ] `geometry/grid.ts` `derivePanels(cells, grid)`: components → panels, derived ids, holes
-      split, empty and out-of-range cells
+- [x] `model/ydoc.ts`: `comicToYDoc`, `projectComic`, `applyComic` (draft diff, page order by
+      midpoints); `model/text.ts` HTML ↔ fragment without a DOM; `model/panels.ts` draft
+      mutators. (No `DOC_VERSION` bump needed; see Approach.)
+- [x] `geometry/grid.ts` `derivePanels`: components → panels, derived ids, holes split into
+      row runs, missing owners → default single panels
 - [ ] `model/mirror.svelte.ts`: an incremental `$state` mirror updated from `observeDeep`,
       keeping object identity for unchanged objects
 - [ ] Rewrite commands as transactions (patch, insert/remove/move, merge, split, setGrid,

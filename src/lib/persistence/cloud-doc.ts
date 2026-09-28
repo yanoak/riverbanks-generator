@@ -9,6 +9,9 @@ import { LOAD } from '$lib/model/ydoc';
 import { compactDoc, isEmptyUpdate, openDoc, type OpenedDoc } from '$lib/ops/ydoc-store';
 import { fromBytea, SupabaseComicStore } from './supabase-store';
 
+/** Row-level security refused the write: this user may no longer edit the comic. */
+const isRefused = (e: unknown) => (e as { code?: string }).code === '42501';
+
 /** Origin of updates that arrived from the server (never sent back). */
 export const REMOTE = 'remote';
 
@@ -34,6 +37,8 @@ export class CloudDoc {
 	onstatus: ((s: SyncStatus) => void) | null = null;
 	/** Fires each time the live channel is (re)joined and caught up. */
 	onlive: ((live: boolean) => void) | null = null;
+	/** Access was withdrawn (removed from the comic): writes and the channel are refused. */
+	onrevoked: (() => void) | null = null;
 
 	constructor(
 		private supabase: SupabaseClient,
@@ -75,9 +80,23 @@ export class CloudDoc {
 					void this.flush(); // anything that failed while we were offline
 				} else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
 					this.onlive?.(false);
+					// A refused (re)join means access was withdrawn; confirm with a read.
+					if (status === 'CHANNEL_ERROR') void this.checkAccess();
 				}
 			});
 		window.addEventListener('online', this.retryNow);
+	}
+
+	private async checkAccess() {
+		const { data, error } = await this.supabase
+			.from('comics')
+			.select('id')
+			.eq('id', this.id)
+			.maybeSingle();
+		if (!error && !data && !this.stopped) {
+			this.stopped = true;
+			this.onrevoked?.();
+		}
 	}
 
 	private retryNow = () => {
@@ -149,6 +168,11 @@ export class CloudDoc {
 				this.failures = 0;
 				this.setStatus(this.pending.length ? 'saving' : 'saved');
 			} catch (e) {
+				if (isRefused(e)) {
+					this.stopped = true;
+					this.onrevoked?.();
+					return;
+				}
 				console.warn('Saving the change failed; will retry', e);
 				this.pending.unshift(update);
 				this.setStatus('offline');

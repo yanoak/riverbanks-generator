@@ -11,7 +11,7 @@ async function connect() {
 		store,
 		user: { id: 'user-1', email: 'yan@test.local' },
 		appUrl: 'https://app.test',
-		importImage: async ({ url }) => {
+		importImage: async (_comicId, { url }) => {
 			imported.push(url ?? 'base64');
 			return { assetId: 'asset-1', naturalWidth: 800, naturalHeight: 600 };
 		}

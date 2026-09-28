@@ -352,11 +352,19 @@ limits and the TipTap-Svelte binding.
 
 **Stage 2: sharing**
 
-- [ ] `comic_members`, `is_member()`, owner trigger; membership RLS on comics, updates,
-      `realtime.messages`
-- [ ] Images to `assets/<comic id>/…`: storage policies, copy script, `cloud-assets.ts`
-- [ ] Invite/remove RPCs; Share dialog; "Shared with me" in the comics list; leave comic
-- [ ] MCP: list/search include shared comics; `whoami` unchanged
+- [x] Migration `20260928220000_comic_members.sql`: `comic_members` (owners backfilled, owner
+      row by trigger), `can_access_comic` now checks membership, so the update log and the
+      channel follow it. Members read and update `comics`; only the owner deletes
+- [x] Images at `assets/<comic id>/…` for members. There is no copy script: an image still in the
+      uploader's own folder is copied into the comic's folder the first time the uploader loads
+      it (`cloud-assets.ts`). The MCP `set_panel_image` and local import upload per comic
+- [x] `invite_to_comic` / `remove_from_comic` / `comic_people` / `shared_comic_owners` RPCs;
+      `ShareDialog.svelte` (native modal dialog); "Shared with me · Shared by …" in the comics
+      list; leave comic; a removed editor's next write (or refused channel rejoin) returns them
+      to `/comics` with "You no longer have access to that comic."
+- [x] MCP: list and search include shared comics through RLS (tested); `whoami` unchanged
+- [x] Fixed a stage 1 regression: revisions are now a per-comic update count that continues the
+      pre-Yjs row revision, so a converted comic's revision never goes backwards
 
 **Stage 3: presence**
 
@@ -514,9 +522,13 @@ e2e = Playwright with two browser contexts.
 
 **Access**
 
-- [ ] RLS: a non-member can't read the comic, its updates, its images or its channel; a member
-      can; an editor can't delete the comic or remove others — int — `access.int.test.ts`
-- [ ] Invite by unknown email → the "no account" error; by the owner's own email → no-op — int
+- [x] RLS: a non-member can't read the comic, its updates or its images, or write any of them;
+      a member can; an editor can't delete the comic or remove others, but can leave — int —
+      `persistence/access.int.test.ts` (the channel is covered by the spike and the e2e tests)
+- [x] Invite by unknown email → the "no account" error; by the owner's own email, or again → a
+      no-op — int
+- [x] Share by keyboard, "Shared with me", edit together, removal returns the editor to their
+      list — e2e — `e2e/share.e2e.ts`
 
 **Soft hold**
 

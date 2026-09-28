@@ -16,13 +16,18 @@ export async function findLocalComic(): Promise<Comic | null> {
 	}
 }
 
-/** Uploads every image the comic uses, then creates it; returns the new comic id. */
+/** Creates the comic, then uploads every image it uses into its folder; returns its id. */
 export async function importLocalComic(
 	supabase: SupabaseClient,
 	userId: string,
 	comic: Comic
 ): Promise<string> {
-	const cloud = supabaseAssets(supabase, userId);
+	const record = await new SupabaseComicStore(supabase).create(
+		comic.title,
+		comic,
+		initialState(comic)
+	);
+	const cloud = supabaseAssets(supabase, record.id, userId);
 	const ids = new Set(
 		comic.pages.flatMap((p) =>
 			p.panels.flatMap((panel) => (panel.image ? [panel.image.assetId] : []))
@@ -32,10 +37,5 @@ export async function importLocalComic(
 		const blob = await indexedDbAssets.blob(id);
 		if (blob) await cloud.put(id, blob);
 	}
-	const record = await new SupabaseComicStore(supabase).create(
-		comic.title,
-		comic,
-		initialState(comic)
-	);
 	return record.id;
 }

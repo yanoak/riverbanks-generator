@@ -24,11 +24,15 @@ export interface McpContext {
 	/** The signed-in user the tools act as. */
 	user: { id: string; email: string };
 	/** Fetch an image URL (or decode base64) into the user's asset storage. */
-	importImage: (source: {
-		url?: string;
-		base64?: string;
-		mimeType?: string;
-	}) => Promise<ImportedImage>;
+	/** Store an image in the comic's folder. */
+	importImage: (
+		comicId: string,
+		source: {
+			url?: string;
+			base64?: string;
+			mimeType?: string;
+		}
+	) => Promise<ImportedImage>;
 	/** Public origin of the app, for view links. */
 	appUrl: string;
 }
@@ -316,7 +320,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		async ({ comicId, page: n, panelId, url, base64, mimeType, fit }) =>
 			guard(async () => {
 				if (!url === !base64) throw new OpError('invalid', 'Give exactly one of url or base64.');
-				const image = await ctx.importImage({ url, base64, mimeType });
+				const image = await ctx.importImage(comicId, { url, base64, mimeType });
 				const { rev, summary } = await mutateComic(store, comicId, (c) =>
 					ops.setPanelImage(c, { page: n, panelId, image, fit })
 				);

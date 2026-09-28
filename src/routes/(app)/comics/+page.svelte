@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import AccountMenu from '$lib/components/AccountMenu.svelte';
@@ -19,8 +20,17 @@
 	let renaming = $state<string | null>(null);
 	let createForm = $state<HTMLFormElement>();
 
+	const mine = $derived(data.comics.filter((c) => !c.sharedBy));
+	const shared = $derived(data.comics.filter((c) => c.sharedBy));
+
 	onMount(async () => {
-		useAssetBackend(supabaseAssets(supabase, data.user.id));
+		// Thumbnails show several comics: find each image's comic by its asset id.
+		const comicOf = new Map(
+			data.comics.flatMap((c) =>
+				(c.firstPage?.panels ?? []).flatMap((p) => (p.image ? [[p.image.assetId, c.id]] : []))
+			) as [string, string][]
+		);
+		useAssetBackend(supabaseAssets(supabase, (id) => comicOf.get(id), data.user.id));
 		localComic = await findLocalComic();
 	});
 
@@ -76,6 +86,11 @@
 			</form>
 		</div>
 
+		{#if page.url.searchParams.get('notice') === 'no-access'}
+			<p class="mb-4 rounded bg-amber-50 px-3 py-2 text-sm text-amber-900" role="status">
+				You no longer have access to that comic.
+			</p>
+		{/if}
 		{#if form?.error}
 			<p class="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{form.error}</p>
 		{/if}
@@ -98,7 +113,7 @@
 			</div>
 		{/if}
 
-		{#if data.comics.length === 0}
+		{#if mine.length === 0}
 			<p
 				class="rounded border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-stone-500"
 			>
@@ -108,75 +123,81 @@
 			</p>
 		{:else}
 			<ul class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
-				{#each data.comics as comic (comic.id)}
-					<li class="group">
-						<a
-							href="/comics/{comic.id}"
-							class="block rounded focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none"
-							aria-label="Open {comic.title}"
-						>
-							<div
-								class="pointer-events-none overflow-hidden bg-white shadow-sm ring-1 ring-stone-200 group-hover:ring-stone-400"
-								style:width="{THUMB}px"
-							>
-								{#if comic.firstPage}
-									<PageView page={comic.firstPage} scale={THUMB / comic.firstPage.width} />
-								{/if}
-							</div>
-						</a>
-						{#if renaming === comic.id}
-							<form
-								method="POST"
-								action="?/rename"
-								class="mt-2 flex gap-1"
-								use:enhance={() =>
-									async ({ update }) => {
-										await update();
-										renaming = null;
-									}}
-							>
-								<input type="hidden" name="id" value={comic.id} />
-								<!-- svelte-ignore a11y_autofocus -->
-								<input
-									name="title"
-									value={comic.title}
-									autofocus
-									aria-label="Title"
-									class="min-w-0 flex-1 rounded border border-stone-300 px-2 py-1 text-sm"
-									onkeydown={(e) => e.key === 'Escape' && (renaming = null)}
-								/>
-								<button class="rounded border border-stone-300 px-2 text-sm">Save</button>
-							</form>
-						{:else}
-							<p class="mt-2 truncate font-medium">{comic.title}</p>
-						{/if}
-						<p class="text-xs text-stone-500">
-							{comic.pageCount} page{comic.pageCount === 1 ? '' : 's'} · edited {ago(
-								comic.updatedAt
-							)}
-						</p>
-						<div class="mt-1 flex gap-2 text-xs">
-							<button
-								class="text-stone-500 hover:text-stone-900"
-								onclick={() => (renaming = comic.id)}>Rename</button
-							>
-							{#if confirmDelete === comic.id}
-								<form method="POST" action="?/delete" use:enhance class="inline">
-									<input type="hidden" name="id" value={comic.id} />
-									<button class="font-medium text-red-700">Really delete?</button>
-								</form>
-								<button class="text-stone-500" onclick={() => (confirmDelete = null)}>Cancel</button
-								>
-							{:else}
-								<button
-									class="text-stone-500 hover:text-red-700"
-									onclick={() => (confirmDelete = comic.id)}>Delete</button
-								>
-							{/if}
-						</div>
-					</li>
-				{/each}
+				{#each mine as comic (comic.id)}{@render card(comic)}{/each}
+			</ul>
+		{/if}
+
+		{#if shared.length}
+			<h2 class="mt-10 mb-6 text-lg font-semibold">Shared with me</h2>
+			<ul class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
+				{#each shared as comic (comic.id)}{@render card(comic)}{/each}
 			</ul>
 		{/if}
 	</main>
 </div>
+
+{#snippet card(comic: (typeof data.comics)[number])}
+	<li class="group">
+		<a
+			href="/comics/{comic.id}"
+			class="block rounded focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none"
+			aria-label="Open {comic.title}"
+		>
+			<div
+				class="pointer-events-none overflow-hidden bg-white shadow-sm ring-1 ring-stone-200 group-hover:ring-stone-400"
+				style:width="{THUMB}px"
+			>
+				{#if comic.firstPage}
+					<PageView page={comic.firstPage} scale={THUMB / comic.firstPage.width} />
+				{/if}
+			</div>
+		</a>
+		{#if renaming === comic.id}
+			<form
+				method="POST"
+				action="?/rename"
+				class="mt-2 flex gap-1"
+				use:enhance={() =>
+					async ({ update }) => {
+						await update();
+						renaming = null;
+					}}
+			>
+				<input type="hidden" name="id" value={comic.id} />
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					name="title"
+					value={comic.title}
+					autofocus
+					aria-label="Title"
+					class="min-w-0 flex-1 rounded border border-stone-300 px-2 py-1 text-sm"
+					onkeydown={(e) => e.key === 'Escape' && (renaming = null)}
+				/>
+				<button class="rounded border border-stone-300 px-2 text-sm">Save</button>
+			</form>
+		{:else}
+			<p class="mt-2 truncate font-medium">{comic.title}</p>
+		{/if}
+		<p class="text-xs text-stone-500">
+			{comic.pageCount} page{comic.pageCount === 1 ? '' : 's'} · edited {ago(comic.updatedAt)}
+		</p>
+		<div class="mt-1 flex gap-2 text-xs">
+			<button class="text-stone-500 hover:text-stone-900" onclick={() => (renaming = comic.id)}
+				>Rename</button
+			>
+			{#if comic.sharedBy}
+				<span class="text-stone-400">Shared by {comic.sharedBy}</span>
+			{:else if confirmDelete === comic.id}
+				<form method="POST" action="?/delete" use:enhance class="inline">
+					<input type="hidden" name="id" value={comic.id} />
+					<button class="font-medium text-red-700">Really delete?</button>
+				</form>
+				<button class="text-stone-500" onclick={() => (confirmDelete = null)}>Cancel</button>
+			{:else}
+				<button class="text-stone-500 hover:text-red-700" onclick={() => (confirmDelete = comic.id)}
+					>Delete</button
+				>
+			{/if}
+		</div>
+	</li>
+{/snippet}

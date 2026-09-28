@@ -66,7 +66,7 @@ describe.skipIf(!url || !serviceKey)('SupabaseComicStore against local Supabase'
 		expect(await store.compact(rec.id, { ...c, baseRev: 0 })).toBe(false);
 		expect(await store.compact(rec.id, { ...c, baseRev: 1 })).toBe(true);
 		const s = (await store.state(rec.id))!;
-		expect([s.snapshotRev, s.upto, s.updates.length]).toEqual([2, id, 0]);
+		expect([s.snapshotRev, s.upto, s.updates.length]).toEqual([2, 1, 0]); // one update folded
 		expect((await store.get(rec.id))?.title).toBe('Renamed');
 		expect(projectComic((await openDoc(store, rec.id))!.doc).title).toBe('Renamed');
 	});

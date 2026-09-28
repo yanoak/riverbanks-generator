@@ -54,12 +54,12 @@ export class MemoryStore implements ComicStore {
 	}
 
 	/** Test hook: a comic saved before Yjs (JSON only). */
-	createLegacy(comic: Comic): string {
+	createLegacy(comic: Comic, rev = 1): string {
 		const row: Row = {
 			id: newId(),
 			title: comic.title,
 			doc: clone(comic),
-			rev: 1,
+			rev,
 			updatedAt: new Date().toISOString(),
 			snapshot: null,
 			snapshotRev: 0,
@@ -92,7 +92,7 @@ export class MemoryStore implements ComicStore {
 	async initSnapshot(id: string, state: Uint8Array): Promise<boolean> {
 		const row = this.rows.get(id);
 		if (!row || row.snapshot) return false;
-		Object.assign(row, { snapshot: state, snapshotRev: 1 });
+		Object.assign(row, { snapshot: state, snapshotRev: 1, upto: row.rev });
 		return true;
 	}
 
@@ -120,14 +120,15 @@ export class MemoryStore implements ComicStore {
 		Object.assign(row, {
 			snapshot: c.state,
 			snapshotRev: c.baseRev + 1,
-			upto: Math.max(row.upto, ...c.applied),
 			title: c.title,
 			doc: clone(c.projection),
 			rev: row.rev + 1,
 			updatedAt: new Date().toISOString()
 		});
 		const folded = new Set(c.applied);
+		const before = this.updates.length;
 		this.updates = this.updates.filter((u) => u.comicId !== id || !folded.has(u.id));
+		row.upto += before - this.updates.length;
 		return true;
 	}
 }

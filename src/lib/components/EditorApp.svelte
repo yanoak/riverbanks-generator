@@ -9,6 +9,8 @@
 	import type { Comic } from '$lib/model/types';
 	import { createAutoSave, type SaveStatus } from '$lib/persistence/autosave';
 	import type { CloudDoc } from '$lib/persistence/cloud-doc';
+	import type { SupabaseClient } from '@supabase/supabase-js';
+	import ShareDialog from './ShareDialog.svelte';
 	import type { DocumentSource } from '$lib/persistence/source';
 	import { onMount, type Snippet } from 'svelte';
 
@@ -16,9 +18,26 @@
 	let {
 		source,
 		cloud,
+		sharing,
 		initialPage = 1,
-		nav
-	}: { source?: DocumentSource; cloud?: CloudDoc; initialPage?: number; nav?: Snippet } = $props();
+		nav,
+		onrevoked
+	}: {
+		source?: DocumentSource;
+		cloud?: CloudDoc;
+		/** Cloud comics: enables the Share dialog. */
+		sharing?: { supabase: SupabaseClient; userId: string };
+		initialPage?: number;
+		nav?: Snippet;
+		/** This user no longer has access (removed, or left). */
+		onrevoked?: () => void;
+	} = $props();
+
+	let sharingOpen = $state(false);
+	function closeSharing() {
+		sharingOpen = false;
+		document.querySelector<HTMLElement>('[data-share]')?.focus();
+	}
 	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
 
 	/** US trim width at 96 CSS px per inch, for the print stylesheet. */
@@ -60,6 +79,7 @@
 	async function openCloud(doc: CloudDoc) {
 		doc.onstatus = (s) => (saveStatus = s);
 		doc.onlive = (l) => (live = l);
+		doc.onrevoked = () => onrevoked?.();
 		editor.attach(await doc.open());
 		editor.goToPage(initialPage - 1);
 		void doc.connect();
@@ -132,6 +152,8 @@
 	}
 
 	function onkeydown(e: KeyboardEvent) {
+		// A modal (the Share dialog) owns the keyboard: Esc closes it, typing is typing.
+		if ((e.target as Element | null)?.closest?.('dialog')) return;
 		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
 			e.preventDefault();
 			exportPng();
@@ -172,7 +194,24 @@
 </div>
 
 <div class="app flex h-screen flex-col bg-stone-100 text-stone-900">
-	<Toolbar {editor} {saveStatus} onexportpng={exportPng} onexportpdf={exportPdf} {nav} />
+	<Toolbar
+		{editor}
+		{saveStatus}
+		onexportpng={exportPng}
+		onexportpdf={exportPdf}
+		onshare={cloud && sharing ? () => (sharingOpen = true) : undefined}
+		{nav}
+	/>
+	{#if sharingOpen && cloud && sharing}
+		<ShareDialog
+			supabase={sharing.supabase}
+			comicId={cloud.id}
+			userId={sharing.userId}
+			title={editor.comic.title}
+			onclose={closeSharing}
+			onleft={() => onrevoked?.()}
+		/>
+	{/if}
 	<div class="flex min-h-0 flex-1">
 		<PageStrip {editor} />
 		<main class="relative min-w-0 flex-1 overflow-auto" {@attach measure}>

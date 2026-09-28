@@ -33,8 +33,8 @@ const toRecord = (r: Row): ComicRecord => ({
 	updatedAt: r.updated_at
 });
 
-const fail = (what: string, error: { message: string }) =>
-	new Error(`Could not ${what}: ${error.message}`);
+const fail = (what: string, error: { message: string; code?: string }) =>
+	Object.assign(new Error(`Could not ${what}: ${error.message}`), { code: error.code });
 
 export class SupabaseComicStore implements ComicStore {
 	constructor(private supabase: SupabaseClient) {}

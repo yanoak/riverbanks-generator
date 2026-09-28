@@ -61,8 +61,8 @@ export async function mutateComic(
 	const update = Y.encodeStateAsUpdate(opened.doc, base);
 	let rev = revisionOf(opened);
 	if (!isEmptyUpdate(update)) {
-		rev = await store.append(id, update);
-		opened.applied.add(rev);
+		opened.applied.add(await store.append(id, update));
+		rev = revisionOf(opened);
 		// Keeps the stored projection (comics list, search) current. Losing the race is fine.
 		await compactDoc(store, id, opened);
 	}

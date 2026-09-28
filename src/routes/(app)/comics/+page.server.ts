@@ -7,18 +7,27 @@ import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const { data, error: err } = await locals.supabase
-		.from('comics')
-		.select('id, title, updated_at, pages:doc->pages, firstPage:doc->pages->0')
-		.order('updated_at', { ascending: false });
-	if (err) error(500, `Could not load your comics: ${err.message}`);
+	const [comics, owners, user] = await Promise.all([
+		locals.supabase
+			.from('comics')
+			.select('id, title, owner_id, updated_at, pages:doc->pages, firstPage:doc->pages->0')
+			.order('updated_at', { ascending: false }),
+		locals.supabase.rpc('shared_comic_owners'),
+		locals.getUser()
+	]);
+	if (comics.error) error(500, `Could not load your comics: ${comics.error.message}`);
+	const ownerEmail = new Map(
+		((owners.data ?? []) as { comic_id: string; email: string }[]).map((o) => [o.comic_id, o.email])
+	);
 	return {
-		comics: (data ?? []).map((r) => ({
+		comics: (comics.data ?? []).map((r) => ({
 			id: r.id as string,
 			title: r.title as string,
 			updatedAt: r.updated_at as string,
 			pageCount: Array.isArray(r.pages) ? r.pages.length : 0,
-			firstPage: r.firstPage as Page | null
+			firstPage: r.firstPage as Page | null,
+			/** Set for comics someone else owns and shared with me. */
+			sharedBy: r.owner_id === user?.id ? null : (ownerEmail.get(r.id as string) ?? 'someone')
 		}))
 	};
 };

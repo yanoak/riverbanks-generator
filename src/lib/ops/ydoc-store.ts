@@ -10,7 +10,7 @@ export interface OpenedDoc {
 	doc: Y.Doc;
 	/** The snapshot revision the doc was built on (compaction compares against it). */
 	snapshotRev: number;
-	/** The highest update id folded into that snapshot. */
+	/** How many updates the snapshot has folded in (see revisionOf). */
 	upto: number;
 	/** Update rows applied to the doc; compaction may fold exactly these. */
 	applied: Set<number>;
@@ -41,9 +41,9 @@ export async function openDoc(store: ComicStore, id: string): Promise<OpenedDoc 
 	if (!s) return null;
 	if (!s.snapshot) {
 		const state = initialState(migrate(s.json));
-		// Two first-openers race: one conversion wins and everyone uses it.
-		if (!(await store.initSnapshot(id, state))) s = await store.state(id);
-		else s = { ...s, snapshot: state, snapshotRev: 1, upto: 0 };
+		// Two first-openers race: one conversion wins and everyone reads it back.
+		await store.initSnapshot(id, state);
+		s = await store.state(id);
 		if (!s?.snapshot) return null;
 	}
 	return build(s as StoredState & { snapshot: Uint8Array });
@@ -66,7 +66,7 @@ export async function compactDoc(store: ComicStore, id: string, opened: OpenedDo
 		});
 		if (ok) {
 			opened.snapshotRev += 1;
-			opened.upto = Math.max(opened.upto, ...opened.applied);
+			opened.upto += opened.applied.size;
 			opened.applied.clear();
 			return true;
 		}
@@ -80,5 +80,5 @@ export async function compactDoc(store: ComicStore, id: string, opened: OpenedDo
 	return false;
 }
 
-/** A monotonic revision: the highest update id in the doc, folded or pending. */
-export const revisionOf = (opened: OpenedDoc) => Math.max(opened.upto, ...opened.applied);
+/** A monotonic revision for agents: updates folded into the snapshot plus those pending. */
+export const revisionOf = (opened: OpenedDoc) => opened.upto + opened.applied.size;

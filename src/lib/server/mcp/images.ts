@@ -105,17 +105,17 @@ export async function readImage(
 	return { bytes, width: size.width, height: size.height, mimeType };
 }
 
-/** Upload into assets/<userId>/<assetId> as the user (storage RLS applies). */
+/** Upload into assets/<comicId>/<assetId> as the user (storage RLS: members only). */
 export async function importImage(
 	supabase: SupabaseClient,
-	userId: string,
+	comicId: string,
 	source: { url?: string; base64?: string; mimeType?: string }
 ): Promise<ImportedImage> {
 	const img = await readImage(source);
 	const assetId = newId();
 	const { error } = await supabase.storage
 		.from('assets')
-		.upload(`${userId}/${assetId}`, img.bytes, { contentType: img.mimeType });
+		.upload(`${comicId}/${assetId}`, img.bytes, { contentType: img.mimeType });
 	if (error) throw new Error(`Storing the image failed: ${error.message}`);
 	return { assetId, naturalWidth: img.width, naturalHeight: img.height };
 }

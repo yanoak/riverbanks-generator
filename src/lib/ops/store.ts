@@ -23,7 +23,7 @@ export interface StoredState {
 	snapshot: Uint8Array | null;
 	/** Compare-and-set counter for snapshot writes. */
 	snapshotRev: number;
-	/** The highest update id already folded into the snapshot. */
+	/** How many updates the snapshot has folded in (continues the pre-Yjs revision). */
 	upto: number;
 	updates: { id: number; update: Uint8Array }[];
 	json: unknown;

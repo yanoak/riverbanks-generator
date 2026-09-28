@@ -94,6 +94,15 @@ describe('openDoc', () => {
 		);
 	});
 
+	it('a converted comic continues its old revision instead of starting over', async () => {
+		const store = new MemoryStore();
+		const id = store.createLegacy(createComic('Old'), 54);
+		expect((await loadComic(store, id)).record.rev).toBe(54);
+		const { rev } = await mutateComic(store, id, (c) => ((c.title = 'Newer'), 'renamed'));
+		expect(rev).toBe(55);
+		expect((await loadComic(store, id)).record.rev).toBe(55);
+	});
+
 	it('two first-openers racing: the loser adopts the winner’s snapshot', async () => {
 		const store = new MemoryStore();
 		const id = store.createLegacy(createComic('Race'));

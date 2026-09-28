@@ -14,18 +14,22 @@
 
 	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
+	import Users from '@lucide/svelte/icons/users';
 
 	let {
 		editor,
 		saveStatus,
 		onexportpng,
 		onexportpdf,
+		onshare,
 		nav
 	}: {
 		editor: Editor;
 		saveStatus: SaveStatus;
 		onexportpng: () => void;
 		onexportpdf: () => void;
+		/** Cloud comics: open the Share dialog. */
+		onshare?: () => void;
 		/** Leading slot: back link / account menu. */
 		nav?: Snippet;
 	} = $props();
@@ -136,8 +140,13 @@
 	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
 		<FileText size={16} /> PDF
 	</button>
+	{#if onshare}
+		<button class="tool" data-share onclick={onshare} title="Who has access">
+			<Users size={16} /> Share
+		</button>
+	{/if}
 	<span
-		class="w-20 text-right text-xs"
+		class="ml-1 min-w-20 text-right text-xs whitespace-nowrap"
 		class:text-stone-400={saveStatus !== 'error' && saveStatus !== 'offline'}
 		class:text-red-600={saveStatus === 'error'}
 		class:text-amber-600={saveStatus === 'offline'}

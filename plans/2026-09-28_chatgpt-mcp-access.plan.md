@@ -56,6 +56,16 @@ connectors in practice accept Streamable HTTP.) One real connection answers all 
 first task is connecting ChatGPT to production and logging token **claims only** (never the token)
 for one session.
 
+**Spike result (2026-09-28, production, Yan's ChatGPT Plus):** ChatGPT's plugin client
+(`codex-mcp-client/0.147.0-alpha`) registered itself by DCR, completed consent, and worked over
+**Streamable HTTP** (protocol `2025-06-18`; it POSTs with `Accept: text/event-stream,
+application/json`). Before signing in it probed with 13 token-less GETs, each answered with the
+`401` challenge. The OAuth token carries `iss` = the Supabase issuer, **`aud: "authenticated"`**
+(Supabase ignores `resource`), `client_id` (the DCR client), `scope: "openid profile email phone
+offline_access"`, and `role`, `session_id` and `amr`. Calls seen: `initialize`, `tools/list`,
+`resources/list`, `resources/templates/list`, `tools/call` (`list_comics`). So the **fallback
+rule** applies, no SSE endpoint is needed, and the debug flag is now off.
+
 **Audience, depending on the spike:**
 
 - If Supabase puts the resource in `aud`: verify that `aud` includes `https://<app>/mcp`, and
@@ -99,7 +109,7 @@ alone are enough for a comic editor whose real UI is the web app.
 
 ## Tasks
 
-- [ ] Spike: log token claims (not tokens) at `/mcp` behind an env flag; connect ChatGPT Developer mode to production; record the transport, the DCR request, `aud`/`scope`/`client_id`, and whether consent and tool calls work; turn the flag off
+- [x] Spike: log token claims (not tokens) at `/mcp` behind an env flag; connect ChatGPT Developer mode to production; record the transport, the DCR request, `aud`/`scope`/`client_id`, and whether consent and tool calls work; turn the flag off
 - [ ] Audience check per the spike (verify `aud` includes the MCP resource, or require the OAuth-only `client_id` claim), with tests
 - [ ] Tool annotations on all 18 tools + the resource, with tests
 - [ ] `search` + `fetch` tools in OpenAI's schemas, with `describeComic`-based plain-text rendering, with tests
@@ -155,8 +165,7 @@ In ChatGPT (web), on an account with Developer mode:
 - [x] **ChatGPT or the API?** ChatGPT only: the users aren't API users. The API stays out of scope.
 - [x] **Audience fallback.** Accepted: if Supabase ignores `resource`, require the OAuth-only
       `client_id` claim instead of an `aud` check.
-- [ ] Does ChatGPT's Developer mode currently connect over Streamable HTTP? The spike answers this;
-      if it needs SSE, add an SSE endpoint alongside `/mcp`.
+- [x] Does ChatGPT connect over Streamable HTTP? **Yes** (spike): no SSE endpoint needed.
 
 ## Outcome
 

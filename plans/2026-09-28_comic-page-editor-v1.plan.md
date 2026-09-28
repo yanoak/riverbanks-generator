@@ -133,7 +133,7 @@ commits a single "edit text" command.
 - [x] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
 - [x] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
 - [x] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
-- [ ] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
+- [x] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
 - [ ] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
 - [ ] Export: page → PNG (html-to-image with embedded fonts and images); comic → PDF via print stylesheet
 - [ ] AI image generation hook: server route + provider adapter, "Generate" in the panel inspector (blocked on the open question below)

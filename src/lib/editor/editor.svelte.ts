@@ -2,6 +2,7 @@
 // every document change goes through run() or record(), so undo, redo and autosave all see it.
 
 import { HistoryManager } from '$lib/history/history.svelte';
+import type { Editor as TipTap } from '@tiptap/core';
 import { BatchCommand, type Command } from '$lib/history/command';
 import { InsertCommand, RemoveCommand } from '$lib/model/commands/list';
 import {
@@ -51,6 +52,13 @@ export class Editor {
 	/** Bumped on every document change; autosave watches it. */
 	version = $state(0);
 	status = $state<string | null>(null);
+	/** The balloon whose text is being edited while mode === 'text'. */
+	editingBalloonId = $state<string | null>(null);
+	/** Whether text mode should start with everything selected (fresh balloons). */
+	selectAllOnEdit = $state(false);
+	/** The live TipTap instance while editing; textTick bumps on every transaction. */
+	textEditor = $state.raw<TipTap | null>(null);
+	textTick = $state(0);
 	/** The panel whose image is being panned/zoomed while mode === 'image'. */
 	imagePanelId = $state<string | null>(null);
 	readonly history = new HistoryManager();
@@ -101,9 +109,11 @@ export class Editor {
 	// --- selection ------------------------------------------------------------------------
 
 	select(selection: Selection): void {
+		const keepEditing = selection.kind === 'balloon' && selection.id === this.editingBalloonId;
 		this.selection = selection;
 		this.status = null;
 		if (this.mode === 'image') this.exitImageMode();
+		if (this.mode === 'text' && !keepEditing) this.stopEditing();
 	}
 
 	selectPanel(id: string, extend = false): void {
@@ -179,13 +189,28 @@ export class Editor {
 		return this.selectedPanels.length === 1 && panel.kind === 'free' ? panel : undefined;
 	}
 
+	startEditing(id = this.selectedBalloon?.id, selectAll = false): boolean {
+		if (!id || !this.page.balloons.some((b) => b.id === id)) return false;
+		this.select({ kind: 'balloon', id });
+		this.selectAllOnEdit = selectAll;
+		this.editingBalloonId = id;
+		this.mode = 'text';
+		return true;
+	}
+
+	/** Leaving text mode unmounts TipTap, which commits the text (see rich-text.ts). */
+	stopEditing(): void {
+		this.mode = 'select';
+		this.editingBalloonId = null;
+	}
+
 	/** Add a balloon inside the selected panel (or the page) and select it. */
 	addBalloon(type: BalloonType): string {
 		const [panel] = this.selectedPanels;
 		const box = panel ? panelBox(this.page, panel) : undefined;
 		const balloon = createBalloon(this.page, type, box);
 		this.run(new InsertCommand(`Add ${type}`, this.page.balloons, balloon));
-		this.select({ kind: 'balloon', id: balloon.id });
+		this.startEditing(balloon.id, true);
 		return balloon.id;
 	}
 
@@ -288,8 +313,8 @@ export class Editor {
 
 	goToPage(index: number): void {
 		if (index < 0 || index >= this.comic.pages.length) return;
-		this.pageIndex = index;
 		this.select({ kind: 'none' });
+		this.pageIndex = index;
 	}
 
 	zoomBy(factor: number, fit: number): void {

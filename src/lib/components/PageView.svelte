@@ -13,6 +13,7 @@
 	import type { Balloon, Panel } from '$lib/model/types';
 	import BalloonView from './BalloonView.svelte';
 	import { PatchCommand } from '$lib/model/commands/patch';
+	import { richText } from '$lib/editor/rich-text';
 
 	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
 
@@ -207,6 +208,7 @@
 					label="{balloon.type} balloon {i + 1}"
 					z={100 + i}
 					selected={selectedBalloonId === balloon.id}
+					movable={editor.editingBalloonId !== balloon.id}
 					onselect={() => editor.select({ kind: 'balloon', id: balloon.id })}
 					oncommit={(before, action) =>
 						editor.commitGeometry(
@@ -215,7 +217,24 @@
 							action === 'move' ? 'Move balloon' : 'Resize balloon'
 						)}
 				>
-					<BalloonView {balloon} />
+					<div
+						class="contents"
+						role="presentation"
+						ondblclick={() => editor.startEditing(balloon.id)}
+					>
+						{#if editor.editingBalloonId === balloon.id}
+							<BalloonView {balloon}>
+								{#snippet text()}
+									<div
+										class="rich-text cursor-text"
+										{@attach richText(editor, balloon, editor.selectAllOnEdit)}
+									></div>
+								{/snippet}
+							</BalloonView>
+						{:else}
+							<BalloonView {balloon} />
+						{/if}
+					</div>
 					{#snippet extra()}
 						{#if balloon.tail}
 							<div
@@ -282,6 +301,10 @@
 	.hit.selected {
 		fill: color-mix(in oklab, var(--color-sky-500) 14%, transparent);
 		stroke: var(--color-sky-500);
+	}
+	.rich-text :global(.ProseMirror) {
+		outline: none;
+		min-height: 1em;
 	}
 	.tail-handle {
 		position: absolute;

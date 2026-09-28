@@ -42,6 +42,14 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	const mod = e.metaKey || e.ctrlKey;
 	const key = e.key;
 
+	if (editor.mode === 'text') {
+		if (key !== 'Escape') return false;
+		const id = editor.editingBalloonId;
+		editor.stopEditing();
+		if (id) focusElement(id);
+		return true;
+	}
+
 	if (isTyping(e.target) && key !== 'Escape') return false;
 
 	if (mod && key.toLowerCase() === 'z') {
@@ -56,7 +64,7 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 
 	if (editor.mode === 'image') return imageModeKey(editor, e);
 
-	if (key === 'Enter' && editor.enterImageMode()) return true;
+	if (key === 'Enter' && (editor.startEditing() || editor.enterImageMode())) return true;
 
 	if (key === 'PageDown') return (editor.goToPage(editor.pageIndex + 1), true);
 	if (key === 'PageUp') return (editor.goToPage(editor.pageIndex - 1), true);
@@ -71,7 +79,7 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	}
 	const balloonType = BALLOON_KEYS[key];
 	if (balloonType) {
-		focusElement(editor.addBalloon(balloonType));
+		editor.addBalloon(balloonType); // opens text mode; TipTap takes focus
 		return true;
 	}
 

@@ -3,7 +3,46 @@
 	import { PatchCommand } from '$lib/model/commands/patch';
 	import type { BalloonType, Panel } from '$lib/model/types';
 
+	import type { Editor as TipTap } from '@tiptap/core';
+	import Bold from '@lucide/svelte/icons/bold';
+	import Italic from '@lucide/svelte/icons/italic';
+	import AlignLeft from '@lucide/svelte/icons/align-left';
+	import AlignCenter from '@lucide/svelte/icons/align-center';
+	import AlignRight from '@lucide/svelte/icons/align-right';
+	import { LETTERING_FONT, SFX_FONT } from '$lib/model/balloons';
+
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
+
+	const FONTS: [string, string][] = [
+		['Comic Neue', LETTERING_FONT],
+		['Bangers', SFX_FONT],
+		['Patrick Hand', "'Patrick Hand', cursive"],
+		['Permanent Marker', "'Permanent Marker', cursive"]
+	];
+
+	const align = (a: string) => ({
+		active: (tt: TipTap) => tt.isActive({ textAlign: a }),
+		run: (tt: TipTap) => tt.chain().focus().setTextAlign(a).run()
+	});
+	const FORMATS = [
+		{
+			label: 'bold',
+			title: 'Bold (⌘B)',
+			icon: Bold,
+			active: (tt: TipTap) => tt.isActive('bold'),
+			run: (tt: TipTap) => tt.chain().focus().toggleBold().run()
+		},
+		{
+			label: 'italic',
+			title: 'Italic (⌘I)',
+			icon: Italic,
+			active: (tt: TipTap) => tt.isActive('italic'),
+			run: (tt: TipTap) => tt.chain().focus().toggleItalic().run()
+		},
+		{ label: 'left', title: 'Align left', icon: AlignLeft, ...align('left') },
+		{ label: 'center', title: 'Align centre', icon: AlignCenter, ...align('center') },
+		{ label: 'right', title: 'Align right', icon: AlignRight, ...align('right') }
+	];
 
 	let { editor }: { editor: Editor } = $props();
 
@@ -26,6 +65,39 @@
 	{#if editor.selectedBalloon}
 		{@const b = editor.selectedBalloon}
 		<h2 class="section">Balloon</h2>
+		{#if editor.textEditor}
+			{@const tt = editor.textEditor}
+			{@const _tick = editor.textTick}
+			<div class="mb-3 flex gap-1" role="toolbar" aria-label="Text formatting">
+				{#each FORMATS as f (f.label)}
+					<button
+						class="fmt"
+						class:active={_tick >= 0 && f.active(tt)}
+						title={f.title}
+						aria-label={f.title}
+						aria-pressed={f.active(tt)}
+						onpointerdown={(e) => e.preventDefault()}
+						onclick={() => f.run(tt)}
+					>
+						<f.icon size={15} />
+					</button>
+				{/each}
+			</div>
+		{:else}
+			<p class="mb-3 text-xs text-stone-500">Double-click or press Enter to edit the text.</p>
+		{/if}
+		<label class="row">
+			<span>Font</span>
+			<select
+				class="w-32 rounded border border-stone-300 px-1 py-0.5"
+				value={b.font}
+				onchange={(e) => editor.run(new PatchCommand('Font', b, { font: e.currentTarget.value }))}
+			>
+				{#each FONTS as [label, value] (value)}
+					<option {value}>{label}</option>
+				{/each}
+			</select>
+		</label>
 		<label class="row">
 			<span>Type</span>
 			<select
@@ -188,6 +260,12 @@
 	}
 	.btn {
 		@apply w-full rounded border border-stone-300 px-3 py-1.5 hover:bg-stone-50;
+	}
+	.fmt {
+		@apply grid h-8 w-8 place-items-center rounded border border-stone-300 hover:bg-stone-50;
+	}
+	.fmt.active {
+		@apply border-sky-500 bg-sky-50 text-sky-700;
 	}
 	kbd {
 		@apply rounded border border-stone-300 bg-stone-50 px-1 font-sans;

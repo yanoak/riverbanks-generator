@@ -34,7 +34,7 @@
 </svg>
 
 <div
-	class="balloon-text absolute flex flex-col justify-center text-center"
+	class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
 	class:sfx={balloon.type === 'sfx'}
 	style:inset="{balloon.h * inset}px {balloon.w * inset}px"
 	style:font-family={balloon.font}

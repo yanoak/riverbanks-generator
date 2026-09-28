@@ -86,7 +86,8 @@ Balloon { id, type: 'caption'|'speech'|'thought'|'whisper'|'shout'|'sfx',
 - Cell rectangles come from the grid spec.
 - A panel's outline is found by tracing the boundary of its cell set on the grid lattice and
   mapping lattice points to page coordinates. Edges between two cells of the same panel absorb
-  the gutter, and outer edges are inset by half a gutter.
+  the gutter, and outer edges sit on the real cell edges. A merged 1×2 panel runs from cell 0's
+  left edge to cell 1's right edge.
 - This yields one polygon per panel, used for both the SVG border and `clip-path`. An L-shape
   comes out as a 6-vertex polygon and a rectangle as 4. CSS Grid spans can't express L-shapes,
   so rendering is SVG polygons plus absolutely positioned DOM, not CSS Grid.
@@ -125,8 +126,8 @@ commits a single "edit text" command.
 ## Tasks
 
 - [x] Scaffold SvelteKit + TS + Tailwind 4 + Vitest; port `HistoryManager`, `Command` and `BatchCommand` from the template, with tests
-- [ ] Document model types, default comic factory (one page, 3×4 grid of single-cell panels), `docVersion` + migrate stub
-- [ ] Grid geometry: cell rects, contiguity check, lattice outline tracing → page-space polygon (TDD)
+- [x] Document model types, default comic factory (one page, 3×4 grid of single-cell panels), `docVersion` + migrate stub
+- [x] Grid geometry: cell rects, contiguity check, lattice outline tracing → page-space polygon (TDD)
 - [ ] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
 - [ ] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
 - [ ] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
@@ -225,11 +226,12 @@ message in the inspector with Retry, and the panel is left unchanged.
 
 - [x] HistoryManager: execute/undo/redo order, redo cleared on new execute, 50-step cap — unit — `src/lib/history/history.test.ts`
 - [x] BatchCommand undoes in reverse order — unit — `src/lib/history/history.test.ts`
-- [ ] Default comic: one page, 12 single-cell panels whose cells partition 0..11 — unit — `src/lib/model/factory.test.ts`
-- [ ] `cellRect` accounts for margin and gutter; the last column ends at `width - margin` — unit — `src/lib/geometry/grid.test.ts`
-- [ ] `isContiguous`: single cell ✓, 2×2 ✓, L ✓, diagonal-only pair ✗, empty ✗ — unit — `grid.test.ts`
-- [ ] `panelOutline`: 1 cell → 4-vertex rect inset by half a gutter; 1×2 → one rect spanning the gutter; L of 3 cells → 6 vertices in clockwise order; 2×2 → 4 vertices (no interior vertices) — unit — `grid.test.ts`
-- [ ] `panelOutline` for a U-shape (5 cells) → 8 vertices — unit — `grid.test.ts`
+- [x] Default comic: one page, 12 single-cell panels whose cells partition 0..11 — unit — `src/lib/model/factory.test.ts`
+- [x] `cellRect` accounts for margin and gutter; the last column ends at `width - margin` — unit — `src/lib/geometry/grid.test.ts`
+- [x] `isContiguous`: single cell ✓, 2×2 ✓, L ✓, diagonal-only pair ✗, empty ✗ — unit — `grid.test.ts`
+- [x] `panelOutline`: 1 cell → exactly its cell rect; 1×2 → one rect spanning the gutter; L of 3 cells → 6 vertices in clockwise order; 2×2 → 4 vertices (no interior vertices) — unit — `grid.test.ts`
+- [x] `panelOutline` for a U-shape (5 cells) → 8 vertices — unit — `grid.test.ts`
+- [x] `hasHoles` / `canMerge`: a ring and a corner-pinched region are rejected with a reason; a U open to the edge is fine — unit — `grid.test.ts`
 - [ ] Merge: merging panels whose union is contiguous yields one panel; merge + undo restores the exact prior panels and ids; non-contiguous merge is rejected with a reason — unit — `src/lib/model/commands/panels.test.ts`
 - [ ] Merge keeps the image of the first selected panel that has one — unit — `panels.test.ts`
 - [ ] Split: an N-cell panel → N single panels; split + undo restores it — unit — `panels.test.ts`
@@ -238,7 +240,7 @@ message in the inspector with Retry, and the panel is left unchanged.
 - [ ] Move/resize balloon as a single command from start/end geometry; undo restores both — unit — `src/lib/model/commands/balloons.test.ts`
 - [ ] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
 - [ ] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`
-- [ ] Serialize → migrate → deserialize round-trips; an unknown future `docVersion` throws — unit — `src/lib/model/serialize.test.ts`
+- [x] Serialize → migrate → deserialize round-trips; an unknown future `docVersion` throws — unit — `src/lib/model/serialize.test.ts`
 - [ ] Autosave debounces, queues a follow-up when an edit lands during a save, and marks clean only if the version is unchanged — unit (fake timers) — `src/lib/persistence/autosave.test.ts`
 - [ ] E2E: merge four cells with the keyboard, add a speech balloon, type text, reload, and both are still there — Playwright — `e2e/editor.e2e.ts`
 
@@ -288,8 +290,10 @@ message in the inspector with Retry, and the panel is left unchanged.
       needed?
 - [ ] Lettering font: is Comic Neue enough for v1, or is there a licensed lettering font (e.g.
       Blambot) to embed?
-- [ ] Should a merge also allow non-rectangular unions with holes (a ring around a centre
-      panel)? Currently rejected by `isContiguous` + outline tracing (single outer boundary only).
+- [x] Should a merge allow unions with holes, such as a ring around a centre panel? **v1: no.**
+      `canMerge` rejects rings and corner-pinched regions (`hasHoles`, 4-connected complement
+      flood), so every panel has exactly one boundary loop. The same visual effect is available
+      from a free panel laid over a borderless panel.
 
 ## Outcome
 

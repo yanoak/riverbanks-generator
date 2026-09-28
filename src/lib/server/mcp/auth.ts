@@ -23,7 +23,7 @@ export function bearerToken(request: Request): string | null {
 
 export interface VerifiedUser {
 	userId: string;
-	clientId?: string;
+	clientId: string;
 	scopes: string[];
 	expiresAt?: number;
 }
@@ -37,9 +37,16 @@ export async function verifyAccessToken(
 	if (payload.role !== 'authenticated' || typeof payload.sub !== 'string') {
 		throw new Error('Not a user token.');
 	}
+	// Supabase ignores RFC 8707 `resource`, so every token has aud "authenticated" and we can't
+	// check audience (ChatGPT spike, 2026-09-28). Instead require the OAuth-only client_id claim:
+	// a token from the OAuth consent flow has it; a web-session token (same issuer) doesn't, so it
+	// can't be replayed at /mcp.
+	if (typeof payload.client_id !== 'string' || !payload.client_id) {
+		throw new Error('Not an OAuth access token (no client_id); connect through OAuth.');
+	}
 	return {
 		userId: payload.sub,
-		clientId: typeof payload.client_id === 'string' ? payload.client_id : undefined,
+		clientId: payload.client_id,
 		scopes: typeof payload.scope === 'string' ? payload.scope.split(' ').filter(Boolean) : [],
 		expiresAt: payload.exp
 	};

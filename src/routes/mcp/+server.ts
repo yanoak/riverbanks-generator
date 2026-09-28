@@ -5,7 +5,6 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { createClient } from '@supabase/supabase-js';
 import { supabaseEnv } from '$lib/server/supabase-env';
 import { bearerToken, CORS, unauthorized, verifyAccessToken } from '$lib/server/mcp/auth';
-import { logMcpRequest } from '$lib/server/mcp/debug';
 import { importImage } from '$lib/server/mcp/images';
 import { createMcpServer } from '$lib/server/mcp/server';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
@@ -14,19 +13,14 @@ import type { RequestHandler } from './$types';
 const handle: RequestHandler = async ({ request, url }) => {
 	const { url: supabaseUrl, key } = supabaseEnv();
 	const token = bearerToken(request);
-	if (!token) {
-		await logMcpRequest(request, null, 'no-token');
-		return unauthorized(url.origin);
-	}
+	if (!token) return unauthorized(url.origin);
 
 	let user;
 	try {
 		user = await verifyAccessToken(token, supabaseUrl);
-	} catch (e) {
-		await logMcpRequest(request, token, `invalid: ${(e as Error).message}`);
+	} catch {
 		return unauthorized(url.origin, 'invalid_token');
 	}
-	await logMcpRequest(request, token, 'ok');
 
 	const supabase = createClient(supabaseUrl, key, {
 		global: { headers: { Authorization: `Bearer ${token}` } },
@@ -45,7 +39,7 @@ const handle: RequestHandler = async ({ request, url }) => {
 	const response = await transport.handleRequest(request, {
 		authInfo: {
 			token,
-			clientId: user.clientId ?? 'unknown',
+			clientId: user.clientId,
 			scopes: user.scopes,
 			expiresAt: user.expiresAt,
 			extra: { userId: user.userId }

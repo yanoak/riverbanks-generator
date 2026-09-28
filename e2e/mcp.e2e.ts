@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { openEditor } from './support/editor';
+import { openEditor, waitForLive } from './support/editor';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { accessToken, createUser, signIn } from './support/accounts';
+import { accessToken, createUser } from './support/accounts';
+import { oauthToken } from './support/oauth';
 
 async function mcpClient(token: string) {
 	const client = new Client({ name: 'e2e', version: '1' });
@@ -30,17 +31,28 @@ test('/mcp refuses requests without a token', async ({ request }) => {
 	expect(meta.authorization_servers[0]).toMatch(/\/auth\/v1$/);
 });
 
-test('an MCP agent edits a comic that is open in the editor, live', async ({ page }) => {
+test('a web-session token is refused at /mcp; only OAuth tokens get in', async ({ request }) => {
+	const user = await createUser('session');
+	const res = await request.post('/mcp', {
+		headers: { authorization: `Bearer ${await accessToken(user.email)}` },
+		data: { jsonrpc: '2.0', id: 1, method: 'initialize' }
+	});
+	expect(res.status()).toBe(401);
+	expect(res.headers()['www-authenticate']).toContain('error="invalid_token"');
+});
+
+test('an MCP agent edits a comic that is open in the editor, live', async ({ page, request }) => {
 	const user = await createUser('mcp');
-	const { call } = await mcpClient(await accessToken(user.email));
+	const { call } = await mcpClient(await oauthToken(page, request, user.email));
 
 	const { id } = JSON.parse(await call('create_comic', { title: 'Made by an agent' }));
-	await signIn(page, user.email);
+	await page.goto('/comics'); // already signed in by the OAuth consent step
 	await expect(page.getByText('Made by an agent')).toBeVisible();
 	await openEditor(page, `/comics/${id}`);
 	const panels = page.locator('main [data-panel-id]');
 	await expect(panels).toHaveCount(12);
 	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+	await waitForLive(page);
 
 	// Agent merges a block and letters it; the open editor follows without a reload.
 	await call('merge_panels', { comicId: id, page: 1, cells: [0, 1, 4, 5] });

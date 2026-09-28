@@ -43,6 +43,8 @@
 	const editor = new Editor();
 	let saveStatus = $state<SaveStatus>('saved');
 	let loaded = $state(false);
+	/** Receiving live updates (cloud comics only); exposed as data-live for tests. */
+	let live = $state(false);
 
 	const autosave = createAutoSave({
 		getVersion: () => editor.version,
@@ -100,10 +102,13 @@
 				autosave.markSaved();
 				loaded = true;
 			});
-		const stopWatching = source.watch?.((comic) => {
-			if (saveStatus === 'saved') adopt(comic);
-			else showConflict();
-		});
+		const stopWatching = source.watch?.(
+			(comic) => {
+				if (saveStatus === 'saved') adopt(comic);
+				else showConflict();
+			},
+			() => (live = true)
+		);
 		const onHide = () => document.visibilityState === 'hidden' && autosave.saveNow();
 		document.addEventListener('visibilitychange', onHide);
 		return () => {
@@ -220,6 +225,7 @@
 			<div
 				data-canvas
 				data-ready={loaded}
+				data-live={live}
 				class="flex min-h-full min-w-full items-center justify-center outline-none"
 				style:padding="{PAD}px"
 				style:width="max-content"

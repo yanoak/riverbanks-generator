@@ -9,3 +9,8 @@ export async function openEditor(page: Page, path: string) {
 export async function waitForEditor(page: Page) {
 	await expect(page.locator('[data-canvas][data-ready="true"]')).toBeVisible();
 }
+
+/** Wait until a cloud comic's editor is receiving live updates. */
+export async function waitForLive(page: Page) {
+	await expect(page.locator('[data-canvas][data-live="true"]')).toBeVisible();
+}

@@ -70,8 +70,9 @@ describe.skipIf(!url || !serviceKey)('SupabaseComicStore against local Supabase'
 		expect(read.error).not.toBeNull();
 	});
 
-	it('issues tokens the MCP endpoint can verify with the JWKS', async () => {
+	it('signs session tokens the JWKS verifies, but /mcp refuses them (no OAuth client_id)', async () => {
 		const { verifyAccessToken } = await import('$lib/server/mcp/auth');
-		expect(await verifyAccessToken(a.token, url!)).toMatchObject({ userId: a.id });
+		// Signature and issuer pass (a real ES256 token); the fallback rule then rejects it.
+		await expect(verifyAccessToken(a.token, url!)).rejects.toThrow(/OAuth/);
 	});
 });

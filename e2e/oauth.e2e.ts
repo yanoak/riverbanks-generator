@@ -5,25 +5,9 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { createUser, PASSWORD } from './support/accounts';
+import { APP, CALLBACK, openConsent } from './support/oauth';
 
-const APP = 'http://localhost:4318';
-const CALLBACK = 'http://localhost:4318/__oauth-callback';
 const b64url = (b: Buffer) => b.toString('base64url');
-
-/**
- * Local Supabase redirects authorization to its site_url (the dev port). Follow that one hop
- * ourselves and open the same consent path on the test server instead.
- */
-async function openConsent(
-	page: import('@playwright/test').Page,
-	request: import('@playwright/test').APIRequestContext,
-	authorize: URL
-) {
-	const res = await request.get(authorize.toString(), { maxRedirects: 0 });
-	const location = new URL(res.headers()['location']);
-	expect(location.pathname).toBe('/oauth/consent');
-	await page.goto(`${APP}${location.pathname}${location.search}`);
-}
 
 test('an MCP client signs in through OAuth consent and calls /mcp', async ({ page, request }) => {
 	const user = await createUser('oauth');

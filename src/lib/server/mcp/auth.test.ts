@@ -30,6 +30,17 @@ describe('bearerToken', () => {
 });
 
 describe('verifyAccessToken', () => {
+	it('refuses a browser-session token (no client_id): only OAuth-issued tokens reach /mcp', async () => {
+		const { jwks, sign } = await keys();
+		const session = await sign({
+			sub: 'user-1',
+			role: 'authenticated',
+			aud: 'authenticated',
+			session_id: 's'
+		});
+		await expect(verifyAccessToken(session, SUPABASE, jwks)).rejects.toThrow(/OAuth/);
+	});
+
 	it('accepts a Supabase user token and returns the user, client and scopes', async () => {
 		const { jwks, sign } = await keys();
 		const token = await sign({
@@ -49,20 +60,23 @@ describe('verifyAccessToken', () => {
 		const { jwks, sign } = await keys();
 		await expect(
 			verifyAccessToken(
-				await sign({ sub: 'u', role: 'authenticated' }, { issuer: 'https://evil.test' }),
+				await sign(
+					{ sub: 'u', role: 'authenticated', client_id: 'c' },
+					{ issuer: 'https://evil.test' }
+				),
 				SUPABASE,
 				jwks
 			)
 		).rejects.toThrow();
 		await expect(
 			verifyAccessToken(
-				await sign({ sub: 'u', role: 'authenticated' }, { exp: '-1m' }),
+				await sign({ sub: 'u', role: 'authenticated', client_id: 'c' }, { exp: '-1m' }),
 				SUPABASE,
 				jwks
 			)
 		).rejects.toThrow();
 		await expect(
-			verifyAccessToken(await sign({ sub: 'u', role: 'anon' }), SUPABASE, jwks)
+			verifyAccessToken(await sign({ sub: 'u', role: 'anon', client_id: 'c' }), SUPABASE, jwks)
 		).rejects.toThrow(/user token/);
 	});
 });

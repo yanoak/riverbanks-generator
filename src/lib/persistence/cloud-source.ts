@@ -57,7 +57,7 @@ export class CloudSource implements DocumentSource {
 		await this.save(comic);
 	}
 
-	watch(onRemote: (comic: Comic) => void): () => void {
+	watch(onRemote: (comic: Comic) => void, onLive?: () => void): () => void {
 		let stopped = false;
 		let channel: ReturnType<SupabaseClient['channel']> | null = null;
 		// The browser client restores its session from cookies asynchronously; subscribing before
@@ -65,7 +65,12 @@ export class CloudSource implements DocumentSource {
 		this.supabase.auth.getSession().then(async ({ data }) => {
 			if (stopped) return;
 			if (data.session) await this.supabase.realtime.setAuth(data.session.access_token);
-			channel = this.subscribe(onRemote);
+			channel = this.subscribe(onRemote, async () => {
+				// Anything written between page load and joining the channel was missed: catch up once.
+				const record = await this.store.get(this.id).catch(() => null);
+				if (!stopped && record) this.apply(record.rev, record.doc, onRemote);
+				if (!stopped) onLive?.();
+			});
 		});
 		return () => {
 			stopped = true;
@@ -73,21 +78,28 @@ export class CloudSource implements DocumentSource {
 		};
 	}
 
-	private subscribe(onRemote: (comic: Comic) => void) {
+	/** Report a newer copy (unless our own save is still settling to that rev). */
+	private async apply(rev: number, doc: unknown, onRemote: (comic: Comic) => void) {
+		// Our own save's echo can arrive before its response; settle that first.
+		if (this.saving) await this.saving.catch(() => {});
+		if (rev <= this.rev) return;
+		this.rev = rev;
+		onRemote(migrate(doc));
+	}
+
+	private subscribe(onRemote: (comic: Comic) => void, onSubscribed: () => void) {
 		return this.supabase
 			.channel(`comic:${this.id}`)
 			.on(
 				'postgres_changes',
 				{ event: 'UPDATE', schema: 'public', table: 'comics', filter: `id=eq.${this.id}` },
-				async (payload) => {
+				(payload) => {
 					const row = payload.new as { rev: number; doc: unknown };
-					// Our own save's echo can arrive before its response; settle that first.
-					if (this.saving) await this.saving.catch(() => {});
-					if (row.rev <= this.rev) return;
-					this.rev = row.rev;
-					onRemote(migrate(row.doc));
+					this.apply(row.rev, row.doc, onRemote);
 				}
 			)
-			.subscribe();
+			.subscribe((status) => {
+				if (status === 'SUBSCRIBED') onSubscribed();
+			});
 	}
 }

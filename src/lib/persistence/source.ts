@@ -10,6 +10,9 @@ export interface DocumentSource {
 	reload?(): Promise<Comic>;
 	/** Write ours over whatever is stored. */
 	overwrite?(comic: Comic): Promise<void>;
-	/** Be told about newer copies written elsewhere (e.g. by the MCP server). */
-	watch?(onRemote: (comic: Comic) => void): () => void;
+	/**
+	 * Be told about newer copies written elsewhere (e.g. by the MCP server). onLive fires once the
+	 * live connection is up (after catching up on anything written before it).
+	 */
+	watch?(onRemote: (comic: Comic) => void, onLive?: () => void): () => void;
 }

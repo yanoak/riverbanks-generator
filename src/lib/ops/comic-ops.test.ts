@@ -1,0 +1,119 @@
+import { describe, expect, it } from 'vitest';
+import { createComic } from '$lib/model/factory';
+import { checkPage, gridPanels } from '$lib/model/invariants';
+import {
+	addBalloon,
+	addFreePanel,
+	addPage,
+	deleteBalloon,
+	deletePage,
+	mergePanels,
+	movePage,
+	removePanelImage,
+	setGrid,
+	setPanelImage,
+	splitPanel,
+	updateBalloon,
+	updatePanel
+} from './comic-ops';
+
+describe('page ops', () => {
+	it('adds after a given page (default: at the end), deletes (never the last) and moves', () => {
+		const comic = createComic();
+		addPage(comic, {});
+		addPage(comic, { after: 1 });
+		expect(comic.pages).toHaveLength(3);
+		const third = comic.pages[2].id;
+		movePage(comic, { page: 3, to: 1 });
+		expect(comic.pages[0].id).toBe(third);
+		deletePage(comic, { page: 1 });
+		deletePage(comic, { page: 1 });
+		expect(() => deletePage(comic, { page: 1 })).toThrow(/last page/);
+	});
+
+	it('changes the grid only while nothing is merged', () => {
+		const comic = createComic();
+		setGrid(comic, { page: 1, rows: 4, cols: 3, gutter: 20 });
+		expect(comic.pages[0].grid).toMatchObject({ rows: 4, cols: 3, gutter: 20 });
+		mergePanels(comic, { page: 1, cells: [0, 1] });
+		expect(() => setGrid(comic, { page: 1, rows: 2 })).toThrow(/Split merged panels/);
+	});
+});
+
+describe('panel ops', () => {
+	it('splits a merged panel back into cells', () => {
+		const comic = createComic();
+		mergePanels(comic, { page: 1, cells: [0, 1, 4, 5] });
+		const merged = gridPanels(comic.pages[0]).find((p) => p.cells.length === 4)!;
+		expect(splitPanel(comic, { page: 1, panelId: merged.id })).toMatch(/4 panels/);
+		expect(checkPage(comic.pages[0])).toEqual([]);
+	});
+
+	it('adds a free panel with an explicit rect and updates panel style', () => {
+		const comic = createComic();
+		const { id } = addFreePanel(comic, { page: 1, rect: { x: 100, y: 200, w: 300, h: 150 } });
+		const free = comic.pages[0].panels.find((p) => p.id === id)!;
+		expect(free).toMatchObject({ kind: 'free', x: 100, y: 200, w: 300, h: 150 });
+		updatePanel(comic, { page: 1, panelId: id, border: 'none', fill: '#000000' });
+		expect(free).toMatchObject({ border: 'none', fill: '#000000' });
+		const grid = comic.pages[0].panels[0];
+		expect(() =>
+			updatePanel(comic, { page: 1, panelId: grid.id, rect: { x: 0, y: 0, w: 1, h: 1 } })
+		).toThrow(/only free panels/i);
+	});
+
+	it('places and removes an image, filling the panel', () => {
+		const comic = createComic();
+		const panel = comic.pages[0].panels[0];
+		setPanelImage(comic, {
+			page: 1,
+			panelId: panel.id,
+			image: { assetId: 'a', naturalWidth: 1000, naturalHeight: 500 }
+		});
+		expect(panel.image?.assetId).toBe('a');
+		expect(panel.image!.scale).toBeGreaterThan(0);
+		removePanelImage(comic, { page: 1, panelId: panel.id });
+		expect(panel.image).toBeUndefined();
+	});
+
+	it('names the unknown panel id', () => {
+		expect(() => splitPanel(createComic(), { page: 1, panelId: 'zzz' })).toThrow(/zzz/);
+	});
+});
+
+describe('balloon ops', () => {
+	it('adds a balloon in a panel with markdown text, edits and deletes it', () => {
+		const comic = createComic();
+		const panel = comic.pages[0].panels[5];
+		const { id } = addBalloon(comic, {
+			page: 1,
+			type: 'speech',
+			text: 'HI **THERE**',
+			panelId: panel.id
+		});
+		const b = comic.pages[0].balloons.find((x) => x.id === id)!;
+		expect(b.html).toBe('<p>HI <strong>THERE</strong></p>');
+		expect(b.x).toBeGreaterThan(0);
+
+		updateBalloon(comic, {
+			page: 1,
+			balloonId: id,
+			text: 'BYE',
+			type: 'shout',
+			tailTip: { x: b.x + 10, y: b.y + b.h + 100 },
+			fontSize: 40
+		});
+		expect(b).toMatchObject({ html: '<p>BYE</p>', type: 'shout', fontSize: 40 });
+		expect(b.tail).toEqual({ x: 10, y: b.h + 100 });
+
+		deleteBalloon(comic, { page: 1, balloonId: id });
+		expect(comic.pages[0].balloons).toHaveLength(0);
+	});
+
+	it('clears the tail for types that have none', () => {
+		const comic = createComic();
+		const { id } = addBalloon(comic, { page: 1, type: 'speech', text: 'x' });
+		updateBalloon(comic, { page: 1, balloonId: id, type: 'caption' });
+		expect(comic.pages[0].balloons[0].tail).toBeUndefined();
+	});
+});

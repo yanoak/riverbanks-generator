@@ -15,6 +15,7 @@ import {
 import { PatchCommand } from '$lib/model/commands/patch';
 import { createComic, createPage } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
+import { REASONS } from '$lib/model/reasons';
 import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { addImage } from '$lib/persistence/assets.svelte';
@@ -33,14 +34,6 @@ export type Selection =
 	{ kind: 'none' } | { kind: 'panels'; ids: string[] } | { kind: 'balloon'; id: string };
 
 export type Mode = 'select' | 'image' | 'text';
-
-const REASONS: Record<string, string> = {
-	'need-two': 'Select at least two panels to merge (⇧-click or ⇧+arrow).',
-	'not-contiguous': 'Panels must share an edge to merge.',
-	'has-hole': 'That merge would enclose a gap — merge the gap too, or use a free panel.',
-	'has-merges': 'Split merged panels before changing rows or columns.',
-	invalid: 'Rows and columns must be at least 1.'
-};
 
 export class Editor {
 	comic = $state<Comic>(createComic());

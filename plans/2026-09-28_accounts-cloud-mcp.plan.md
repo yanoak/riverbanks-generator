@@ -205,7 +205,7 @@ the view link instead.
 
 **MCP**
 
-- [ ] Headless ops layer (`src/lib/ops/`): load → migrate → command → invariants → save-with-rev, shared by the tools; `describeComic()` for `get_comic`
+- [x] Headless ops layer (`src/lib/ops/`): load → migrate → command → invariants → save-with-rev, shared by the tools; `describeComic()` for `get_comic`
 - [ ] `/mcp` endpoint (Streamable HTTP, stateless) with all tools and the page resource, authenticated by a bearer token verified against JWKS
 - [ ] OAuth: `/.well-known/oauth-protected-resource`, the 401 challenge, and the `/oauth/consent` page
 - [ ] Connect Claude Code to local and production `/mcp` via OAuth; write the connection how-to into README
@@ -284,12 +284,12 @@ OAuth consent:
 
 ## Test list (TDD)
 
-- [ ] `describeComic()` gives stable ids, 1-based page numbers, cells and bboxes, and plain balloon text — unit — `src/lib/ops/describe.test.ts`
-- [ ] Ops run a command on a loaded doc and reject invariant-breaking results — unit, with a fake store — `src/lib/ops/ops.test.ts`
-- [ ] Save with a stale `rev` fails with `conflict`; the op layer retries once on a fresh load and then surfaces the conflict — unit, with a fake store — `ops.test.ts`
+- [x] `describeComic()` gives stable ids, 1-based page numbers, cells and bboxes, and plain balloon text — unit — `src/lib/ops/describe.test.ts`
+- [x] Ops run a command on a loaded doc and reject invariant-breaking results — unit, with a fake store — `src/lib/ops/ops.test.ts`
+- [x] Save with a stale `rev` fails with `conflict`; the op layer retries once on a fresh load and then surfaces the conflict — unit, with a fake store — `ops.test.ts`
 - [ ] Tool input schemas: merge by cells, merge by ids, and invalid shapes return the editor's reason text — unit — `src/lib/mcp/tools.test.ts`
 - [ ] `set_panel_image` rejects non-image and oversized URLs, and stores by the user's folder — unit — `tools.test.ts`
-- [ ] Balloon text input (simple markdown → the TipTap-compatible HTML subset) is sanitised — unit — `src/lib/mcp/text.test.ts`
+- [x] Balloon text input (simple markdown → the TipTap-compatible HTML subset) is sanitised — unit — `src/lib/mcp/text.test.ts`
 - [ ] `/mcp` without a token answers 401 with the resource-metadata challenge; the metadata route names the Supabase issuer — integration (the route handler called directly) — `src/routes/mcp/mcp.test.ts`
 - [ ] Documents store: the rev-checked update against local Supabase; user B can't read user A's comic (RLS) — integration against `supabase start` — `src/lib/persistence/documents.int.test.ts`
 - [ ] E2E: sign up → confirm (read from local Inbucket/Mailpit) → create a comic → merge, add a balloon → reload → still there → sign out, and the route guard redirects — Playwright + local Supabase — `e2e/auth.e2e.ts`

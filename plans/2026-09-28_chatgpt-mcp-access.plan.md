@@ -1,6 +1,6 @@
 ---
 slug: 2026-09-28_chatgpt-mcp-access
-status: draft
+status: active
 started: 2026-09-28
 finished:
 issue:
@@ -151,13 +151,10 @@ In ChatGPT (web), on an account with Developer mode:
 
 ## Open questions
 
-- [ ] **Who has Developer mode?** It needs Plus, Pro, Business, Enterprise or Edu. On a Business or
-      Enterprise workspace an admin may have to allow custom connectors first. Which ChatGPT plans
-      does the team use?
-- [ ] **By "GPT", ChatGPT the app, or also the OpenAI API** (GPT models calling `/mcp` from
-      scripts)? The plan covers ChatGPT; the API is listed as a cheap follow-on.
-- [ ] **Audience fallback.** If Supabase ignores `resource`, is "OAuth-only claims, no `aud` check"
-      acceptable for an internal tool until Supabase supports RFC 8707?
+- [x] **Who has Developer mode?** Yan tests with a ChatGPT **Pro** account (2026-09-28).
+- [x] **ChatGPT or the API?** ChatGPT only: the users aren't API users. The API stays out of scope.
+- [x] **Audience fallback.** Accepted: if Supabase ignores `resource`, require the OAuth-only
+      `client_id` claim instead of an `aud` check.
 - [ ] Does ChatGPT's Developer mode currently connect over Streamable HTTP? The spike answers this;
       if it needs SSE, add an SSE endpoint alongside `/mcp`.
 

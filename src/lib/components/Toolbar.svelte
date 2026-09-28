@@ -9,7 +9,16 @@
 
 	import type { BalloonType } from '$lib/model/types';
 
-	let { editor }: { editor: Editor } = $props();
+	import type { SaveStatus } from '$lib/persistence/autosave';
+
+	let { editor, saveStatus }: { editor: Editor; saveStatus: SaveStatus } = $props();
+
+	const SAVE_LABEL: Record<SaveStatus, string> = {
+		saved: 'Saved',
+		dirty: 'Unsaved',
+		saving: 'Saving…',
+		error: 'Save failed'
+	};
 
 	const BALLOONS: [BalloonType, string, string][] = [
 		['speech', 'Speech', 'S'],
@@ -99,8 +108,14 @@
 	<div class="flex-1"></div>
 
 	{#if editor.status}
-		<p class="mr-2 text-amber-700" role="status">{editor.status}</p>
+		<p class="mr-3 text-amber-700" role="status">{editor.status}</p>
 	{/if}
+	<span
+		class="w-20 text-right text-xs"
+		class:text-stone-400={saveStatus !== 'error'}
+		class:text-red-600={saveStatus === 'error'}
+		aria-live="polite">{SAVE_LABEL[saveStatus]}</span
+	>
 </header>
 
 <style lang="postcss">

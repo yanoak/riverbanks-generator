@@ -45,6 +45,41 @@ test('merge by keyboard, letter a balloon, undo and redo', async ({ page }) => {
 	await page.keyboard.press('ControlOrMeta+Shift+z');
 	await page.keyboard.press('ControlOrMeta+Shift+z');
 	await expect(text).toHaveText('THE TRICK IS TO NEVER MISTAKE THE MESSAGE');
+
+	// Autosave to IndexedDB, then a reload brings everything back.
+	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+	await page.reload();
+	await expect(panels).toHaveCount(9);
+	await expect(text).toHaveText('THE TRICK IS TO NEVER MISTAKE THE MESSAGE');
+	await expect(text.locator('strong')).toHaveText('MESSAGE');
+});
+
+test('pages: add, reorder, delete, and persist', async ({ page }) => {
+	await page.goto('/');
+	const thumbs = page.getByRole('navigation', { name: 'Pages' }).getByRole('button', {
+		name: /^Page \d+$/
+	});
+	await expect(thumbs).toHaveCount(1);
+	await page.getByRole('button', { name: 'Add page' }).click();
+	await page.getByRole('button', { name: 'Add page' }).click();
+	await expect(thumbs).toHaveCount(3);
+	await expect(thumbs.nth(2)).toHaveAttribute('aria-current', 'page');
+
+	// Put a caption on page 3, move it to position 2, and check it travelled.
+	await page.keyboard.press('c');
+	await page.keyboard.press('Escape');
+	await page.keyboard.press('Alt+PageUp');
+	await expect(thumbs.nth(1)).toHaveAttribute('aria-current', 'page');
+	await expect(page.locator('main .balloon-text')).toHaveCount(1);
+
+	await page.getByRole('button', { name: 'Delete page' }).click();
+	await expect(thumbs).toHaveCount(2);
+	await page.keyboard.press('ControlOrMeta+z');
+	await expect(thumbs).toHaveCount(3);
+
+	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+	await page.reload();
+	await expect(thumbs).toHaveCount(3);
 });
 
 test('a non-contiguous merge is refused with a reason', async ({ page }) => {

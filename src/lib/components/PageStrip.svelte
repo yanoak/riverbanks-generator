@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import PageView from './PageView.svelte';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	let { editor }: { editor: Editor } = $props();
 	const THUMB_WIDTH = 88;
@@ -27,5 +31,43 @@
 			</div>
 			{i + 1}
 		</button>
+		{#if i === editor.pageIndex}
+			<div class="-mt-2 flex justify-center gap-0.5 text-stone-500">
+				<button
+					class="mini"
+					aria-label="Move page up"
+					title="Move up (⌥PageUp)"
+					disabled={i === 0}
+					onclick={() => editor.movePage(-1)}><ChevronUp size={14} /></button
+				>
+				<button
+					class="mini"
+					aria-label="Move page down"
+					title="Move down (⌥PageDown)"
+					disabled={i === editor.comic.pages.length - 1}
+					onclick={() => editor.movePage(1)}><ChevronDown size={14} /></button
+				>
+				<button
+					class="mini"
+					aria-label="Delete page"
+					title="Delete page"
+					disabled={editor.comic.pages.length === 1}
+					onclick={() => editor.deletePage()}><Trash2 size={14} /></button
+				>
+			</div>
+		{/if}
 	{/each}
+	<button
+		class="flex items-center justify-center gap-1 rounded border border-dashed border-stone-300 py-2 text-xs text-stone-500 hover:bg-white"
+		onclick={() => editor.addPage()}
+	>
+		<Plus size={14} /> Add page
+	</button>
 </nav>
+
+<style lang="postcss">
+	@reference "../../routes/layout.css";
+	.mini {
+		@apply grid h-6 w-6 place-items-center rounded hover:bg-stone-200 disabled:opacity-30 disabled:hover:bg-transparent;
+	}
+</style>

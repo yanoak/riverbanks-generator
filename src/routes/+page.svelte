@@ -5,8 +5,41 @@
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import { Editor } from '$lib/editor/editor.svelte';
 	import { handleShortcut } from '$lib/editor/shortcuts';
+	import { deserialize, serialize } from '$lib/model/serialize';
+	import { createAutoSave, type SaveStatus } from '$lib/persistence/autosave';
+	import { loadDocument, saveDocument } from '$lib/persistence/documents';
+	import { onMount } from 'svelte';
 
 	const editor = new Editor();
+	let saveStatus = $state<SaveStatus>('saved');
+	let loaded = $state(false);
+
+	const autosave = createAutoSave({
+		getVersion: () => editor.version,
+		serialize: () => serialize(editor.comic),
+		save: saveDocument,
+		onStatus: (s) => (saveStatus = s)
+	});
+
+	onMount(() => {
+		loadDocument()
+			.then((json) => {
+				if (json) editor.load(deserialize(json));
+			})
+			.catch((e) => editor.say(`Couldn't open the saved comic: ${e.message}`))
+			.finally(() => {
+				autosave.markSaved();
+				loaded = true;
+			});
+		const onHide = () => document.visibilityState === 'hidden' && autosave.saveNow();
+		document.addEventListener('visibilitychange', onHide);
+		return () => document.removeEventListener('visibilitychange', onHide);
+	});
+
+	$effect(() => {
+		void editor.version;
+		if (loaded) autosave.schedule();
+	});
 
 	let viewportWidth = $state(0);
 	let viewportHeight = $state(0);
@@ -59,7 +92,7 @@
 <svelte:window {onkeydown} {onpaste} />
 
 <div class="flex h-screen flex-col bg-stone-100 text-stone-900">
-	<Toolbar {editor} />
+	<Toolbar {editor} {saveStatus} />
 	<div class="flex min-h-0 flex-1">
 		<PageStrip {editor} />
 		<main class="relative min-w-0 flex-1 overflow-auto" {@attach measure}>
@@ -75,7 +108,9 @@
 				onpointerdown={onCanvasPointerDown}
 			>
 				<div class="shadow-[0_2px_24px_rgba(0,0,0,0.12)]">
-					<PageView page={editor.page} {scale} {editor} />
+					{#if loaded}
+						<PageView page={editor.page} {scale} {editor} />
+					{/if}
 				</div>
 			</div>
 			<div

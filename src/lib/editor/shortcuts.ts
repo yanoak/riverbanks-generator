@@ -66,6 +66,8 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 
 	if (key === 'Enter' && (editor.startEditing() || editor.enterImageMode())) return true;
 
+	if (e.altKey && key === 'PageDown') return (editor.movePage(1), true);
+	if (e.altKey && key === 'PageUp') return (editor.movePage(-1), true);
 	if (key === 'PageDown') return (editor.goToPage(editor.pageIndex + 1), true);
 	if (key === 'PageUp') return (editor.goToPage(editor.pageIndex - 1), true);
 

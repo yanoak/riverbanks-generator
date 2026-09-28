@@ -4,7 +4,7 @@
 import { HistoryManager } from '$lib/history/history.svelte';
 import type { Editor as TipTap } from '@tiptap/core';
 import { BatchCommand, type Command } from '$lib/history/command';
-import { InsertCommand, RemoveCommand } from '$lib/model/commands/list';
+import { InsertCommand, MoveCommand, RemoveCommand } from '$lib/model/commands/list';
 import {
 	createFreePanel,
 	MergePanelsCommand,
@@ -13,7 +13,7 @@ import {
 	SplitPanelCommand
 } from '$lib/model/commands/panels';
 import { PatchCommand } from '$lib/model/commands/patch';
-import { createComic } from '$lib/model/factory';
+import { createComic, createPage } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
 import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
@@ -87,14 +87,28 @@ export class Editor {
 
 	undo(): void {
 		this.history.undo();
-		this.pruneSelection();
-		this.changed();
+		this.afterHistory();
 	}
 
 	redo(): void {
 		this.history.redo();
+		this.afterHistory();
+	}
+
+	private afterHistory(): void {
+		this.pageIndex = Math.min(this.pageIndex, this.comic.pages.length - 1);
 		this.pruneSelection();
 		this.changed();
+	}
+
+	/** Replace the document (e.g. from storage); history starts fresh. */
+	load(comic: Comic): void {
+		this.stopEditing();
+		this.exitImageMode();
+		this.comic = comic;
+		this.pageIndex = 0;
+		this.selection = { kind: 'none' };
+		this.history.clear();
 	}
 
 	/** Mark the document changed without a history entry (e.g. renaming the comic). */
@@ -310,6 +324,27 @@ export class Editor {
 	}
 
 	// --- pages & view ---------------------------------------------------------------------
+
+	addPage(): void {
+		const page = createPage(this.page.grid);
+		this.run(new InsertCommand('Add page', this.comic.pages, page, this.pageIndex + 1));
+		this.goToPage(this.pageIndex + 1);
+	}
+
+	deletePage(): void {
+		if (this.comic.pages.length === 1) return this.say("Can't delete the last page.");
+		const index = this.pageIndex;
+		this.select({ kind: 'none' });
+		this.run(new RemoveCommand('Delete page', this.comic.pages, this.page));
+		this.pageIndex = Math.min(index, this.comic.pages.length - 1);
+	}
+
+	movePage(delta: number): void {
+		const to = this.pageIndex + delta;
+		if (to < 0 || to >= this.comic.pages.length) return;
+		this.run(new MoveCommand('Move page', this.comic.pages, this.page, to));
+		this.pageIndex = to;
+	}
 
 	goToPage(index: number): void {
 		if (index < 0 || index >= this.comic.pages.length) return;

@@ -134,7 +134,7 @@ commits a single "edit text" command.
 - [x] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
 - [x] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
 - [x] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
-- [ ] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
+- [x] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
 - [ ] Export: page → PNG (html-to-image with embedded fonts and images); comic → PDF via print stylesheet
 - [ ] AI image generation hook: server route + provider adapter, "Generate" in the panel inspector (blocked on the open question below)
 
@@ -215,7 +215,7 @@ message in the inspector with Retry, and the panel is left unchanged.
      selected panel (or at the page centre).
    - ⌘E: export the current page as PNG.
    - ⌘0: zoom to fit. ⌘= / ⌘−: zoom the page.
-   - PageUp / PageDown: previous / next page.
+   - PageUp / PageDown: previous / next page. ⌥PageUp / ⌥PageDown: move the current page.
 3. **Focus management:**
    - Adding a balloon selects it and focuses its text for editing.
    - Esc returns focus to the canvas region with the balloon still selected.
@@ -244,8 +244,8 @@ message in the inspector with Retry, and the panel is left unchanged.
 - [x] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
 - [x] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`
 - [x] Serialize → migrate → deserialize round-trips; an unknown future `docVersion` throws — unit — `src/lib/model/serialize.test.ts`
-- [ ] Autosave debounces, queues a follow-up when an edit lands during a save, and marks clean only if the version is unchanged — unit (fake timers) — `src/lib/persistence/autosave.test.ts`
-- [ ] E2E: merge four cells with the keyboard, add a speech balloon, type text, reload, and both are still there — Playwright — `e2e/editor.e2e.ts`
+- [x] Autosave debounces, queues a follow-up when an edit lands during a save, and marks clean only if the version is unchanged — unit (fake timers) — `src/lib/persistence/autosave.test.ts`
+- [x] E2E: merge four cells with the keyboard, add a speech balloon, type text, reload, and both are still there — Playwright — `e2e/editor.e2e.ts`
 
 ## Verification
 

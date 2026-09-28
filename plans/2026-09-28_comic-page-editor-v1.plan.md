@@ -129,7 +129,7 @@ commits a single "edit text" command.
 - [x] Document model types, default comic factory (one page, 3×4 grid of single-cell panels), `docVersion` + migrate stub
 - [x] Grid geometry: cell rects, contiguity check, lattice outline tracing → page-space polygon (TDD)
 - [x] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
-- [ ] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
+- [x] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
 - [ ] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
 - [ ] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
 - [ ] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
@@ -203,7 +203,8 @@ message in the inspector with Retry, and the panel is left unchanged.
    - ⌘Z / ⇧⌘Z: undo / redo
    - Delete / Backspace: delete the selected balloon or free panel. On a grid panel it removes
      the image instead.
-   - ⌘M: merge the selection. ⇧⌘M: split the selected panel.
+   - M: merge the selection. ⇧M: split the selected panel. (Not ⌘M: Chrome on macOS
+     minimises the window on ⌘M before the page sees it.)
    - Arrow keys: nudge the selection 1 unit; ⇧+Arrow nudges 10.
    - Enter: on a balloon, start editing text; on a panel, enter image pan/zoom mode.
    - Esc: leave editing mode (commits the text), then clear the selection.
@@ -249,9 +250,9 @@ message in the inspector with Retry, and the panel is left unchanged.
 1. `npm run check && npm run test:unit -- --run && npm run test:e2e` all pass.
 2. `npm run dev`, then open `/`. A single page with a 3×4 grid is shown and fitted to the viewport.
 3. Keyboard only:
-   - Tab to the canvas and Tab to cell 1. ⇧+Arrow extends the selection to cells 1, 2, 5, 6. ⌘M
+   - Tab to the canvas and Tab to cell 1. ⇧+Arrow extends the selection to cells 1, 2, 5, 6. M
      leaves one 2×2 panel.
-   - Select cells 3, 7, 8 and press ⌘M. An L-shaped panel appears whose border follows the L,
+   - Select cells 3, 7, 8 and press M. An L-shaped panel appears whose border follows the L,
      with no border line crossing its interior.
    - ⌘Z twice restores the original grid. ⇧⌘Z twice redoes both merges.
 4. Select panel A, then ⌘V an image from the clipboard. It fills the panel, clipped to its

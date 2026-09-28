@@ -312,14 +312,19 @@ limits and the TipTap-Svelte binding.
       mutators. (No `DOC_VERSION` bump needed; see Approach.)
 - [x] `geometry/grid.ts` `derivePanels`: components → panels, derived ids, holes split into
       row runs, missing owners → default single panels
-- [ ] `model/mirror.svelte.ts`: an incremental `$state` mirror updated from `observeDeep`,
-      keeping object identity for unchanged objects
-- [ ] Rewrite commands as transactions (patch, insert/remove/move, merge, split, setGrid,
-      splash, free panel, balloon, image, page ops); keep `REASONS` refusals
-- [ ] Undo/redo on `Y.UndoManager` with description + selection meta; toolbar and shortcuts
-      unchanged
-- [ ] Balloon text on Y.XmlFragment (Collaboration extension); fragment → HTML render cache;
-      auto-grow as a local geometry write
+- [x] Mirror: `model/reconcile.ts` patches the live `$state` comic in place from a fresh
+      projection after every Y update (simpler than per-event `observeDeep` patching; comics are
+      small, and fragment HTML is cached), keeping object identity for unchanged objects
+- [x] Commands as draft edits through `Editor.change()` (patch, insert/remove/move, merge,
+      split, setGrid, splash, free panel, balloon, image, page ops); `REASONS` refusals kept;
+      old command classes and `HistoryManager` deleted; MCP ops use the same draft functions
+- [x] Undo/redo on `Y.UndoManager` (`history/yhistory.svelte.ts`) with descriptions carried
+      across undo/redo; toolbar and shortcuts unchanged. Selection is pruned rather than restored
+      from meta. Found: Yjs skips a step a collaborator has fully overwritten and undoes the one
+      before (pinned in `editor.test.ts`)
+- [x] Balloon text on Y.XmlFragment via the sync-only extension (`editor/rich-text.ts`);
+      fragment → HTML cache; auto-grow joins the typing undo step. Verified by the unit suite and
+      all 15 e2e tests
 - [ ] Migration: `comics.ydoc bytea`, `ydoc_upto bigint`, `comic_updates` table and RLS (owner-
       only for now); convert existing rows
 - [ ] `YjsCloudProvider`: load snapshot + log, batched inserts, subscribe, catch-up on
@@ -473,8 +478,8 @@ e2e = Playwright with two browser contexts.
       Y.Doc) — unit — `model/commands/*.test.ts`
 - [ ] Undo reverts only local changes, and a collaborator's later edit to another object
       survives — unit — `history/undo.test.ts`
-- [ ] Undo of a local move that a collaborator has since overwritten keeps the collaborator's
-      value (Yjs semantics, confirmed in the spike) — unit
+- [x] Undo of a local move that a collaborator has since overwritten keeps the collaborator's
+      value, and that undo then acts on the step before (Yjs semantics) — unit
 - [ ] One command = one undo step, even when it touches several maps (merge, splash) — unit
 - [ ] Undo description and selection restore come from stack-item meta — unit
 

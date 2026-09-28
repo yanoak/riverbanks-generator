@@ -1,21 +1,19 @@
-// Editor state: the comic document, selection, mode and history. Components read from it;
-// every document change goes through run() or record(), so undo, redo and autosave all see it.
+// Editor state: the comic document, selection, mode and history. The document lives in a
+// Y.Doc; `comic` is a live projection of it that components read. Every change goes through
+// change(): edit a draft copy, and the difference is written to the Y.Doc as one undo step.
+// Any transaction on the doc (ours, undo, or a collaborator's) re-syncs `comic` in place.
 
-import { HistoryManager } from '$lib/history/history.svelte';
 import type { Editor as TipTap } from '@tiptap/core';
-import { BatchCommand, type Command } from '$lib/history/command';
-import { InsertCommand, MoveCommand, RemoveCommand } from '$lib/model/commands/list';
-import {
-	createFreePanel,
-	MergePanelsCommand,
-	SetGridCommand,
-	splashCommand,
-	SplitPanelCommand
-} from '$lib/model/commands/panels';
-import { PatchCommand } from '$lib/model/commands/patch';
+import { ySyncPluginKey } from '@tiptap/y-tiptap';
+import type * as Y from 'yjs';
+import { YHistory } from '$lib/history/yhistory.svelte';
 import { createComic, createPage } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
+import { clone } from '$lib/model/clone';
+import { createFreePanel, mergePanels, setGrid, splash, splitPanel } from '$lib/model/panels';
 import { REASONS } from '$lib/model/reasons';
+import { reconcile } from '$lib/model/reconcile';
+import { applyComic, comicToYDoc, LOCAL, projectComic } from '$lib/model/ydoc';
 import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { addImage } from '$lib/persistence/assets.svelte';
@@ -35,8 +33,13 @@ export type Selection =
 
 export type Mode = 'select' | 'image' | 'text';
 
+/** Title edits are not undo steps (they never were). */
+const TITLE = 'title';
+
 export class Editor {
-	comic = $state<Comic>(createComic());
+	/** The source of truth. Not reactive itself: `comic` mirrors it. */
+	doc: Y.Doc = comicToYDoc(createComic());
+	comic = $state<Comic>(projectComic(this.doc));
 	pageIndex = $state(0);
 	selection = $state<Selection>({ kind: 'none' });
 	mode = $state<Mode>('select');
@@ -54,7 +57,11 @@ export class Editor {
 	textTick = $state(0);
 	/** The panel whose image is being panned/zoomed while mode === 'image'. */
 	imagePanelId = $state<string | null>(null);
-	readonly history = new HistoryManager();
+	readonly history = new YHistory();
+
+	constructor() {
+		this.attach(this.doc);
+	}
 
 	get page(): Page {
 		return this.comic.pages[this.pageIndex];
@@ -66,51 +73,89 @@ export class Editor {
 		return sel.ids.map((id) => this.page.panels.find((p) => p.id === id)).filter((p) => !!p);
 	}
 
-	run(command: Command): void {
-		this.history.execute(command);
-		this.changed();
+	// --- the document ---------------------------------------------------------------------
+
+	private detach: (() => void) | null = null;
+
+	/** Edit `doc` from now on (e.g. one loaded from storage); history starts fresh. */
+	attach(doc: Y.Doc): void {
+		this.detach?.();
+		this.doc = doc;
+		this.history.attach(doc.getMap('comic'), { local: LOCAL, other: [ySyncPluginKey] });
+		const onUpdate = () => this.sync();
+		doc.on('update', onUpdate);
+		this.detach = () => doc.off('update', onUpdate);
+		this.sync();
 	}
 
-	/** For gestures that already applied their change live (drags). */
-	record(command: Command | null): void {
-		if (!command) return;
-		this.history.record(command);
-		this.changed();
+	/** Bring `comic` in line with the doc, then keep the page and selection valid. */
+	private sync(): void {
+		reconcile(this.comic, projectComic(this.doc));
+		this.pageIndex = Math.max(0, Math.min(this.pageIndex, this.comic.pages.length - 1));
+		this.pruneSelection();
+		this.version++;
+		this.onchange?.();
+	}
+
+	/**
+	 * Apply one edit: `edit` mutates a draft copy of the comic (and gets the current page's
+	 * draft for convenience); only what it changed is written, as one undo step. `group` joins
+	 * the step in progress instead (e.g. a balloon growing while its text is typed).
+	 */
+	change<R>(
+		description: string,
+		edit: (draft: Comic, page: Page) => R,
+		opts: { group?: boolean; origin?: unknown } = {}
+	): R {
+		const before = projectComic(this.doc);
+		const draft = clone(before);
+		const result = edit(draft, draft.pages[this.pageIndex]);
+		this.history.begin(description, opts);
+		applyComic(this.doc, before, draft, opts.origin ?? LOCAL);
+		this.history.end(opts);
+		return result;
+	}
+
+	/** Set fields on a panel or balloon of the current page. Undefined deletes the field. */
+	patch(description: string, id: string, fields: Partial<Balloon> | Partial<Panel>): void {
+		this.change(description, (_d, page) => Object.assign(find(page, id), fields));
+	}
+
+	/**
+	 * Record a gesture that already changed the live object (a drag, resize, pan): writes the
+	 * current values of the keys in `before`. Nothing is written if nothing changed.
+	 */
+	commit(description: string, target: { id: string }, before: object): void {
+		const now = Object.fromEntries(
+			Object.keys(before).map((k) => [k, clone((target as Record<string, unknown>)[k])])
+		);
+		this.change(description, (_d, page) => Object.assign(find(page, target.id), now));
 	}
 
 	undo(): void {
 		this.history.undo();
-		this.afterHistory();
 	}
 
 	redo(): void {
 		this.history.redo();
-		this.afterHistory();
-	}
-
-	private afterHistory(): void {
-		this.pageIndex = Math.min(this.pageIndex, this.comic.pages.length - 1);
-		this.pruneSelection();
-		this.changed();
 	}
 
 	/** Replace the document (e.g. from storage); history starts fresh. */
 	load(comic: Comic): void {
 		this.stopEditing();
 		this.exitImageMode();
-		this.comic = comic;
 		this.pageIndex = 0;
 		this.selection = { kind: 'none' };
-		this.history.clear();
+		this.attach(comicToYDoc(comic));
 	}
 
 	/** Called synchronously on every document change (autosave hooks in here). */
 	onchange: (() => void) | null = null;
 
-	/** Mark the document changed without a history entry (e.g. renaming the comic). */
-	changed(): void {
-		this.version++;
-		this.onchange?.();
+	setTitle(title: string): void {
+		const trimmed = title.trim();
+		if (!trimmed || trimmed === this.comic.title) return;
+		this.change('Rename', (d) => (d.title = trimmed), { origin: TITLE });
 	}
 
 	say(message: string | null): void {
@@ -134,14 +179,21 @@ export class Editor {
 		this.select(ids.length ? { kind: 'panels', ids } : { kind: 'none' });
 	}
 
-	/** Drop selected ids that no longer exist (after undo, delete, page switch). */
+	/** Drop selected ids that no longer exist (after undo, delete, a collaborator's edit). */
 	private pruneSelection(): void {
 		const sel = this.selection;
+		const page = this.page;
+		if (!page) return;
 		if (sel.kind === 'panels') {
-			const ids = sel.ids.filter((id) => this.page.panels.some((p) => p.id === id));
-			this.selection = ids.length ? { kind: 'panels', ids } : { kind: 'none' };
-		} else if (sel.kind === 'balloon' && !this.page.balloons.some((b) => b.id === sel.id)) {
+			const ids = sel.ids.filter((id) => page.panels.some((p) => p.id === id));
+			if (ids.length !== sel.ids.length)
+				this.selection = ids.length ? { kind: 'panels', ids } : { kind: 'none' };
+		} else if (sel.kind === 'balloon' && !page.balloons.some((b) => b.id === sel.id)) {
 			this.selection = { kind: 'none' };
+			if (this.editingBalloonId === sel.id) this.stopEditing();
+		}
+		if (this.imagePanelId && !page.panels.some((p) => p.id === this.imagePanelId)) {
+			this.exitImageMode();
 		}
 	}
 
@@ -149,9 +201,8 @@ export class Editor {
 
 	merge(): void {
 		const ids = this.selection.kind === 'panels' ? this.selection.ids : [];
-		const result = MergePanelsCommand.create(this.page, ids);
+		const result = this.change('Merge panels', (_d, page) => mergePanels(page, ids));
 		if (!result.ok) return this.say(REASONS[result.reason]);
-		this.run(result.command);
 		this.select({ kind: 'panels', ids: [result.mergedId] });
 	}
 
@@ -160,32 +211,29 @@ export class Editor {
 		if (!panel || panel.kind !== 'grid' || panel.cells.length < 2) {
 			return this.say('Select a merged panel to split.');
 		}
-		this.run(new SplitPanelCommand(this.page, panel.id));
+		this.change('Split panel', (_d, page) => splitPanel(page, panel.id));
 		this.select({ kind: 'panels', ids: [panel.id] });
 	}
 
 	setGrid(spec: Partial<GridSpec>): void {
-		const result = SetGridCommand.create(this.page, spec);
-		if (!result.ok) return this.say(REASONS[result.reason]);
-		this.run(result.command);
-		this.pruneSelection();
+		const result = this.change('Change grid', (_d, page) => setGrid(page, spec));
+		if (!result.ok) this.say(REASONS[result.reason]);
 	}
 
 	addFreePanel(): string {
 		const panel = createFreePanel(this.page);
-		this.run(new InsertCommand('Add free panel', this.page.panels, panel));
+		this.change('Add free panel', (_d, page) => page.panels.push(panel));
 		this.select({ kind: 'panels', ids: [panel.id] });
 		return panel.id;
 	}
 
 	splash(): void {
-		this.run(splashCommand(this.page));
-		this.pruneSelection();
+		this.change('Full-page panel', (_d, page) => splash(page));
 	}
 
 	/** Record a completed drag or resize of a free panel or balloon. */
-	commitGeometry(target: Rect, before: Rect, description: string): void {
-		this.record(PatchCommand.fromChange(description, target, before));
+	commitGeometry(target: Rect & { id: string }, before: Rect, description: string): void {
+		this.commit(description, target, before);
 	}
 
 	get selectedBalloon(): Balloon | undefined {
@@ -194,7 +242,7 @@ export class Editor {
 	}
 
 	/** The single selected free panel or balloon that arrows and z-order act on. */
-	get movable(): (Rect & { z: number }) | undefined {
+	get movable(): (Rect & { id: string; z: number }) | undefined {
 		if (this.selectedBalloon) return this.selectedBalloon;
 		const [panel] = this.selectedPanels;
 		return this.selectedPanels.length === 1 && panel.kind === 'free' ? panel : undefined;
@@ -209,7 +257,7 @@ export class Editor {
 		return true;
 	}
 
-	/** Leaving text mode unmounts TipTap, which commits the text (see rich-text.ts). */
+	/** Leaving text mode unmounts TipTap; its text is already in the doc (see rich-text.ts). */
 	stopEditing(): void {
 		this.mode = 'select';
 		this.editingBalloonId = null;
@@ -220,7 +268,7 @@ export class Editor {
 		const [panel] = this.selectedPanels;
 		const box = panel ? panelBox(this.page, panel) : undefined;
 		const balloon = createBalloon(this.page, type, box);
-		this.run(new InsertCommand(`Add ${type}`, this.page.balloons, balloon));
+		this.change(`Add ${type}`, (_d, page) => page.balloons.push(balloon));
 		this.startEditing(balloon.id, true);
 		return balloon.id;
 	}
@@ -228,7 +276,11 @@ export class Editor {
 	nudge(dx: number, dy: number): boolean {
 		const target = this.movable;
 		if (!target) return false;
-		this.run(new PatchCommand('Nudge', target, { x: target.x + dx, y: target.y + dy }));
+		this.change('Nudge', (_d, page) => {
+			const t = find(page, target.id) as Rect;
+			t.x += dx;
+			t.y += dy;
+		});
 		return true;
 	}
 
@@ -239,26 +291,25 @@ export class Editor {
 			? this.page.balloons.map((b) => b.z)
 			: this.page.panels.filter((p): p is FreePanel => p.kind === 'free').map((p) => p.z);
 		const z = to === 'front' ? Math.max(...zs) + 1 : Math.min(...zs) - 1;
-		this.run(new PatchCommand(to === 'front' ? 'Bring to front' : 'Send to back', target, { z }));
+		this.patch(to === 'front' ? 'Bring to front' : 'Send to back', target.id, { z });
 	}
 
 	/** Delete removes free panels; on a lone grid panel it removes the image instead. */
 	deleteSelection(): void {
 		const balloon = this.selectedBalloon;
 		if (balloon) {
-			this.run(new RemoveCommand(`Delete ${balloon.type}`, this.page.balloons, balloon));
+			this.change(`Delete ${balloon.type}`, (_d, page) => {
+				page.balloons = page.balloons.filter((b) => b.id !== balloon.id);
+			});
 			return this.select({ kind: 'none' });
 		}
-		const free = this.selectedPanels.filter((p) => p.kind === 'free');
+		const free = this.selectedPanels.filter((p) => p.kind === 'free').map((p) => p.id);
 		const [only] = this.selectedPanels;
 		if (!free.length && only?.image) return this.removeImage(only);
 		if (!free.length) return;
-		this.run(
-			new BatchCommand(
-				'Delete panel',
-				free.map((p) => new RemoveCommand('Delete panel', this.page.panels, p))
-			)
-		);
+		this.change('Delete panel', (_d, page) => {
+			page.panels = page.panels.filter((p) => !free.includes(p.id));
+		});
 		this.select({ kind: 'none' });
 	}
 
@@ -275,12 +326,12 @@ export class Editor {
 		const panel = this.page.panels.find((p) => p.id === panelId);
 		if (!panel) return;
 		const placement = fitImage(stored, panelBox(this.page, panel), 'fill');
-		this.run(new PatchCommand('Set image', panel, { image: { ...stored, ...placement } }));
+		this.patch('Set image', panelId, { image: { ...stored, ...placement } });
 		this.select({ kind: 'panels', ids: [panelId] });
 	}
 
 	removeImage(panel: Panel): void {
-		if (panel.image) this.run(new PatchCommand('Remove image', panel, { image: undefined }));
+		if (panel.image) this.patch('Remove image', panel.id, { image: undefined });
 	}
 
 	enterImageMode(): boolean {
@@ -299,7 +350,7 @@ export class Editor {
 	private placeImage(description: string, place: (panel: Panel) => Panel['image']): void {
 		const panel = this.imagePanel ?? this.selectedPanels[0];
 		if (!panel?.image) return;
-		this.run(new PatchCommand(description, panel, { image: place(panel) }));
+		this.patch(description, panel.id, { image: place(panel) });
 	}
 
 	fitSelectedImage(mode: 'fill' | 'fit'): void {
@@ -324,22 +375,24 @@ export class Editor {
 
 	addPage(): void {
 		const page = createPage(this.page.grid);
-		this.run(new InsertCommand('Add page', this.comic.pages, page, this.pageIndex + 1));
-		this.goToPage(this.pageIndex + 1);
+		const at = this.pageIndex + 1;
+		this.change('Add page', (d) => d.pages.splice(at, 0, page));
+		this.goToPage(at);
 	}
 
 	deletePage(): void {
 		if (this.comic.pages.length === 1) return this.say("Can't delete the last page.");
 		const index = this.pageIndex;
 		this.select({ kind: 'none' });
-		this.run(new RemoveCommand('Delete page', this.comic.pages, this.page));
+		this.change('Delete page', (d) => d.pages.splice(index, 1));
 		this.pageIndex = Math.min(index, this.comic.pages.length - 1);
 	}
 
 	movePage(delta: number): void {
-		const to = this.pageIndex + delta;
+		const from = this.pageIndex;
+		const to = from + delta;
 		if (to < 0 || to >= this.comic.pages.length) return;
-		this.run(new MoveCommand('Move page', this.comic.pages, this.page, to));
+		this.change('Move page', (d) => d.pages.splice(to, 0, ...d.pages.splice(from, 1)));
 		this.pageIndex = to;
 	}
 
@@ -353,4 +406,11 @@ export class Editor {
 		const current = this.zoom ?? fit;
 		this.zoom = Math.min(4, Math.max(0.1, current * factor));
 	}
+}
+
+/** A panel or balloon of `page` by id (throws if it has gone: callers check selection first). */
+function find(page: Page, id: string): Panel | Balloon {
+	const found = page.panels.find((p) => p.id === id) ?? page.balloons.find((b) => b.id === id);
+	if (!found) throw new Error(`No panel or balloon ${id} on this page.`);
+	return found;
 }

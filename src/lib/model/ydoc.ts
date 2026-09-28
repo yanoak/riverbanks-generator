@@ -231,6 +231,17 @@ export function applyComic(doc: Y.Doc, before: Comic, after: Comic, origin: unkn
 
 // --- reading -------------------------------------------------------------------------------
 
+/** A balloon's text, for binding the text editor to it directly. */
+export function balloonFragment(
+	doc: Y.Doc,
+	pageId: string,
+	balloonId: string
+): Y.XmlFragment | undefined {
+	const page = pagesOf(doc).get(pageId) as YMap | undefined;
+	const balloon = page && (map(page, 'balloons').get(balloonId) as YMap | undefined);
+	return balloon?.get('text') as Y.XmlFragment | undefined;
+}
+
 const htmlCache = new WeakMap<Y.XmlFragment, string>();
 const watched = new WeakSet<Y.Doc>();
 

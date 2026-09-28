@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createPage } from '$lib/model/factory';
-import { MergePanelsCommand } from '$lib/model/commands/panels';
+import { mergePanels } from '$lib/model/panels';
 import { gridPanels } from '$lib/model/invariants';
 import type { Page } from '$lib/model/types';
 import { neighbourPanel } from './navigation';
@@ -24,9 +24,8 @@ describe('neighbourPanel', () => {
 
 	it('leaves a merged panel from its outermost cells', () => {
 		const page = createPage();
-		const m = MergePanelsCommand.create(page, [at(page, 0), at(page, 1), at(page, 4), at(page, 5)]);
+		const m = mergePanels(page, [at(page, 0), at(page, 1), at(page, 4), at(page, 5)]);
 		if (!m.ok) throw new Error();
-		m.command.execute();
 		expect(neighbourPanel(page, m.mergedId, 'right')).toBe(at(page, 2));
 		expect(neighbourPanel(page, m.mergedId, 'down')).toBe(at(page, 8));
 		// Stepping back in from the right lands on the merged panel.

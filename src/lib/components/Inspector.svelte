@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
-	import { PatchCommand } from '$lib/model/commands/patch';
 	import type { BalloonType, Panel } from '$lib/model/types';
 
 	import type { Editor as TipTap } from '@tiptap/core';
@@ -54,7 +53,7 @@
 	}
 
 	function patchPanel(p: Panel, patch: Partial<Panel>, description: string) {
-		editor.run(new PatchCommand(description, p, patch));
+		editor.patch(description, p.id, patch);
 	}
 </script>
 
@@ -91,7 +90,7 @@
 			<select
 				class="w-32 rounded border border-stone-300 px-1 py-0.5"
 				value={b.font}
-				onchange={(e) => editor.run(new PatchCommand('Font', b, { font: e.currentTarget.value }))}
+				onchange={(e) => editor.patch('Font', b.id, { font: e.currentTarget.value })}
 			>
 				{#each FONTS as [label, value] (value)}
 					<option {value}>{label}</option>
@@ -104,16 +103,12 @@
 				class="rounded border border-stone-300 px-1 py-0.5"
 				value={b.type}
 				onchange={(e) =>
-					editor.run(
-						new PatchCommand('Balloon type', b, {
-							type: e.currentTarget.value as BalloonType,
-							tail:
-								b.tail ??
-								(TAILED.includes(e.currentTarget.value)
-									? { x: b.w * 0.35, y: b.h * 1.6 }
-									: undefined)
-						})
-					)}
+					editor.patch('Balloon type', b.id, {
+						type: e.currentTarget.value as BalloonType,
+						tail:
+							b.tail ??
+							(TAILED.includes(e.currentTarget.value) ? { x: b.w * 0.35, y: b.h * 1.6 } : undefined)
+					})}
 			>
 				{#each ['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'] as t (t)}
 					<option value={t}>{t}</option>
@@ -129,7 +124,7 @@
 				max="200"
 				value={b.fontSize}
 				onchange={(e) =>
-					editor.run(new PatchCommand('Font size', b, { fontSize: Number(e.currentTarget.value) }))}
+					editor.patch('Font size', b.id, { fontSize: Number(e.currentTarget.value) })}
 			/>
 		</label>
 		<label class="row">
@@ -137,8 +132,7 @@
 			<input
 				type="color"
 				value={b.fill}
-				onchange={(e) =>
-					editor.run(new PatchCommand('Balloon fill', b, { fill: e.currentTarget.value }))}
+				onchange={(e) => editor.patch('Balloon fill', b.id, { fill: e.currentTarget.value })}
 			/>
 		</label>
 		<label class="row">
@@ -148,11 +142,9 @@
 				checked={!!b.tail}
 				disabled={!TAILED.includes(b.type)}
 				onchange={(e) =>
-					editor.run(
-						new PatchCommand('Toggle tail', b, {
-							tail: e.currentTarget.checked ? { x: b.w * 0.35, y: b.h * 1.6 } : undefined
-						})
-					)}
+					editor.patch('Toggle tail', b.id, {
+						tail: e.currentTarget.checked ? { x: b.w * 0.35, y: b.h * 1.6 } : undefined
+					})}
 			/>
 		</label>
 		<div class="mt-3 grid grid-cols-2 gap-2">

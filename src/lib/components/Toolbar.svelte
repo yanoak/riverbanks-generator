@@ -63,8 +63,8 @@
 	<input
 		class="w-48 rounded px-2 py-1 text-stone-600 hover:bg-stone-100 focus:bg-stone-100 focus:outline-none"
 		aria-label="Comic title"
-		bind:value={editor.comic.title}
-		onchange={() => editor.changed()}
+		value={editor.comic.title}
+		onchange={(e) => editor.setTitle(e.currentTarget.value)}
 	/>
 
 	<div class="mx-2 h-6 w-px bg-stone-200"></div>

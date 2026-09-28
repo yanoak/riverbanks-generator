@@ -1,16 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { createComic } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
-import { MergePanelsCommand } from '$lib/model/commands/panels';
+import { mergePanels } from '$lib/model/panels';
 import { describeComic } from './describe';
 
 describe('describeComic', () => {
 	it('summarises pages, panels and balloons for an agent', () => {
 		const comic = createComic('Riverbanks');
 		const page = comic.pages[0];
-		const merge = MergePanelsCommand.create(page, [page.panels[0].id, page.panels[1].id]);
-		if (!merge.ok) throw new Error();
-		merge.command.execute();
+		if (!mergePanels(page, [page.panels[0].id, page.panels[1].id]).ok) throw new Error();
 		const balloon = createBalloon(page, 'speech');
 		balloon.html = '<p>HI <strong>THERE</strong></p>';
 		page.balloons.push(balloon);

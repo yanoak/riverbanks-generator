@@ -7,7 +7,6 @@
 	import { panelBox } from '$lib/geometry/panel';
 	import { zoomImage } from '$lib/geometry/image';
 	import type { Editor } from '$lib/editor/editor.svelte';
-	import { PatchCommand } from '$lib/model/commands/patch';
 	import type { Page, Panel, PanelImage as Img } from '$lib/model/types';
 	import PanelImage from './PanelImage.svelte';
 
@@ -39,7 +38,7 @@
 	}
 
 	function onpointerup() {
-		if (drag) editor.record(PatchCommand.fromChange('Pan image', image, drag.start));
+		if (drag) editor.commit('Pan image', panel, { image: drag.start });
 		drag = null;
 	}
 
@@ -58,7 +57,7 @@
 			Object.assign(image, zoomImage(snapshot(image), Math.exp(-e.deltaY * 0.002), anchor));
 			clearTimeout(wheelTimer);
 			wheelTimer = setTimeout(() => {
-				if (wheelStart) editor.record(PatchCommand.fromChange('Zoom image', image, wheelStart));
+				if (wheelStart) editor.commit('Zoom image', panel, { image: wheelStart });
 				wheelStart = null;
 			}, 250);
 		};

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { PatchCommand } from './commands/patch';
 import { createPage } from './factory';
 import { createBalloon } from './balloons';
 
@@ -29,19 +28,5 @@ describe('createBalloon', () => {
 	it('uses a display font for sfx', () => {
 		const page = createPage();
 		expect(createBalloon(page, 'sfx').font).toMatch(/Bangers/);
-	});
-});
-
-describe('balloon move + resize', () => {
-	it('is one undo step from start and end geometry', () => {
-		const page = createPage();
-		const b = createBalloon(page, 'speech');
-		const start = { x: b.x, y: b.y, w: b.w, h: b.h };
-		Object.assign(b, { x: 10, y: 20, w: 300, h: 200 }); // live drag
-		const cmd = PatchCommand.fromChange('Resize balloon', b, start)!;
-		cmd.undo();
-		expect({ x: b.x, y: b.y, w: b.w, h: b.h }).toEqual(start);
-		cmd.execute();
-		expect(b.w).toBe(300);
 	});
 });

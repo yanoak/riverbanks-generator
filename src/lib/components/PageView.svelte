@@ -12,7 +12,6 @@
 	import ImageOverlay from './ImageOverlay.svelte';
 	import type { Balloon, Panel } from '$lib/model/types';
 	import BalloonView from './BalloonView.svelte';
-	import { PatchCommand } from '$lib/model/commands/patch';
 	import { richText } from '$lib/editor/rich-text';
 
 	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
@@ -60,8 +59,7 @@
 	}
 
 	function tailUp(balloon: Balloon) {
-		if (tailDrag)
-			editor?.record(PatchCommand.fromChange('Move tail', balloon, { tail: tailDrag.start }));
+		if (tailDrag) editor?.commit('Move tail', balloon, { tail: tailDrag.start });
 		tailDrag = null;
 	}
 

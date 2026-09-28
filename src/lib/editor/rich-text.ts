@@ -1,15 +1,31 @@
-// In-place balloon text editing with TipTap. Mounted as an attachment while a balloon is in
-// text mode; when it unmounts (Esc, clicking elsewhere, switching page) the final HTML is
-// committed as a single "Edit text" undo step. TipTap's own history covers typing meanwhile.
+// In-place balloon text editing with TipTap, bound straight to the balloon's Y.XmlFragment:
+// every keystroke is a Yjs change (so collaborators see it as it is typed), and ⌘Z goes to the
+// comic-wide undo, which groups typing into steps. Only ySyncPlugin is used, not TipTap's
+// Collaboration extension: that one destroys a shared UndoManager whenever the editor unmounts
+// (see the spike in plans/2026-09-28_realtime-collaboration.plan.md).
 
 import { untrack } from 'svelte';
-import { Editor as TipTap } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import TextAlign from '@tiptap/extension-text-align';
+import { Editor as TipTap, Extension } from '@tiptap/core';
+import { ySyncPlugin } from '@tiptap/y-tiptap';
+import type * as Y from 'yjs';
 import { textInset } from '$lib/geometry/balloon';
-import { PatchCommand } from '$lib/model/commands/patch';
+import { balloonExtensions } from '$lib/model/text';
 import type { Balloon } from '$lib/model/types';
+import { balloonFragment } from '$lib/model/ydoc';
 import type { Editor } from './editor.svelte';
+
+/** Sync with a fragment, and route undo/redo to the editor's history. */
+const yText = (editor: Editor, fragment: Y.XmlFragment) =>
+	Extension.create({
+		name: 'yText',
+		priority: 1000, // like Collaboration: other plugins read the sync plugin's state
+		addProseMirrorPlugins: () => [ySyncPlugin(fragment)],
+		addKeyboardShortcuts: () => ({
+			'Mod-z': () => (editor.undo(), true),
+			'Shift-Mod-z': () => (editor.redo(), true),
+			'Mod-y': () => (editor.redo(), true)
+		})
+	});
 
 export function richText(editor: Editor, balloon: Balloon, selectAll: boolean) {
 	// untrack: an attachment re-runs when state it reads changes, and fit() changes balloon.h —
@@ -18,35 +34,28 @@ export function richText(editor: Editor, balloon: Balloon, selectAll: boolean) {
 }
 
 function mount(editor: Editor, balloon: Balloon, selectAll: boolean, node: HTMLElement) {
-	const start = { html: balloon.html, h: balloon.h };
+	const fragment = balloonFragment(editor.doc, editor.page.id, balloon.id);
+	if (!fragment) return;
 
-	/** Grow the balloon so the text fits; the text box is inset from the balloon edge. */
+	/** Grow the balloon so the text fits (same undo step as the typing that caused it). */
 	const fit = () => {
 		const available = node.parentElement?.clientHeight ?? 0;
 		const overflow = node.offsetHeight - available;
-		if (overflow > 1) balloon.h += overflow / (1 - 2 * textInset(balloon.type));
+		if (overflow <= 1) return;
+		const h = balloon.h + overflow / (1 - 2 * textInset(balloon.type));
+		editor.change(
+			'Edit text',
+			(_d, page) => {
+				const b = page.balloons.find((x) => x.id === balloon.id);
+				if (b) b.h = h;
+			},
+			{ group: true }
+		);
 	};
 
 	const tiptap = new TipTap({
 		element: node,
-		extensions: [
-			StarterKit.configure({
-				heading: false,
-				blockquote: false,
-				bulletList: false,
-				orderedList: false,
-				listItem: false,
-				listKeymap: false,
-				code: false,
-				codeBlock: false,
-				horizontalRule: false,
-				link: false,
-				dropcursor: false,
-				gapcursor: false
-			}),
-			TextAlign.configure({ types: ['paragraph'], defaultAlignment: 'center' })
-		],
-		content: start.html,
+		extensions: [...balloonExtensions, yText(editor, fragment)],
 		autofocus: selectAll ? 'all' : 'end',
 		editorProps: { attributes: { 'aria-label': `${balloon.type} text`, spellcheck: 'false' } },
 		onTransaction: () => {
@@ -57,13 +66,7 @@ function mount(editor: Editor, balloon: Balloon, selectAll: boolean, node: HTMLE
 	editor.textEditor = tiptap;
 
 	return () => {
-		const html = tiptap.getHTML();
 		if (editor.textEditor === tiptap) editor.textEditor = null;
 		tiptap.destroy();
-		// Text and any growth are one undo step. Deferred: this runs during Svelte teardown.
-		queueMicrotask(() => {
-			balloon.html = html;
-			editor.record(PatchCommand.fromChange('Edit text', balloon, start));
-		});
 	};
 }

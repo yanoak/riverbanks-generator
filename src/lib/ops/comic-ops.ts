@@ -6,10 +6,10 @@ import { panelBox } from '$lib/geometry/panel';
 import { createBalloon } from '$lib/model/balloons';
 import {
 	createFreePanel,
-	MergePanelsCommand,
-	SetGridCommand,
-	SplitPanelCommand
-} from '$lib/model/commands/panels';
+	mergePanels as merge,
+	setGrid as reshape,
+	splitPanel as split
+} from '$lib/model/panels';
 import { createPage } from '$lib/model/factory';
 import { gridPanels } from '$lib/model/invariants';
 import { REASONS } from '$lib/model/reasons';
@@ -58,9 +58,8 @@ export function mergePanels(
 		[...new Set((args.cells ?? []).map((c) => panels.find((p) => p.cells.includes(c))?.id))].filter(
 			(id): id is string => !!id
 		);
-	const result = MergePanelsCommand.create(page, ids);
+	const result = merge(page, ids);
 	if (!result.ok) throw invalid(REASONS[result.reason]);
-	result.command.execute();
 	const merged = gridPanels(page).find((p) => p.id === result.mergedId)!;
 	return `Merged ${merged.cells.length} cells into panel ${merged.id} on page ${args.page}.`;
 }
@@ -93,9 +92,8 @@ export function movePage(comic: Comic, args: { page: number; to: number }): stri
 export function setGrid(comic: Comic, args: { page: number } & Partial<GridSpec>): string {
 	const { page: n, ...spec } = args;
 	const page = pageAt(comic, n);
-	const result = SetGridCommand.create(page, spec);
+	const result = reshape(page, spec);
 	if (!result.ok) throw invalid(REASONS[result.reason]);
-	result.command.execute();
 	const g = page.grid;
 	return `Page ${n} grid is now ${g.rows}×${g.cols}, gutter ${g.gutter}, margin ${g.margin}.`;
 }
@@ -107,8 +105,9 @@ export function splitPanel(comic: Comic, args: { page: number; panelId: string }
 	const panel = panelIn(page, args.panelId);
 	if (panel.kind !== 'grid' || panel.cells.length < 2)
 		throw invalid('Only merged grid panels can be split.');
-	new SplitPanelCommand(page, panel.id).execute();
-	return `Split panel ${panel.id} into ${panel.cells.length} panels.`;
+	const cells = panel.cells.length;
+	split(page, panel.id);
+	return `Split panel ${panel.id} into ${cells} panels.`;
 }
 
 export function addFreePanel(

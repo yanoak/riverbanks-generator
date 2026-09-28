@@ -151,7 +151,7 @@ In ChatGPT (web), on an account with Developer mode:
 
 ## Open questions
 
-- [x] **Who has Developer mode?** Yan tests with a ChatGPT **Pro** account (2026-09-28).
+- [x] **Who has Developer mode?** Yan tests with a ChatGPT **Plus** account (2026-09-28); Developer mode is available on Plus.
 - [x] **ChatGPT or the API?** ChatGPT only: the users aren't API users. The API stays out of scope.
 - [x] **Audience fallback.** Accepted: if Supabase ignores `resource`, require the OAuth-only
       `client_id` claim instead of an `aud` check.

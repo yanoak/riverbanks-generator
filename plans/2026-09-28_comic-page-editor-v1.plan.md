@@ -128,7 +128,7 @@ commits a single "edit text" command.
 - [x] Scaffold SvelteKit + TS + Tailwind 4 + Vitest; port `HistoryManager`, `Command` and `BatchCommand` from the template, with tests
 - [x] Document model types, default comic factory (one page, 3×4 grid of single-cell panels), `docVersion` + migrate stub
 - [x] Grid geometry: cell rects, contiguity check, lattice outline tracing → page-space polygon (TDD)
-- [ ] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
+- [x] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
 - [ ] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
 - [ ] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
 - [ ] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
@@ -232,11 +232,11 @@ message in the inspector with Retry, and the panel is left unchanged.
 - [x] `panelOutline`: 1 cell → exactly its cell rect; 1×2 → one rect spanning the gutter; L of 3 cells → 6 vertices in clockwise order; 2×2 → 4 vertices (no interior vertices) — unit — `grid.test.ts`
 - [x] `panelOutline` for a U-shape (5 cells) → 8 vertices — unit — `grid.test.ts`
 - [x] `hasHoles` / `canMerge`: a ring and a corner-pinched region are rejected with a reason; a U open to the edge is fine — unit — `grid.test.ts`
-- [ ] Merge: merging panels whose union is contiguous yields one panel; merge + undo restores the exact prior panels and ids; non-contiguous merge is rejected with a reason — unit — `src/lib/model/commands/panels.test.ts`
-- [ ] Merge keeps the image of the first selected panel that has one — unit — `panels.test.ts`
-- [ ] Split: an N-cell panel → N single panels; split + undo restores it — unit — `panels.test.ts`
-- [ ] Changing grid rows/cols is allowed only when all panels are single cells, and regenerates the partition — unit — `panels.test.ts`
-- [ ] Invariant checker flags overlapping and missing cells — unit — `src/lib/model/invariants.test.ts`
+- [x] Merge: merging panels whose union is contiguous yields one panel; merge + undo restores the exact prior panels and ids; non-contiguous merge is rejected with a reason — unit — `src/lib/model/commands/panels.test.ts`
+- [x] Merge keeps the image of the first selected panel that has one — unit — `panels.test.ts`
+- [x] Split: an N-cell panel → N single panels; split + undo restores it — unit — `panels.test.ts`
+- [x] Changing grid rows/cols is allowed only when all panels are single cells, and regenerates the partition — unit — `panels.test.ts`
+- [x] Invariant checker flags overlapping and missing cells — unit — `src/lib/model/invariants.test.ts`
 - [ ] Move/resize balloon as a single command from start/end geometry; undo restores both — unit — `src/lib/model/commands/balloons.test.ts`
 - [ ] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
 - [ ] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`

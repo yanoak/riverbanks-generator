@@ -1,4 +1,11 @@
-import { DOC_VERSION, type Comic, type GridPanel, type GridSpec, type Page, type Size } from './types';
+import {
+	DOC_VERSION,
+	type Comic,
+	type GridPanel,
+	type GridSpec,
+	type Page,
+	type Size
+} from './types';
 
 /** US comic trim, 6.625" × 10.25", at ~151 units per inch. */
 export const PAGE_SIZE: Size = { width: 1000, height: 1545 };

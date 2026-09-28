@@ -15,7 +15,12 @@ export function cellRect(grid: GridSpec, size: Size, cell: number): Rect {
 	const { w, h } = cellSize(grid, size);
 	const row = Math.floor(cell / grid.cols);
 	const col = cell % grid.cols;
-	return { x: grid.margin + col * (w + grid.gutter), y: grid.margin + row * (h + grid.gutter), w, h };
+	return {
+		x: grid.margin + col * (w + grid.gutter),
+		y: grid.margin + row * (h + grid.gutter),
+		w,
+		h
+	};
 }
 
 /** Which cell contains a page-space point, or null if it falls in a margin or gutter. */

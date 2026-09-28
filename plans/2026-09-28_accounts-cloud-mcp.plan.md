@@ -1,6 +1,6 @@
 ---
 slug: 2026-09-28_accounts-cloud-mcp
-status: draft
+status: active
 started: 2026-09-28
 finished:
 issue:
@@ -186,7 +186,7 @@ the view link instead.
 
 **Infra**
 
-- [ ] Switch to `adapter-vercel`, `vercel link`, first preview deploy of the current app (proves the pipeline early)
+- [x] Switch to `adapter-vercel`, `vercel link`, first preview deploy of the current app (proves the pipeline early)
 - [ ] Supabase: `supabase init`, config.toml (auth, OAuth server, storage), migration for `comics` + RLS + `assets` bucket policies; local stack runs; generated DB types
 - [ ] Cloud project: user creates the free project; `supabase link` + `db push`; enable asymmetric JWT keys, OAuth server, dynamic registration; set Site URL and redirect URLs; env vars into Vercel and `.env.local`
 
@@ -341,7 +341,10 @@ On the **production** URL:
 - [ ] **Free-tier pausing.** The project pauses after about a week of inactivity, and the app
       shows errors until it's resumed in the dashboard. Acceptable for a hobby deployment, or add
       a weekly keep-alive cron (a Vercel cron hitting a cheap query)?
-- [ ] **Vercel project name / URL**: `riverbanks-generator.vercel.app` unless you want another.
+- [x] **Vercel project**: `riverbanks-generator` in the `yanthibicos-projects` team (Hobby).
+      The first `vercel deploy` went to **production**, not preview, so
+      https://riverbanks-generator.vercel.app has been public since 2026-09-28 (the local-first
+      v1, with no server data).
 - [ ] **OAuth beta.** Supabase's OAuth server is beta. If it misbehaves with a given MCP client,
       is falling back to personal tokens for that client acceptable?
 

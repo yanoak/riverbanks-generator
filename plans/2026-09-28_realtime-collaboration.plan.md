@@ -1,6 +1,6 @@
 ---
 slug: 2026-09-28_realtime-collaboration
-status: draft
+status: active
 started: 2026-09-28
 finished:
 issue:
@@ -103,7 +103,9 @@ becomes its own single panel.
 Each existing command class is rewritten as a function that runs inside
 `doc.transact(fn, LOCAL)`. `HistoryManager` is replaced by a `Y.UndoManager` scoped to the
 comic, with `trackedOrigins = {LOCAL}` so undo never reverts a collaborator's edit.
-`captureTimeout: 0` keeps one command = one undo step, as today. The step's description
+`captureTimeout: 500` groups typing the way TipTap does today, and every command calls
+`um.stopCapturing()` after its transaction, so one command is still one undo step (verified in
+the spike). The step's description
 ("Merge panels") and the selection to restore go in the stack item's `meta`, keeping the
 toolbar's "Undo Merge panels". Drags keep mutating the mirror live for smoothness and write
 once to the Y.Doc at pointer-up, as `record()` does now.
@@ -114,7 +116,8 @@ Drags are the one place where last-writer-wins would feel like lost work, so a d
 places a **soft hold** on its object, carried in presence (awareness), not the document:
 
 - **Claiming:** at pointer-down, awareness publishes `moving: { id, since, rect }`, and it
-  updates `rect` as the pointer moves (throttled to about 30 Hz). The hold ends at pointer-up
+  updates `rect` as the pointer moves (throttled to 10 Hz for the Realtime message budget;
+  receivers interpolate). The hold ends at pointer-up
   (after the Y.Doc write), on Esc, or when that person's presence drops. Presence entries time
   out after 5 s, not Yjs's default 30 s, so a closed laptop doesn't hold a balloon for long.
 - **What others see:** the object follows the holder's `rect` live, outlined in their colour
@@ -143,11 +146,22 @@ boundaries that undo and batching need.
 
 ### Balloon text: TipTap Collaboration on a Y.XmlFragment
 
-`@tiptap/extension-collaboration` (3.31, matching our TipTap) binds the in-place editor to the
-balloon's `text` fragment, and `@tiptap/extension-collaboration-caret` shows remote carets.
-StarterKit's own undo is turned off (`undoRedo: false`); typing then undoes through the same
-UndoManager (the Collaboration extension's undo plugin shares ours). Balloons that aren't being
-edited render HTML derived from the fragment, cached per fragment and invalidated on change.
+A small **own extension** binds the in-place editor to the balloon's `text` fragment: only
+`ySyncPlugin` from `@tiptap/y-tiptap`, at priority 1000, with ⌘Z/⇧⌘Z mapped to the comic-wide
+UndoManager. `@tiptap/extension-collaboration-caret` shows remote carets. StarterKit's own undo
+is off (`undoRedo: false`).
+
+**Rejected (spike): `@tiptap/extension-collaboration` with a shared UndoManager.** Its
+`yUndoPlugin` calls `undoManager.destroy()` whenever the editor unmounts (every Esc out of a
+balloon), even for a manager passed in. The comic-wide manager then stops recording until the
+next text edit. The spike reproduced it: after unmount the manager was `alive: false`, and two
+nudges recorded `1 → 1` undo steps. Our extension recorded `1 → 3`.
+
+Balloons that aren't being edited render HTML derived from the fragment, cached per fragment and
+invalidated on change. `getHTMLFromFragment` needs a DOM (it crashed during SSR in the spike),
+so the browser uses it, and the server (MCP, compaction's `doc` projection) uses a DOM-free
+serializer over the same schema. Candidates: `@tiptap/static-renderer`, or
+`yXmlFragmentToProsemirrorJSON` plus a small JSON→HTML function for our few marks.
 The "commit on unmount" path in `rich-text.ts` goes away. Auto-grow (`fit()`) becomes a
 geometry write in its own transaction, which happens only when someone is typing locally.
 
@@ -170,6 +184,16 @@ Design:
 - **An insert trigger broadcasts the row** with `realtime.send` to the private channel
   `comic:<id>`. Durable-then-broadcast means there is one path for browsers and the MCP server
   alike. Private-channel access is RLS on `realtime.messages` via the same membership check.
+- **Oversize updates:** hosted free-tier broadcasts cap at 256 KB (Pro 3 MB), and base64
+  inflates by 4/3. So above 128 KB of update the trigger broadcasts only
+  `{id, author, fetch: true}`, and receivers read that row over HTTP.
+- **Message budget:** the free tier allows 100 messages/s and 20 Presence messages/s,
+  project-wide. So:
+  - local updates are batched at 150 ms;
+  - awareness (selection, carets, soft-hold rects) travels as Broadcast, throttled to 10 Hz, and
+    receivers interpolate drag rects;
+  - Presence is used only for join and leave.
+  - Three people dragging at once stays around 60 msg/s.
 - **Presence goes straight client-to-client** over the same channel: a Yjs awareness state
   broadcast plus Realtime Presence for who's online. It carries page, selection, live drag
   positions and user colour, and is never stored.
@@ -235,11 +259,35 @@ limits and the TipTap-Svelte binding.
 
 **Spike (throwaway branch, findings written into this plan)**
 
-- [ ] Realtime: private channel + `realtime.send` from an insert trigger + RLS on
+- [x] Realtime: private channel + `realtime.send` from an insert trigger + RLS on
       `realtime.messages`; measure insert→receive latency and confirm the free-tier message size
-      and rate limits against a 50-row burst and a 200 KB initial state
-- [ ] TipTap 3 Collaboration + CollaborationCaret mounted on a Y.XmlFragment inside our Svelte 5
-      attachment, sharing an external Y.UndoManager
+      and rate limits against a 50-row burst and a 200 KB initial state.
+      **Result (local stack, `spike/realtime.mjs`): 14/14.**
+      - Latency: median 14 ms, max 147 ms (local, so production will add network time).
+      - The 50-row burst all arrived, and replicas converged.
+      - 50 KB, 200 KB and 1 MB updates arrived.
+      - A full log replay rebuilds the doc.
+      - An outsider is refused the channel (`Unauthorized`), reads no rows, and can't insert
+        (`42501`).
+      - Client-to-client broadcast on the same channel works.
+      - The local stack doesn't enforce hosted limits. From the docs, the free tier allows
+        256 KB per broadcast and 100 msg/s, which led to the oversize-notice and
+        message-budget design in the Approach.
+- [x] TipTap 3 Collaboration + CollaborationCaret mounted on a Y.XmlFragment inside our Svelte 5
+      attachment, sharing an external Y.UndoManager.
+      **Result (`/spike/collab`, `spike/tiptap.mjs`): the stock Collaboration extension breaks a
+      shared UndoManager on unmount (5/11). Our sync-only extension passes 11/11:**
+      - Concurrent typing converges, and remote carets render.
+      - ⌘Z undoes only your own typing.
+      - The manager survives unmount, and text and geometry share one ordered stack.
+      - Undoing a change a collaborator has since overwritten keeps their value.
+      - Remounting still syncs.
+      - Also found: `getHTMLFromFragment` needs a DOM.
+- [x] Re-run `spike/realtime.mjs` with the >128 KB fetch-notice path: 16/16 (the 200 KB and 1 MB
+      updates arrived as notices and were fetched; replicas converged)
+- [ ] Run `spike/realtime.mjs` once against a hosted throwaway Supabase project (not production)
+      to measure real latency and hit the real 256 KB broadcast cap. Needs Yan's go-ahead to
+      create the project.
 
 **Stage 1: Y.Doc underneath**
 
@@ -408,8 +456,8 @@ e2e = Playwright with two browser contexts.
       Y.Doc) — unit — `model/commands/*.test.ts`
 - [ ] Undo reverts only local changes, and a collaborator's later edit to another object
       survives — unit — `history/undo.test.ts`
-- [ ] Undo of a local move after a remote move of the same balloon restores our "before"
-      (documented behaviour) — unit
+- [ ] Undo of a local move that a collaborator has since overwritten keeps the collaborator's
+      value (Yjs semantics, confirmed in the spike) — unit
 - [ ] One command = one undo step, even when it touches several maps (merge, splash) — unit
 - [ ] Undo description and selection restore come from stack-item meta — unit
 

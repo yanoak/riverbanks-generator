@@ -53,6 +53,26 @@ async function readCapped(res: Response): Promise<Uint8Array> {
 	return out;
 }
 
+const MAX_REDIRECTS = 5;
+
+/** Follow redirects by hand so every hop passes assertFetchableUrl, not just the first. */
+async function fetchPublic(raw: string, fetchImpl: typeof fetch): Promise<Response> {
+	let url = assertFetchableUrl(raw);
+	for (let hop = 0; ; hop++) {
+		let res: Response;
+		try {
+			res = await fetchImpl(url, { redirect: 'manual', signal: AbortSignal.timeout(15_000) });
+		} catch {
+			throw new OpError('invalid', `Could not reach ${url.hostname} to fetch the image.`);
+		}
+		const location = res.headers.get('location');
+		if (res.status < 300 || res.status > 399 || !location) return res;
+		if (hop >= MAX_REDIRECTS)
+			throw new OpError('invalid', 'Too many redirects; give the final image URL instead.');
+		url = assertFetchableUrl(new URL(location, url).href);
+	}
+}
+
 export async function readImage(
 	source: { url?: string; base64?: string; mimeType?: string },
 	fetchImpl: typeof fetch = fetch
@@ -60,8 +80,7 @@ export async function readImage(
 	let bytes: Uint8Array;
 	let mimeType = source.mimeType ?? '';
 	if (source.url) {
-		const url = assertFetchableUrl(source.url);
-		const res = await fetchImpl(url, { redirect: 'error', signal: AbortSignal.timeout(15_000) });
+		const res = await fetchPublic(source.url, fetchImpl);
 		if (!res.ok) throw new OpError('invalid', `Fetching the image failed with HTTP ${res.status}.`);
 		mimeType = (res.headers.get('content-type') ?? '').split(';')[0].trim();
 		if (!TYPES.includes(mimeType))

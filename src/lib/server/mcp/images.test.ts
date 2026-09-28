@@ -61,6 +61,54 @@ describe('readImage', () => {
 		await expect(readImage({ url: 'https://a.test/x' }, fakeFetch(big))).rejects.toThrow(/10 MB/);
 	});
 
+	it('follows redirects to a public host', async () => {
+		const seen: string[] = [];
+		const f = (async (url: URL | string) => {
+			seen.push(String(url));
+			if (String(url) === 'https://short.test/a')
+				return new Response(null, { status: 302, headers: { location: 'https://cdn.test/a.png' } });
+			return new Response(PNG as unknown as BodyInit, { headers: { 'content-type': 'image/png' } });
+		}) as typeof fetch;
+		const img = await readImage({ url: 'https://short.test/a' }, f);
+		expect(img.width).toBe(1);
+		expect(seen).toEqual(['https://short.test/a', 'https://cdn.test/a.png']);
+	});
+
+	it('resolves relative redirect locations', async () => {
+		const seen: string[] = [];
+		const f = (async (url: URL | string) => {
+			seen.push(String(url));
+			if (seen.length === 1)
+				return new Response(null, { status: 301, headers: { location: '/b.png' } });
+			return new Response(PNG as unknown as BodyInit, { headers: { 'content-type': 'image/png' } });
+		}) as typeof fetch;
+		await readImage({ url: 'https://img.test/a' }, f);
+		expect(seen[1]).toBe('https://img.test/b.png');
+	});
+
+	it('rejects redirects to private hosts, to http, and endless chains', async () => {
+		const redirectTo = (location: string) =>
+			(async () => new Response(null, { status: 302, headers: { location } })) as typeof fetch;
+		await expect(
+			readImage({ url: 'https://a.test/x' }, redirectTo('https://169.254.169.254/latest'))
+		).rejects.toThrow(/not allowed/);
+		await expect(
+			readImage({ url: 'https://a.test/x' }, redirectTo('http://a.test/y.png'))
+		).rejects.toThrow(/https/);
+		await expect(
+			readImage({ url: 'https://a.test/x' }, redirectTo('https://a.test/x'))
+		).rejects.toThrow(/too many redirects/i);
+	});
+
+	it('explains network failures instead of passing on "fetch failed"', async () => {
+		const f = (async () => {
+			throw new TypeError('fetch failed');
+		}) as typeof fetch;
+		await expect(readImage({ url: 'https://down.test/a.png' }, f)).rejects.toThrow(
+			/could not reach down\.test/i
+		);
+	});
+
 	it('rejects bytes that do not parse as an image', async () => {
 		await expect(
 			readImage({ url: 'https://a.test/x' }, fakeFetch(new Uint8Array([1, 2, 3])))

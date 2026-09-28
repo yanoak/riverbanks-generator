@@ -210,6 +210,7 @@ the view link instead.
 - [x] `/mcp` endpoint (Streamable HTTP, stateless) with all tools and the page resource, authenticated by a bearer token verified against JWKS
 - [x] OAuth: `/.well-known/oauth-protected-resource`, the 401 challenge, and the `/oauth/consent` page
 - [ ] Connect Claude Code to local and production `/mcp` via OAuth; write the connection how-to into README
+- [x] `set_panel_image` follows redirects by hand (up to 5), re-checking every hop against the private-host guard, and names the host when it can't be reached. Before, any redirect (picsum.photos, most short links) surfaced as a bare `fetch failed`.
 
 **Ship**
 

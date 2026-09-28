@@ -23,11 +23,12 @@ in the Supabase dashboard: **Authentication → Users → Add user → Create ne
 `/local` works without an account and saves in that browser only. After signing in, the comics
 page offers to import that local comic.
 
-## Using it with Claude (MCP)
+## Using it with Claude or ChatGPT (MCP)
 
 The MCP endpoint is `https://riverbanks-generator.vercel.app/mcp`. It uses Streamable HTTP and
-OAuth. The first time a client connects, a browser opens: sign in with your Riverbanks account,
-then click **Allow**.
+OAuth, works with Claude and ChatGPT, and only accepts tokens issued through OAuth sign-in. The
+first time a client connects, a browser opens: sign in with your Riverbanks account, then click
+**Allow**.
 
 - **Claude Code:** `claude mcp add --transport http riverbanks https://riverbanks-generator.vercel.app/mcp`,
   then `/mcp` inside Claude Code to sign in.
@@ -37,6 +38,23 @@ Then ask, for example: *"Create a comic called Sediment. On page 1 merge the top
 panel, put a caption 'Bangkok, October 2026' in it, and a speech balloon in cell 5 saying 'The
 river does not hoard.'"* Open the comic in the app to watch it happen.
 
+### ChatGPT
+
+This needs a ChatGPT plan with **Developer mode**: Plus, Pro, Business, Enterprise or Edu. It
+works on the web app only.
+
+1. **Settings → Security and login → Developer mode**, and turn it on. On Business or Enterprise
+   an admin may need to allow custom connectors first.
+2. **Settings → Plugins** (called Apps & Connectors in some versions) → **+**. Enter the name
+   `Riverbanks`, the URL `https://riverbanks-generator.vercel.app/mcp`, and choose **OAuth** for
+   authentication.
+3. Allow access on the Riverbanks consent page.
+4. In a chat, choose **+ → Developer mode → Riverbanks**, and name the app in your request, for
+   example *"Use the Riverbanks app to list my comics."*
+
+ChatGPT confirms before any change; reads don't need a confirmation. Deep research can search
+your comics by their text and cite the page.
+
 The tools are:
 
 - **Comics:** `list_comics`, `create_comic`, `get_comic`, `rename_comic`, `delete_comic`
@@ -44,6 +62,7 @@ The tools are:
 - **Panels:** `merge_panels`, `split_panel`, `add_free_panel`, `update_panel`
 - **Images:** `set_panel_image`, `remove_panel_image`
 - **Balloons:** `add_balloon`, `update_balloon`, `delete_balloon`
+- **Search and account:** `search`, `fetch` (the comic as a script, for deep research), `whoami`
 
 Each page is also available as the resource `comic://{id}/page/{n}`. Agents get the same
 refusals the editor gives people, such as "Panels must share an edge to merge."

@@ -115,7 +115,7 @@ alone are enough for a comic editor whose real UI is the web app.
 - [x] `search` + `fetch` tools in OpenAI's schemas, with `describeComic`-based plain-text rendering, with tests
 - [x] `whoami` profile tool with `_meta["openai/profile"]`
 - [x] E2E: extend `e2e/oauth.e2e.ts` to send `resource` and assert the audience rule end to end against local Supabase
-- [ ] Docs: a README "Using it with ChatGPT" section, plus a short addendum for the team email
+- [x] Docs: a README "Using it with ChatGPT" section, plus a short addendum for the team email
 - [ ] Production verification (below), then deploy
 
 ## Test list (TDD)

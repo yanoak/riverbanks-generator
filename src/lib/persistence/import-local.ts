@@ -5,6 +5,7 @@ import type { Comic } from '$lib/model/types';
 import { indexedDbAssets } from './assets.svelte';
 import { supabaseAssets } from './cloud-assets';
 import { localSource } from './local-source';
+import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from './supabase-store';
 
 export async function findLocalComic(): Promise<Comic | null> {
@@ -31,6 +32,10 @@ export async function importLocalComic(
 		const blob = await indexedDbAssets.blob(id);
 		if (blob) await cloud.put(id, blob);
 	}
-	const record = await new SupabaseComicStore(supabase).create(comic.title, comic);
+	const record = await new SupabaseComicStore(supabase).create(
+		comic.title,
+		comic,
+		initialState(comic)
+	);
 	return record.id;
 }

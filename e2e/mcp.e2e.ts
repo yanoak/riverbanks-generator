@@ -70,14 +70,22 @@ test('an MCP agent edits a comic that is open in the editor, live', async ({ pag
 	await expect(text).toHaveText('HELLO FROM CLAUDE');
 	await expect(text.locator('strong')).toHaveText('CLAUDE');
 
-	// A local edit that hasn't saved yet + an agent edit = conflict banner, not a silent overwrite.
+	// A local edit and an agent edit at the same moment both survive: no conflict, no overwrite.
 	await panels.nth(3).click();
 	await page.keyboard.press('Shift+ArrowDown');
-	await page.keyboard.press('m'); // unsaved for ~800 ms
+	await page.keyboard.press('m');
 	await call('rename_comic', { comicId: id, title: 'Renamed by the agent' });
-	await expect(page.getByRole('alert')).toContainText('changed elsewhere');
-	await page.getByRole('button', { name: 'Keep mine' }).click();
+	const title = page.getByRole('textbox', { name: 'Comic title' });
+	await expect(title).toHaveValue('Renamed by the agent');
+	await expect(panels).toHaveCount(8);
+	await expect(page.getByRole('alert')).toHaveCount(0);
 	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
-	const after = JSON.parse(await call('get_comic', { comicId: id }));
-	expect(after.pages[0].panels).toHaveLength(8); // my merge won
+	await expect
+		.poll(async () => JSON.parse(await call('get_comic', { comicId: id })).pages[0].panels.length)
+		.toBe(8);
+
+	// Both are stored, not just shown.
+	await openEditor(page, `/comics/${id}`);
+	await expect(panels).toHaveCount(8);
+	await expect(title).toHaveValue('Renamed by the agent');
 });

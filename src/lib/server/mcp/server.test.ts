@@ -90,9 +90,10 @@ describe('Riverbanks MCP server', () => {
 
 		const merged = await call('merge_panels', { comicId: id, page: 1, cells: [0, 1, 4, 5] });
 		expect(merged.isError).toBe(false);
-		expect(merged.text).toMatch(/Merged 4 cells .* \(rev 2\)/);
+		expect(merged.text).toMatch(/Merged 4 cells .* \(rev \d+\)/);
 
 		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const revAfterMerge = d.rev;
 		const big = d.pages[0].panels.find((p: { cells?: number[] }) => p.cells?.length === 4);
 
 		await call('set_panel_image', {
@@ -110,7 +111,7 @@ describe('Riverbanks MCP server', () => {
 		});
 
 		d = JSON.parse((await call('get_comic', { comicId: id })).text);
-		expect(d.rev).toBe(4);
+		expect(d.rev).toBe(revAfterMerge + 2); // image + balloon: one update each
 		expect(d.pages[0].panels.find((p: { id: string }) => p.id === big.id).hasImage).toBe(true);
 		expect(d.pages[0].balloons[0]).toMatchObject({ type: 'speech', text: 'THE **TRICK** IS…' });
 		expect(d.pages[0].url).toBe(`https://app.test/comics/${id}?page=1`);

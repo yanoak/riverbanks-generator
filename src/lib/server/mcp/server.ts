@@ -10,6 +10,7 @@ import { describeComic } from '$lib/ops/describe';
 import { migrate } from '$lib/model/serialize';
 import { comicScript, searchComic } from '$lib/ops/script';
 import { loadComic, mutateComic, OpError } from '$lib/ops/ops';
+import { initialState } from '$lib/ops/ydoc-store';
 import type { ComicStore } from '$lib/ops/store';
 
 export interface ImportedImage {
@@ -124,7 +125,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		},
 		async ({ title }) => {
 			const comic = createComic(title);
-			const record = await store.create(title, comic);
+			const record = await store.create(title, comic, initialState(comic));
 			return json({ id: record.id, url: `${ctx.appUrl}/comics/${record.id}` });
 		}
 	);

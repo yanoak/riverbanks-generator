@@ -8,14 +8,17 @@
 	import { serialize } from '$lib/model/serialize';
 	import type { Comic } from '$lib/model/types';
 	import { createAutoSave, type SaveStatus } from '$lib/persistence/autosave';
+	import type { CloudDoc } from '$lib/persistence/cloud-doc';
 	import type { DocumentSource } from '$lib/persistence/source';
-	import { onMount, tick, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
+	/** A cloud comic (`cloud`, synced live through Yjs) or the local one (`source`). */
 	let {
 		source,
+		cloud,
 		initialPage = 1,
 		nav
-	}: { source: DocumentSource; initialPage?: number; nav?: Snippet } = $props();
+	}: { source?: DocumentSource; cloud?: CloudDoc; initialPage?: number; nav?: Snippet } = $props();
 	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
 
 	/** US trim width at 96 CSS px per inch, for the print stylesheet. */
@@ -46,86 +49,56 @@
 	/** Receiving live updates (cloud comics only); exposed as data-live for tests. */
 	let live = $state(false);
 
+	// The local comic is saved whole, as JSON, after each change settles.
 	const autosave = createAutoSave({
 		getVersion: () => editor.version,
 		serialize: () => serialize(editor.comic),
-		save: (json) => source.save(JSON.parse(json) as Comic),
+		save: (json) => source!.save(JSON.parse(json) as Comic),
 		onStatus: (s) => (saveStatus = s)
 	});
 
-	/** Show a newer copy (reload / remote update) without losing the user's place. */
-	function adopt(comic: Comic) {
-		const page = editor.pageIndex;
-		editor.load(comic);
-		editor.pageIndex = Math.min(page, comic.pages.length - 1);
+	async function openCloud(doc: CloudDoc) {
+		doc.onstatus = (s) => (saveStatus = s);
+		doc.onlive = (l) => (live = l);
+		editor.attach(await doc.open());
+		editor.goToPage(initialPage - 1);
+		void doc.connect();
+	}
+
+	async function openLocal(local: DocumentSource) {
+		const comic = await local.load();
+		if (comic) editor.load(comic);
+		editor.goToPage(initialPage - 1);
 		autosave.markSaved();
 	}
 
-	/** A newer copy arrived while there were unsaved edits here. */
-	let conflict = $state(false);
-	let banner = $state<HTMLElement>();
-
-	async function showConflict() {
-		conflict = true;
-		await tick();
-		banner?.focus();
-	}
-
-	$effect(() => {
-		if (saveStatus === 'conflict' && !conflict) showConflict();
-	});
-
-	async function resolve(choice: 'reload' | 'keep') {
-		try {
-			if (choice === 'reload' && source.reload) adopt(await source.reload());
-			if (choice === 'keep' && source.overwrite) {
-				await source.overwrite(editor.comic);
-				autosave.markSaved();
-			}
-			conflict = false;
-			autosave.resume();
-			document.querySelector<HTMLElement>('[data-canvas]')?.focus();
-		} catch (e) {
-			editor.say((e as Error).message);
-		}
-	}
-
 	onMount(() => {
-		source
-			.load()
-			.then((comic) => {
-				if (comic) editor.load(comic);
-				editor.goToPage(initialPage - 1);
-			})
+		(cloud ? openCloud(cloud) : openLocal(source!))
 			.catch((e) => editor.say(`Couldn't open the comic: ${e.message}`))
-			.finally(() => {
-				autosave.markSaved();
-				loaded = true;
-			});
-		const stopWatching = source.watch?.(
-			(comic) => {
-				if (saveStatus === 'saved') adopt(comic);
-				else showConflict();
-			},
-			() => (live = true)
-		);
-		const onHide = () => document.visibilityState === 'hidden' && autosave.saveNow();
+			.finally(() => (loaded = true));
+		const onHide = () => {
+			if (document.visibilityState !== 'hidden') return;
+			if (cloud) void cloud.compact();
+			else void autosave.saveNow();
+		};
 		document.addEventListener('visibilitychange', onHide);
 		return () => {
-			stopWatching?.();
+			cloud?.destroy();
 			document.removeEventListener('visibilitychange', onHide);
 		};
 	});
 
 	// Scheduled synchronously (not from an $effect a tick later), so the toolbar never shows
-	// "Saved" while a change is still waiting to be written.
+	// "Saved" while a change is still waiting to be written. Cloud comics send their own
+	// changes as they happen (see CloudDoc).
 	editor.onchange = () => {
-		if (loaded) autosave.schedule();
+		if (loaded && !cloud) autosave.schedule();
 	};
 
 	function onbeforeunload(e: BeforeUnloadEvent) {
 		if (saveStatus === 'saved') return;
-		autosave.saveNow();
+		if (cloud) void cloud.flush();
+		else void autosave.saveNow();
 		e.preventDefault(); // the browser's "changes may not be saved" prompt
 	}
 
@@ -200,24 +173,6 @@
 
 <div class="app flex h-screen flex-col bg-stone-100 text-stone-900">
 	<Toolbar {editor} {saveStatus} onexportpng={exportPng} onexportpdf={exportPdf} {nav} />
-	{#if conflict}
-		<div
-			bind:this={banner}
-			class="flex items-center gap-3 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 outline-none"
-			role="alert"
-			tabindex="-1"
-		>
-			<span class="flex-1">
-				This comic was changed elsewhere (for example by an AI agent) while you had unsaved edits.
-			</span>
-			<button class="rounded bg-amber-900 px-3 py-1 text-white" onclick={() => resolve('reload')}>
-				Reload theirs
-			</button>
-			<button class="rounded border border-amber-900 px-3 py-1" onclick={() => resolve('keep')}>
-				Keep mine
-			</button>
-		</div>
-	{/if}
 	<div class="flex min-h-0 flex-1">
 		<PageStrip {editor} />
 		<main class="relative min-w-0 flex-1 overflow-auto" {@attach measure}>

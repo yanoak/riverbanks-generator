@@ -1,7 +1,11 @@
 // Integration: runs against the local stack (`supabase start`), via `npm run test:int`.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { beforeAll, describe, expect, it } from 'vitest';
+import * as Y from 'yjs';
+import { clone } from '$lib/model/clone';
 import { createComic } from '$lib/model/factory';
+import { applyComic, projectComic } from '$lib/model/ydoc';
+import { initialState, openDoc } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from './supabase-store';
 
 const url = process.env.SUPABASE_TEST_URL;
@@ -32,31 +36,73 @@ describe.skipIf(!url || !serviceKey)('SupabaseComicStore against local Supabase'
 		[a, b] = await Promise.all([userClient(admin, 'a'), userClient(admin, 'b')]);
 	});
 
-	it('creates, reads and saves with the rev guard', async () => {
-		const store = new SupabaseComicStore(a.client);
-		const comic = createComic('Integration');
-		const rec = await store.create('Integration', comic);
-		expect(rec.rev).toBe(1);
+	const create = (store: SupabaseComicStore, title: string) => {
+		const comic = createComic(title);
+		return store.create(title, comic, initialState(comic));
+	};
 
-		comic.title = 'Renamed';
-		expect(await store.update(rec.id, comic, 'Renamed', 1)).toEqual({ ok: true, rev: 2 });
-		expect(await store.update(rec.id, comic, 'Stale', 1)).toEqual({
-			ok: false,
-			reason: 'conflict'
-		});
+	it('creates with a snapshot, appends updates, and compacts compare-and-set', async () => {
+		const store = new SupabaseComicStore(a.client);
+		const rec = await create(store, 'Integration');
+		const opened = (await openDoc(store, rec.id))!;
+		expect(opened.snapshotRev).toBe(1);
+
+		const before = projectComic(opened.doc);
+		const after = clone(before);
+		after.title = 'Renamed';
+		const base = Y.encodeStateVector(opened.doc);
+		applyComic(opened.doc, before, after);
+		const id = await store.append(rec.id, Y.encodeStateAsUpdate(opened.doc, base));
+		opened.applied.add(id);
+		expect((await store.state(rec.id))?.updates.map((u) => u.id)).toEqual([id]);
+
+		// A stale base loses; the right one folds the update and refreshes the projection.
+		const c = {
+			state: Y.encodeStateAsUpdate(opened.doc),
+			applied: [id],
+			title: 'Renamed',
+			projection: projectComic(opened.doc)
+		};
+		expect(await store.compact(rec.id, { ...c, baseRev: 0 })).toBe(false);
+		expect(await store.compact(rec.id, { ...c, baseRev: 1 })).toBe(true);
+		const s = (await store.state(rec.id))!;
+		expect([s.snapshotRev, s.upto, s.updates.length]).toEqual([2, id, 0]);
 		expect((await store.get(rec.id))?.title).toBe('Renamed');
-		expect((await store.list()).find((c) => c.id === rec.id)).toMatchObject({ pages: 1, rev: 2 });
+		expect(projectComic((await openDoc(store, rec.id))!.doc).title).toBe('Renamed');
+	});
+
+	it('converts a pre-Yjs comic on first open, once', async () => {
+		const comic = createComic('Legacy');
+		const { data } = await a.client
+			.from('comics')
+			.insert({ title: 'Legacy', doc: comic })
+			.select('id')
+			.single();
+		const store = new SupabaseComicStore(a.client);
+		const [x, y] = await Promise.all([openDoc(store, data!.id), openDoc(store, data!.id)]);
+		expect(projectComic(x!.doc).pages[0].panels.map((p) => p.id)).toEqual(
+			comic.pages[0].panels.map((p) => p.id)
+		);
+		expect(Y.encodeStateVector(y!.doc)).toEqual(Y.encodeStateVector(x!.doc));
 	});
 
 	it('keeps other users out (RLS)', async () => {
-		const rec = await new SupabaseComicStore(a.client).create('Private', createComic('Private'));
+		const rec = await create(new SupabaseComicStore(a.client), 'Private');
 		const theirs = new SupabaseComicStore(b.client);
 		expect(await theirs.get(rec.id)).toBeNull();
+		expect(await theirs.state(rec.id)).toBeNull();
 		expect((await theirs.list()).map((c) => c.id)).not.toContain(rec.id);
-		expect(await theirs.update(rec.id, createComic('x'), 'x', 1)).toEqual({
-			ok: false,
-			reason: 'not-found'
-		});
+		await expect(theirs.append(rec.id, new Uint8Array([0, 0]))).rejects.toThrow();
+		expect(
+			await theirs.compact(rec.id, {
+				baseRev: 1,
+				state: new Uint8Array([0, 0]),
+				applied: [],
+				title: 'x',
+				projection: createComic('x')
+			})
+		).toBe(false);
+		expect(await theirs.initSnapshot(rec.id, new Uint8Array([0, 0]))).toBe(false);
 		expect(await theirs.delete(rec.id)).toBe(false);
 		// records() feeds the MCP search tool: RLS keeps other people's comics out of it too.
 		expect((await theirs.records()).map((r) => r.id)).not.toContain(rec.id);

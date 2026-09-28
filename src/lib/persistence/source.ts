@@ -1,18 +1,8 @@
 import type { Comic } from '$lib/model/types';
 
-/** Where the editor's document lives: the browser (local) or Supabase (signed in). */
+/** The local (signed-out) comic's storage. Cloud comics sync through CloudDoc instead. */
 export interface DocumentSource {
 	/** The document to open; null starts a fresh comic. */
 	load(): Promise<Comic | null>;
-	/** Persist; throws ConflictError (see autosave.ts) when someone else wrote first. */
 	save(comic: Comic): Promise<void>;
-	/** The newest stored copy, after a conflict. */
-	reload?(): Promise<Comic>;
-	/** Write ours over whatever is stored. */
-	overwrite?(comic: Comic): Promise<void>;
-	/**
-	 * Be told about newer copies written elsewhere (e.g. by the MCP server). onLive fires once the
-	 * live connection is up (after catching up on anything written before it).
-	 */
-	watch?(onRemote: (comic: Comic) => void, onLive?: () => void): () => void;
 }

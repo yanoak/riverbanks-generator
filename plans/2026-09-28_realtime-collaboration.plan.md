@@ -213,13 +213,21 @@ Design:
 - **Presence goes straight client-to-client** over the same channel: a Yjs awareness state
   broadcast plus Realtime Presence for who's online. It carries page, selection, live drag
   positions and user colour, and is never stored.
-- **Load and reconnect:** fetch `comics.ydoc` (the compacted snapshot) plus every
-  `comic_updates` row after `ydoc_upto`, then apply. On reconnect, re-fetch rows after the last
-  id seen. Applying Yjs updates is idempotent, so overlaps are harmless.
-- **Compaction** runs in a SvelteKit endpoint (Node, Yjs), triggered when a load sees more than
-  200 rows (and by a daily Vercel cron). It merges the snapshot with the rows up to N, and in
-  one transaction writes `ydoc`, sets `ydoc_upto = N`, deletes rows ≤ N, and refreshes the
-  `doc` JSONB projection.
+- **Load and reconnect:** fetch `comics.ydoc` (the compacted snapshot) plus **every**
+  remaining `comic_updates` row (not "rows after N": an id is allocated before its row commits,
+  so a lower id can become visible after a higher one). Joining or rejoining the channel does the
+  same catch-up. Applying Yjs updates is idempotent, so overlaps are harmless.
+- **Compaction** (revised while building): no endpoint or cron. Clients compact: the editor when
+  its tab is hidden (and on open with 100+ pending rows), the MCP server after each write. The
+  `compact_comic` RPC:
+  - is compare-and-set on `ydoc_rev`. A loser merges the winner's snapshot and retries once,
+    because its state must contain the snapshot it replaces.
+  - deletes exactly the row ids the caller applied, so a late-committing row is never lost.
+  - refreshes `title` and the `doc` projection.
+  - `ydoc_upto` records the highest folded id, so revisions stay monotonic after rows are
+    deleted.
+- **Pre-Yjs comics** convert lazily on first open (`init_comic_ydoc`, compare-and-set on
+  `ydoc is null`; racing openers adopt the winner's conversion). No migration script.
 - **`comics.doc` (JSONB) stays** as a read projection for the comics list thumbnails, MCP
   `search`/`fetch`, and anything else reading JSON. It's refreshed by compaction and, debounced,
   after MCP writes. It may lag live edits by up to a compaction; the editor never reads it.
@@ -325,13 +333,22 @@ limits and the TipTap-Svelte binding.
 - [x] Balloon text on Y.XmlFragment via the sync-only extension (`editor/rich-text.ts`);
       fragment → HTML cache; auto-grow joins the typing undo step. Verified by the unit suite and
       all 15 e2e tests
-- [ ] Migration: `comics.ydoc bytea`, `ydoc_upto bigint`, `comic_updates` table and RLS (owner-
-      only for now); convert existing rows
-- [ ] `YjsCloudProvider`: load snapshot + log, batched inserts, subscribe, catch-up on
-      reconnect; retire autosave, `ConflictError`, the conflict banner and `rev` guards
-- [ ] Compaction endpoint + daily cron; `doc` JSONB projection refresh
-- [ ] Local mode on `y-indexeddb`; `import-local` uploads encoded state
-- [ ] MCP ops on the Y.Doc (origin `mcp`), headless markdown → fragment; drop the retry loop
+- [x] Migration `20260928210000_comic_ydoc_log.sql`: `ydoc`, `ydoc_rev`, `ydoc_upto`,
+      `comic_updates` + RLS (owner-only via `can_access_comic`), broadcast trigger with the
+      oversize notice, channel policies, `init_comic_ydoc`, `compact_comic`; `comics` dropped
+      from the `postgres_changes` publication. Existing rows convert lazily on first open.
+      Applied locally only; **not yet pushed to production**
+- [x] `persistence/cloud-doc.ts` (`CloudDoc`): load snapshot + log, 150 ms batched inserts
+      with backoff while offline, private-channel subscribe, catch-up on every (re)join; the
+      conflict banner, `ConflictError`, `CloudSource` and the rev guard are gone. The store
+      (`ops/store.ts`, `ops/ydoc-store.ts`) is shared by browser and server
+- [x] Compaction from clients (hidden tab, MCP writes) instead of an endpoint + cron; `doc`
+      projection refreshed by it (see Approach)
+- [x] ~~Local mode on `y-indexeddb`~~. Not needed: the signed-out editor is single-user, and
+      it already runs on a Y.Doc in memory (`Editor.load` converts), so its JSON autosave to
+      IndexedDB stays. `import-local` creates the cloud comic with a snapshot
+- [x] MCP ops on the Y.Doc (origin `mcp`): open, draft edit, append one update, compact; the
+      retry loop is gone. Revisions are update ids (monotonic, via `ydoc_upto`)
 
 **Stage 2: sharing**
 
@@ -447,53 +464,53 @@ e2e = Playwright with two browser contexts.
 
 **Model and grid**
 
-- [ ] `jsonToYDoc` ∘ `yDocToJson` round-trips every v1 fixture, including L-shapes, free
+- [x] `jsonToYDoc` ∘ `yDocToJson` round-trips every v1 fixture, including L-shapes, free
       panels, images, tails and rich HTML — unit — `model/ydoc.test.ts`
-- [ ] `derivePanels`: normal partition → same panels as v1 — unit — `geometry/grid.test.ts`
-- [ ] `derivePanels`: a disconnected id → two panels, and the second gets a derived id and
+- [x] `derivePanels`: normal partition → same panels as v1 — unit — `geometry/grid.test.ts`
+- [x] `derivePanels`: a disconnected id → two panels, and the second gets a derived id and
       inherits the original's properties — unit
-- [ ] `derivePanels`: a holed ring → split into hole-free panels, and the result passes
+- [x] `derivePanels`: a holed ring → split into hole-free panels, and the result passes
       `checkPage` — unit
-- [ ] `derivePanels`: missing cells → singleton panels; out-of-range keys ignored after
+- [x] `derivePanels`: missing cells → singleton panels; out-of-range keys ignored after
       `setGrid` shrinks — unit
-- [ ] Two docs merge overlapping cells concurrently → both converge to the same derived page,
-      and it passes `checkPage` — unit — `model/concurrency.test.ts`
-- [ ] Concurrent merge vs split of the same panel → converge, and it passes `checkPage` — unit
-- [ ] Concurrent `setGrid` vs merge → converge, and it passes `checkPage` — unit
-- [ ] Concurrent move of balloon A + delete of balloon B → both applied — unit
-- [ ] Concurrent edits to different fields of one balloon → both kept; same field → one value
+- [x] Two docs merge overlapping cells concurrently → both converge to the same derived page,
+      and it passes `checkPage` — unit — in `model/ydoc.test.ts`
+- [x] Concurrent merge vs split of the same panel → converge, and it passes `checkPage` — unit
+- [x] Concurrent `setGrid` vs merge → converge, and it passes `checkPage` — unit
+- [x] Concurrent move of balloon A + delete of balloon B → both applied — unit
+- [x] Concurrent edits to different fields of one balloon → both kept; same field → one value
       on every replica — unit
-- [ ] Deleting a page while the other side edits a balloon on it → the page stays deleted, no
+- [x] Deleting a page while the other side edits a balloon on it → the page stays deleted, no
       crash — unit
 
 **Mirror**
 
-- [ ] A remote update to one balloon changes only that balloon, and other objects keep identity
-      — unit — `model/mirror.test.ts`
-- [ ] Page reorder and delete reflect in the mirror's `pages` order — unit
+- [x] A remote update to one balloon changes only that balloon, and other objects keep identity
+      — unit — `model/reconcile.test.ts`, `editor/editor.test.ts`
+- [x] Page reorder and delete reflect in the mirror's `pages` order — unit
 
 **Commands and undo**
 
-- [ ] Every command's refusals are unchanged (port the existing command tests to run against a
-      Y.Doc) — unit — `model/commands/*.test.ts`
-- [ ] Undo reverts only local changes, and a collaborator's later edit to another object
-      survives — unit — `history/undo.test.ts`
+- [x] Every command's refusals are unchanged (port the existing command tests to run against a
+      Y.Doc) — unit — `model/panels.test.ts`, `editor/editor.test.ts`
+- [x] Undo reverts only local changes, and a collaborator's later edit to another object
+      survives — unit — `history/yhistory.test.ts`, `editor/editor.test.ts`
 - [x] Undo of a local move that a collaborator has since overwritten keeps the collaborator's
       value, and that undo then acts on the step before (Yjs semantics) — unit
-- [ ] One command = one undo step, even when it touches several maps (merge, splash) — unit
-- [ ] Undo description and selection restore come from stack-item meta — unit
+- [x] One command = one undo step, even when it touches several maps (merge, splash) — unit
+- [x] Undo descriptions come from stack-item meta (carried across undo/redo) — unit. Selection
+      is pruned after undo rather than restored
 
 **Persistence, transport and compaction**
 
-- [ ] The provider batches a burst of 20 transactions into one insert; a pointer-up flushes
-      immediately — unit — `persistence/yjs-provider.test.ts`
-- [ ] Reconnect fetches only rows after the last seen id; duplicate application is harmless —
-      unit
-- [ ] Compaction: the snapshot + rows ≤ N become the new snapshot, rows ≤ N are deleted, rows
-      > N kept; a concurrent insert during compaction survives — int —
-      `persistence/compaction.int.test.ts`
-- [ ] The `doc` projection after compaction equals `yDocToJson(snapshot)` — int
-- [ ] v1 row migration converts and preserves every fixture — int
+- [ ] `CloudDoc` batching and retry as unit tests — not written; covered end to end by
+      `e2e/collab.e2e.ts` (typing arrives live; an offline edit syncs on reconnect)
+- [x] Compaction is compare-and-set; a loser merges and retries; it deletes exactly the rows it
+      applied, and a late-committing lower id survives — unit (`ops/ops.test.ts`) and int
+      (`persistence/supabase-store.int.test.ts`)
+- [x] The projection and title are refreshed by compaction — unit, int
+- [x] A pre-Yjs comic converts on first open, once, even with two racing openers; panel ids
+      preserved — unit, int
 
 **Access**
 
@@ -515,16 +532,18 @@ e2e = Playwright with two browser contexts.
 
 **MCP**
 
-- [ ] An MCP op inserts one update row and never touches `rev`; an illegal op inserts nothing —
+- [x] An MCP op appends one update (then compacts); an illegal or empty op writes nothing —
       unit — `ops/ops.test.ts`
-- [ ] An MCP `add_balloon` with markdown produces the same HTML as the editor's render of the
-      fragment — unit — `ops/text.test.ts`
+- [x] An MCP `add_balloon` with markdown renders in the open editor with its marks — e2e
+      (`e2e/mcp.e2e.ts`); HTML ↔ fragment round-trips — unit (`model/text.test.ts`)
 
 **End to end**
 
-- [ ] Two contexts, same comic: A merges panels, B sees it within 1 s; B types in a balloon, A
-      sees text and caret — e2e — `e2e/collab.test.ts`
-- [ ] Offline edit on A, reconnect → B receives it; no conflict UI exists — e2e
+- [x] Two contexts, same comic: A merges panels, B sees it; B types in a balloon, A sees the text
+      while it is typed — e2e — `e2e/collab.e2e.ts` (carets: stage 3)
+- [x] Offline edit on B, reconnect → A receives it; A's undo leaves B's edits — e2e
+- [x] An agent edit and a local edit at the same moment both survive, and are stored, with no
+      conflict UI — e2e — `e2e/mcp.e2e.ts`
 
 ## Verification
 

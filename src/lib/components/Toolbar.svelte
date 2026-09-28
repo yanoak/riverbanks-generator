@@ -35,7 +35,7 @@
 		dirty: 'Unsaved',
 		saving: 'Saving…',
 		error: 'Save failed',
-		conflict: 'Changed elsewhere'
+		offline: 'Offline — changes will sync'
 	};
 
 	const BALLOONS: [BalloonType, string, string][] = [
@@ -138,8 +138,9 @@
 	</button>
 	<span
 		class="w-20 text-right text-xs"
-		class:text-stone-400={saveStatus !== 'error' && saveStatus !== 'conflict'}
-		class:text-red-600={saveStatus === 'error' || saveStatus === 'conflict'}
+		class:text-stone-400={saveStatus !== 'error' && saveStatus !== 'offline'}
+		class:text-red-600={saveStatus === 'error'}
+		class:text-amber-600={saveStatus === 'offline'}
 		aria-live="polite">{SAVE_LABEL[saveStatus]}</span
 	>
 </header>

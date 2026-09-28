@@ -1,0 +1,163 @@
+// Panel geometry on the page grid. A grid panel is a set of cells; its outline is traced
+// along the grid lattice and mapped to page coordinates, so internal gutters are absorbed
+// and an L-shape comes out as one 6-vertex polygon.
+
+import type { GridSpec, Point, Rect, Size } from '$lib/model/types';
+
+function cellSize(grid: GridSpec, size: Size) {
+	return {
+		w: (size.width - 2 * grid.margin - (grid.cols - 1) * grid.gutter) / grid.cols,
+		h: (size.height - 2 * grid.margin - (grid.rows - 1) * grid.gutter) / grid.rows
+	};
+}
+
+export function cellRect(grid: GridSpec, size: Size, cell: number): Rect {
+	const { w, h } = cellSize(grid, size);
+	const row = Math.floor(cell / grid.cols);
+	const col = cell % grid.cols;
+	return { x: grid.margin + col * (w + grid.gutter), y: grid.margin + row * (h + grid.gutter), w, h };
+}
+
+/** Which cell contains a page-space point, or null if it falls in a margin or gutter. */
+export function cellAt(grid: GridSpec, size: Size, p: Point): number | null {
+	const { w, h } = cellSize(grid, size);
+	const col = Math.floor((p.x - grid.margin) / (w + grid.gutter));
+	const row = Math.floor((p.y - grid.margin) / (h + grid.gutter));
+	if (col < 0 || row < 0 || col >= grid.cols || row >= grid.rows) return null;
+	const r = cellRect(grid, size, row * grid.cols + col);
+	if (p.x > r.x + r.w || p.y > r.y + r.h) return null;
+	return row * grid.cols + col;
+}
+
+function neighbours(cell: number, grid: GridSpec): number[] {
+	const row = Math.floor(cell / grid.cols);
+	const col = cell % grid.cols;
+	const out: number[] = [];
+	if (row > 0) out.push(cell - grid.cols);
+	if (row < grid.rows - 1) out.push(cell + grid.cols);
+	if (col > 0) out.push(cell - 1);
+	if (col < grid.cols - 1) out.push(cell + 1);
+	return out;
+}
+
+/** Non-empty, in range, and 4-connected. */
+export function isContiguous(cells: number[], grid: GridSpec): boolean {
+	const total = grid.rows * grid.cols;
+	const set = new Set(cells);
+	if (set.size === 0 || [...set].some((c) => c < 0 || c >= total)) return false;
+	const seen = new Set<number>();
+	const stack = [cells[0]];
+	while (stack.length) {
+		const c = stack.pop()!;
+		if (seen.has(c)) continue;
+		seen.add(c);
+		for (const n of neighbours(c, grid)) if (set.has(n) && !seen.has(n)) stack.push(n);
+	}
+	return seen.size === set.size;
+}
+
+/**
+ * True if some cell outside the set cannot reach the page edge by 4-connected steps through
+ * other outside cells — a ring, or a region pinched off at a corner. Such shapes have more
+ * than one boundary loop, so they are not valid panels.
+ */
+export function hasHoles(cells: number[], grid: GridSpec): boolean {
+	const set = new Set(cells);
+	const total = grid.rows * grid.cols;
+	const outside = [...Array(total).keys()].filter((c) => !set.has(c));
+	const onEdge = (c: number) => {
+		const row = Math.floor(c / grid.cols);
+		const col = c % grid.cols;
+		return row === 0 || col === 0 || row === grid.rows - 1 || col === grid.cols - 1;
+	};
+	const reached = new Set<number>();
+	const stack = outside.filter(onEdge);
+	while (stack.length) {
+		const c = stack.pop()!;
+		if (reached.has(c)) continue;
+		reached.add(c);
+		for (const n of neighbours(c, grid)) if (!set.has(n) && !reached.has(n)) stack.push(n);
+	}
+	return reached.size < outside.length;
+}
+
+export type MergeCheck = { ok: true } | { ok: false; reason: 'not-contiguous' | 'has-hole' };
+
+export function canMerge(cells: number[], grid: GridSpec): MergeCheck {
+	if (!isContiguous(cells, grid)) return { ok: false, reason: 'not-contiguous' };
+	if (hasHoles(cells, grid)) return { ok: false, reason: 'has-hole' };
+	return { ok: true };
+}
+
+type LatticeEdge = { from: [number, number]; to: [number, number] };
+
+/**
+ * Clockwise (screen coordinates, y down) outline of a valid panel, starting at its top-left
+ * vertex. Boundary edges are collected on the (cols+1) × (rows+1) lattice, chained into a
+ * loop, reduced to corners, and each corner is placed on the real cell edge its adjoining
+ * edges belong to — so a boundary between two cells of the panel never appears.
+ */
+export function panelOutline(cells: number[], grid: GridSpec, size: Size): Point[] {
+	const set = new Set(cells);
+	const has = (row: number, col: number) =>
+		row >= 0 && col >= 0 && row < grid.rows && col < grid.cols && set.has(row * grid.cols + col);
+
+	const edges = new Map<string, LatticeEdge>();
+	const add = (from: [number, number], to: [number, number]) =>
+		edges.set(from.join(','), { from, to });
+	for (const cell of set) {
+		const r = Math.floor(cell / grid.cols);
+		const c = cell % grid.cols;
+		// Lattice points are [col, row]. Each exposed side runs clockwise around the cell.
+		if (!has(r - 1, c)) add([c, r], [c + 1, r]);
+		if (!has(r, c + 1)) add([c + 1, r], [c + 1, r + 1]);
+		if (!has(r + 1, c)) add([c + 1, r + 1], [c, r + 1]);
+		if (!has(r, c - 1)) add([c, r + 1], [c, r]);
+	}
+
+	// Start at the top-left-most lattice point that begins an edge.
+	const starts = [...edges.values()].map((e) => e.from);
+	starts.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+	const loop: LatticeEdge[] = [];
+	let edge = edges.get(starts[0].join(','))!;
+	while (loop.length <= edges.size) {
+		loop.push(edge);
+		edge = edges.get(edge.to.join(','))!;
+		if (edge === loop[0]) break;
+	}
+
+	const { w, h } = cellSize(grid, size);
+	const colLeft = (i: number) => grid.margin + i * (w + grid.gutter);
+	const rowTop = (j: number) => grid.margin + j * (h + grid.gutter);
+
+	// Keep only corners: vertex i sits between loop[i-1] (incoming) and loop[i] (outgoing).
+	const points: Point[] = [];
+	for (let i = 0; i < loop.length; i++) {
+		const incoming = loop[(i - 1 + loop.length) % loop.length];
+		const outgoing = loop[i];
+		const vertical = (e: LatticeEdge) => e.from[0] === e.to[0];
+		if (vertical(incoming) === vertical(outgoing)) continue;
+		const v = vertical(incoming) ? incoming : outgoing;
+		const hz = vertical(incoming) ? outgoing : incoming;
+		// Going down = the panel is on the left of this line (the right side of a cell).
+		const x = v.to[1] > v.from[1] ? colLeft(v.from[0] - 1) + w : colLeft(v.from[0]);
+		// Going right = the top side of a cell; going left = the bottom side.
+		const y = hz.to[0] > hz.from[0] ? rowTop(hz.from[1]) : rowTop(hz.from[1] - 1) + h;
+		points.push({ x, y });
+	}
+	return points;
+}
+
+export function polygonBBox(points: Point[]): Rect {
+	const xs = points.map((p) => p.x);
+	const ys = points.map((p) => p.y);
+	const x = Math.min(...xs);
+	const y = Math.min(...ys);
+	return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+}
+
+/** CSS clip-path polygon relative to the polygon's own bbox. */
+export function clipPathFor(points: Point[]): string {
+	const b = polygonBBox(points);
+	return `polygon(${points.map((p) => `${p.x - b.x}px ${p.y - b.y}px`).join(', ')})`;
+}

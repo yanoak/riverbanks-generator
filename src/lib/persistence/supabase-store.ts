@@ -47,6 +47,15 @@ export class SupabaseComicStore implements ComicStore {
 		return data ? toRecord(data as Row) : null;
 	}
 
+	async records(): Promise<ComicRecord[]> {
+		const { data, error } = await this.supabase
+			.from('comics')
+			.select('id, title, doc, rev, updated_at')
+			.order('updated_at', { ascending: false });
+		if (error) throw fail('search comics', error);
+		return (data as Row[]).map(toRecord);
+	}
+
 	async create(title: string, doc: Comic): Promise<ComicRecord> {
 		const { data, error } = await this.supabase
 			.from('comics')

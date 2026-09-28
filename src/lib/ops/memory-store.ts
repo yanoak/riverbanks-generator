@@ -24,6 +24,10 @@ export class MemoryStore implements ComicStore {
 		return row ? clone(row) : null;
 	}
 
+	async records(): Promise<ComicRecord[]> {
+		return [...this.rows.values()].map((r) => clone(r));
+	}
+
 	async create(title: string, doc: Comic): Promise<ComicRecord> {
 		const row = {
 			id: newId(),

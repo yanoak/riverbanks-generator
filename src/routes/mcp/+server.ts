@@ -28,6 +28,7 @@ const handle: RequestHandler = async ({ request, url }) => {
 	});
 	const server = createMcpServer({
 		store: new SupabaseComicStore(supabase),
+		user: { id: user.userId, email: user.email },
 		importImage: (source) => importImage(supabase, user.userId, source),
 		appUrl: url.origin
 	});

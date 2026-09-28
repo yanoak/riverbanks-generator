@@ -9,6 +9,7 @@ async function connect() {
 	const imported: string[] = [];
 	const server = createMcpServer({
 		store,
+		user: { id: 'user-1', email: 'yan@test.local' },
 		appUrl: 'https://app.test',
 		importImage: async ({ url }) => {
 			imported.push(url ?? 'base64');
@@ -21,9 +22,10 @@ async function connect() {
 	const call = async (name: string, args: Record<string, unknown> = {}) => {
 		const res = (await client.callTool({ name, arguments: args })) as {
 			content: { text: string }[];
+			structuredContent?: unknown;
 			isError?: boolean;
 		};
-		return { text: res.content[0].text, isError: !!res.isError };
+		return { text: res.content[0].text, isError: !!res.isError, structured: res.structuredContent };
 	};
 	return { client, call, store, imported };
 }
@@ -50,6 +52,9 @@ describe('Riverbanks MCP server', () => {
 				'set_grid',
 				'set_panel_image',
 				'split_panel',
+				'search',
+				'fetch',
+				'whoami',
 				'update_balloon',
 				'update_panel'
 			].sort()
@@ -62,7 +67,7 @@ describe('Riverbanks MCP server', () => {
 		const by = Object.fromEntries(tools.map((t) => [t.name, t.annotations ?? {}]));
 		for (const t of tools) expect(t.annotations, `${t.name} has annotations`).toBeDefined();
 
-		for (const read of ['list_comics', 'get_comic']) {
+		for (const read of ['list_comics', 'get_comic', 'search', 'fetch', 'whoami']) {
 			expect(by[read].readOnlyHint, read).toBe(true);
 		}
 		for (const del of ['delete_comic', 'delete_page', 'delete_balloon', 'remove_panel_image']) {
@@ -122,7 +127,7 @@ describe('Riverbanks MCP server', () => {
 	it('reports unknown comics as not-found', async () => {
 		const { call } = await connect();
 		const res = await call('get_comic', { comicId: 'missing' });
-		expect(res).toEqual({ isError: true, text: 'not-found: No comic with id missing.' });
+		expect(res).toMatchObject({ isError: true, text: 'not-found: No comic with id missing.' });
 	});
 
 	it('requires exactly one image source', async () => {
@@ -140,5 +145,66 @@ describe('Riverbanks MCP server', () => {
 		const page = JSON.parse((res.contents[0] as { text: string }).text);
 		expect(page.number).toBe(1);
 		expect(page.panels).toHaveLength(12);
+	});
+
+	describe('deep research tools (OpenAI search/fetch schemas)', () => {
+		async function seeded() {
+			const c = await connect();
+			const { id } = JSON.parse((await c.call('create_comic', { title: 'Sediment' })).text);
+			const d = JSON.parse((await c.call('get_comic', { comicId: id })).text);
+			await c.call('add_balloon', {
+				comicId: id,
+				page: 1,
+				type: 'speech',
+				text: 'The river does not hoard.',
+				panelId: d.pages[0].panels[5].id
+			});
+			return { ...c, id };
+		}
+
+		it('search returns {results:[{id,title,url}]} as structured content and as JSON text', async () => {
+			const { call, id } = await seeded();
+			const res = await call('search', { query: 'HOARD' });
+			const expected = {
+				results: [{ id, title: 'Sediment', url: `https://app.test/comics/${id}?page=1` }]
+			};
+			expect(res.structured).toEqual(expected);
+			expect(JSON.parse(res.text)).toEqual(expected);
+		});
+
+		it('search with no match returns an empty list, not an error', async () => {
+			const { call } = await seeded();
+			const res = await call('search', { query: 'zeppelin' });
+			expect(res.isError).toBe(false);
+			expect(res.structured).toEqual({ results: [] });
+		});
+
+		it('fetch returns {id,title,text,url,metadata} with the comic as a script', async () => {
+			const { call, id } = await seeded();
+			const res = await call('fetch', { id });
+			const doc = res.structured as {
+				id: string;
+				title: string;
+				text: string;
+				url: string;
+				metadata: Record<string, unknown>;
+			};
+			expect(doc).toMatchObject({ id, title: 'Sediment', url: `https://app.test/comics/${id}` });
+			expect(doc.text).toContain('speech: The river does not hoard.');
+			expect(doc.metadata).toMatchObject({ pages: 1 });
+			expect(JSON.parse(res.text)).toEqual(doc);
+		});
+
+		it('fetch of an unknown id is a tool error', async () => {
+			const { call } = await seeded();
+			expect((await call('fetch', { id: 'nope' })).isError).toBe(true);
+		});
+	});
+
+	it('whoami identifies the signed-in account and is marked as the OpenAI profile tool', async () => {
+		const { client, call } = await connect();
+		const tool = (await client.listTools()).tools.find((t) => t.name === 'whoami')!;
+		expect(tool._meta?.['openai/profile']).toBe(true);
+		expect((await call('whoami')).structured).toEqual({ id: 'user-1', email: 'yan@test.local' });
 	});
 });

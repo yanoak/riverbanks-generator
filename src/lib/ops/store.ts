@@ -24,6 +24,8 @@ export type UpdateResult =
 export interface ComicStore {
 	list(): Promise<ComicSummary[]>;
 	get(id: string): Promise<ComicRecord | null>;
+	/** Every comic the caller owns, with documents (for search). */
+	records(): Promise<ComicRecord[]>;
 	create(title: string, doc: Comic): Promise<ComicRecord>;
 	/** Writes only if the stored rev still equals expectedRev. */
 	update(id: string, doc: Comic, title: string, expectedRev: number): Promise<UpdateResult>;

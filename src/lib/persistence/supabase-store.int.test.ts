@@ -58,6 +58,9 @@ describe.skipIf(!url || !serviceKey)('SupabaseComicStore against local Supabase'
 			reason: 'not-found'
 		});
 		expect(await theirs.delete(rec.id)).toBe(false);
+		// records() feeds the MCP search tool: RLS keeps other people's comics out of it too.
+		expect((await theirs.records()).map((r) => r.id)).not.toContain(rec.id);
+		expect((await new SupabaseComicStore(a.client).records()).map((r) => r.id)).toContain(rec.id);
 	});
 
 	it('confines storage to the user’s own folder', async () => {

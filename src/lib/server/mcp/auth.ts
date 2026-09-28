@@ -23,6 +23,7 @@ export function bearerToken(request: Request): string | null {
 
 export interface VerifiedUser {
 	userId: string;
+	email: string;
 	clientId: string;
 	scopes: string[];
 	expiresAt?: number;
@@ -46,6 +47,7 @@ export async function verifyAccessToken(
 	}
 	return {
 		userId: payload.sub,
+		email: typeof payload.email === 'string' ? payload.email : '',
 		clientId: payload.client_id,
 		scopes: typeof payload.scope === 'string' ? payload.scope.split(' ').filter(Boolean) : [],
 		expiresAt: payload.exp

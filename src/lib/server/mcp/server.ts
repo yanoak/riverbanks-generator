@@ -7,6 +7,8 @@ import { createComic } from '$lib/model/factory';
 import type { Comic } from '$lib/model/types';
 import * as ops from '$lib/ops/comic-ops';
 import { describeComic } from '$lib/ops/describe';
+import { migrate } from '$lib/model/serialize';
+import { comicScript, searchComic } from '$lib/ops/script';
 import { loadComic, mutateComic, OpError } from '$lib/ops/ops';
 import type { ComicStore } from '$lib/ops/store';
 
@@ -18,6 +20,8 @@ export interface ImportedImage {
 
 export interface McpContext {
 	store: ComicStore;
+	/** The signed-in user the tools act as. */
+	user: { id: string; email: string };
 	/** Fetch an image URL (or decode base64) into the user's asset storage. */
 	importImage: (source: {
 		url?: string;
@@ -387,6 +391,89 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			inputSchema: { comicId: z.string(), page, balloonId: z.string() }
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.deleteBalloon(c, args))
+	);
+
+	// --- deep research (OpenAI's search/fetch schemas) + profile ------------------------------
+
+	const searchResult = z.object({ id: z.string(), title: z.string(), url: z.string() });
+
+	server.registerTool(
+		'search',
+		{
+			annotations: READ,
+			title: 'Search comics',
+			description:
+				'Search your comics by title and balloon text. Returns matching comics with a link to the first matching page; use fetch with an id for the full script.',
+			inputSchema: { query: z.string().min(1).describe('A single query string') },
+			outputSchema: { results: z.array(searchResult) }
+		},
+		async ({ query }) => {
+			const results = [];
+			for (const record of await store.records()) {
+				let comic: Comic;
+				try {
+					comic = migrate(record.doc);
+				} catch {
+					continue;
+				}
+				const hit = searchComic(comic, query);
+				if (hit) {
+					results.push({
+						id: record.id,
+						title: record.title,
+						url: `${ctx.appUrl}/comics/${record.id}?page=${hit.page}`
+					});
+				}
+			}
+			const structuredContent = { results };
+			return { ...json(structuredContent), structuredContent };
+		}
+	);
+
+	server.registerTool(
+		'fetch',
+		{
+			annotations: READ,
+			title: 'Fetch comic',
+			description:
+				'The full text of a comic as a script: every page, panel by panel, with each balloon as “type: text”.',
+			inputSchema: { id: z.string().describe('A comic id from search or list_comics') },
+			outputSchema: {
+				id: z.string(),
+				title: z.string(),
+				text: z.string(),
+				url: z.string(),
+				metadata: z.record(z.string(), z.unknown()).optional()
+			}
+		},
+		async ({ id }) =>
+			guard(async () => {
+				const { record, comic } = await loadComic(store, id);
+				const structuredContent = {
+					id: record.id,
+					title: record.title,
+					text: comicScript(comic, { id: record.id, appUrl: ctx.appUrl }),
+					url: `${ctx.appUrl}/comics/${record.id}`,
+					metadata: { pages: comic.pages.length, rev: record.rev, updatedAt: record.updatedAt }
+				};
+				return { ...json(structuredContent), structuredContent };
+			})
+	);
+
+	server.registerTool(
+		'whoami',
+		{
+			annotations: READ,
+			title: 'Who am I',
+			description: 'The Riverbanks account these tools act as.',
+			outputSchema: { id: z.string(), email: z.string() },
+			// ChatGPT uses this to tell accounts apart when one person connects several.
+			_meta: { 'openai/profile': true }
+		},
+		async () => {
+			const structuredContent = { id: ctx.user.id, email: ctx.user.email };
+			return { ...json(structuredContent), structuredContent };
+		}
 	);
 
 	// --- resources ---------------------------------------------------------------------------

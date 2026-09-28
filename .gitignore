@@ -28,3 +28,7 @@ test-results
 .claude/settings.local.json
 playwright-report
 .env*
+!.env.example
+
+# Supabase local signing keys
+supabase/signing_keys.json

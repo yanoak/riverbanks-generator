@@ -187,7 +187,7 @@ the view link instead.
 **Infra**
 
 - [x] Switch to `adapter-vercel`, `vercel link`, first preview deploy of the current app (proves the pipeline early)
-- [ ] Supabase: `supabase init`, config.toml (auth, OAuth server, storage), migration for `comics` + RLS + `assets` bucket policies; local stack runs; generated DB types
+- [x] Supabase: `supabase init`, config.toml (auth, OAuth server, storage), migration for `comics` + RLS + `assets` bucket policies; local stack runs; generated DB types
 - [ ] Cloud project: user creates the free project; `supabase link` + `db push`; enable asymmetric JWT keys, OAuth server, dynamic registration; set Site URL and redirect URLs; env vars into Vercel and `.env.local`
 
 **Auth**
@@ -291,7 +291,7 @@ OAuth consent:
 - [x] `set_panel_image` rejects non-image and oversized URLs, and stores by the user's folder — unit — `tools.test.ts`
 - [x] Balloon text input (simple markdown → the TipTap-compatible HTML subset) is sanitised — unit — `src/lib/mcp/text.test.ts`
 - [x] `/mcp` without a token answers 401 with the resource-metadata challenge; the metadata route names the Supabase issuer — integration (the route handler called directly) — `src/routes/mcp/mcp.test.ts`
-- [ ] Documents store: the rev-checked update against local Supabase; user B can't read user A's comic (RLS) — integration against `supabase start` — `src/lib/persistence/documents.int.test.ts`
+- [x] Documents store: the rev-checked update against local Supabase; user B can't read user A's comic (RLS) — integration against `supabase start` — `src/lib/persistence/documents.int.test.ts`
 - [ ] E2E: sign up → confirm (read from local Inbucket/Mailpit) → create a comic → merge, add a balloon → reload → still there → sign out, and the route guard redirects — Playwright + local Supabase — `e2e/auth.e2e.ts`
 - [ ] E2E: an MCP SDK client with a local user's token calls `create_comic`, `merge_panels`, `add_balloon`; the open editor updates live — Playwright + SDK client — `e2e/mcp.e2e.ts`
 

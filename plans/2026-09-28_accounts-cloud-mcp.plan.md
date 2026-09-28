@@ -208,7 +208,7 @@ the view link instead.
 
 - [x] Headless ops layer (`src/lib/ops/`): load → migrate → command → invariants → save-with-rev, shared by the tools; `describeComic()` for `get_comic`
 - [x] `/mcp` endpoint (Streamable HTTP, stateless) with all tools and the page resource, authenticated by a bearer token verified against JWKS
-- [ ] OAuth: `/.well-known/oauth-protected-resource`, the 401 challenge, and the `/oauth/consent` page
+- [x] OAuth: `/.well-known/oauth-protected-resource`, the 401 challenge, and the `/oauth/consent` page
 - [ ] Connect Claude Code to local and production `/mcp` via OAuth; write the connection how-to into README
 
 **Ship**

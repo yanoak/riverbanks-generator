@@ -1,14 +1,76 @@
 # Riverbanks
 
-A comic book page maker: panel grids with arbitrary contiguous merges and break-out panels,
-per-panel images (mostly AI-generated), and WYSIWYG captions, balloons and SFX.
+A comic page maker for the seapunk team:
 
-SvelteKit 2 + Svelte 5, local-first (IndexedDB). See
-[`plans/2026-09-28_comic-page-editor-v1.plan.md`](plans/2026-09-28_comic-page-editor-v1.plan.md).
+- panel grids that merge into any contiguous layout, plus break-out panels
+- per-panel images (mostly AI-generated)
+- WYSIWYG captions, speech, thought, whisper and shout balloons, and SFX
+
+Comics are saved to Supabase. An MCP server lets Claude build and edit pages alongside you, and
+its changes appear live in the open editor.
+
+- **App:** https://riverbanks-generator.vercel.app (SvelteKit on Vercel)
+- **Data:** Supabase project `riverbanks-comics`, which holds Postgres, Auth and Storage
+- **Plans and diary:** `plans/`, `work-diary/` (see `CLAUDE.md`)
+
+## Accounts
+
+This is an internal tool, so public sign-up is off and no emails are sent. An admin adds people
+in the Supabase dashboard: **Authentication → Users → Add user → Create new user**, with
+**Auto Confirm User** ticked. Give the person their password; they can change it from
+**Change password** on the comics page. For a forgotten password, set a new one the same way.
+
+`/local` works without an account and saves in that browser only. After signing in, the comics
+page offers to import that local comic.
+
+## Using it with Claude (MCP)
+
+The MCP endpoint is `https://riverbanks-generator.vercel.app/mcp`. It uses Streamable HTTP and
+OAuth. The first time a client connects, a browser opens: sign in with your Riverbanks account,
+then click **Allow**.
+
+- **Claude Code:** `claude mcp add --transport http riverbanks https://riverbanks-generator.vercel.app/mcp`,
+  then `/mcp` inside Claude Code to sign in.
+- **claude.ai:** Settings → Connectors → Add custom connector, and paste the URL.
+
+Then ask, for example: *"Create a comic called Sediment. On page 1 merge the top row into one wide
+panel, put a caption 'Bangkok, October 2026' in it, and a speech balloon in cell 5 saying 'The
+river does not hoard.'"* Open the comic in the app to watch it happen.
+
+The tools are:
+
+- **Comics:** `list_comics`, `create_comic`, `get_comic`, `rename_comic`, `delete_comic`
+- **Pages:** `add_page`, `delete_page`, `move_page`, `set_grid`
+- **Panels:** `merge_panels`, `split_panel`, `add_free_panel`, `update_panel`
+- **Images:** `set_panel_image`, `remove_panel_image`
+- **Balloons:** `add_balloon`, `update_balloon`, `delete_balloon`
+
+Each page is also available as the resource `comic://{id}/page/{n}`. Agents get the same
+refusals the editor gives people, such as "Panels must share an edge to merge."
+
+## Development
 
 ```sh
 npm install
-npm run dev        # editor at http://localhost:5173
-npm run test:unit  # vitest
-npm run check      # svelte-check
+supabase start --ignore-health-check   # local Postgres/Auth/Storage (Docker); CLI 2.95's storage check is impatient
+npm run dev                            # http://localhost:5173, uses .env.development.local
 ```
+
+Create `.env.development.local` from `supabase status -o env`, with `PUBLIC_SUPABASE_URL` set to
+`API_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY` set to `PUBLISHABLE_KEY`. Create a local user
+with Supabase Studio (http://127.0.0.1:54323) or the admin API.
+
+```sh
+npm run test:unit -- --run   # vitest
+npm run test:int             # against the local Supabase stack
+npx playwright test          # e2e: builds and serves on :4318 against local Supabase
+npm run check                # svelte-check
+```
+
+Schema changes go in `supabase/migrations/` and reach production with `supabase db push`.
+
+## Studio material
+
+`riverbanks/` holds the Riverbanks studio material (the Chao Phraya Accord, the lightning talk,
+and their slide decks), copied from `cosmolocalcnx`. It names people, so it is **gitignored and
+never pushed**, and exists only on the machine it was copied to.

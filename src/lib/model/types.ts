@@ -71,7 +71,9 @@ export interface Balloon extends Rect {
 	id: Id;
 	type: BalloonType;
 	z: number;
+	/** Tail tip relative to the balloon's top-left, so the tail moves with the balloon. */
 	tail?: Point;
+	/** Rich text from the in-place editor (TipTap), rendered as-is. */
 	html: string;
 	font: string;
 	fontSize: number;

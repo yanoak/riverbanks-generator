@@ -132,7 +132,7 @@ commits a single "edit text" command.
 - [x] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
 - [x] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
 - [x] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
-- [ ] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
+- [x] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
 - [ ] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
 - [ ] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
 - [ ] Export: page → PNG (html-to-image with embedded fonts and images); comic → PDF via print stylesheet
@@ -211,7 +211,8 @@ message in the inspector with Retry, and the panel is left unchanged.
    - In image mode: arrow keys pan, + / − zoom, 0 fits.
    - ⌘V with a panel selected pastes an image into it.
    - P: add a free panel. ] / [: bring the selected free panel to the front / send it to the back.
-   - T / S / K / C / X: add a thought, speech, shout, caption or SFX balloon at the page centre.
+   - S / T / W / K / C / X: add a speech, thought, whisper, shout, caption or SFX balloon in the
+     selected panel (or at the page centre).
    - ⌘E: export the current page as PNG.
    - ⌘0: zoom to fit. ⌘= / ⌘−: zoom the page.
    - PageUp / PageDown: previous / next page.
@@ -239,8 +240,8 @@ message in the inspector with Retry, and the panel is left unchanged.
 - [x] Split: an N-cell panel → N single panels; split + undo restores it — unit — `panels.test.ts`
 - [x] Changing grid rows/cols is allowed only when all panels are single cells, and regenerates the partition — unit — `panels.test.ts`
 - [x] Invariant checker flags overlapping and missing cells — unit — `src/lib/model/invariants.test.ts`
-- [ ] Move/resize balloon as a single command from start/end geometry; undo restores both — unit — `src/lib/model/commands/balloons.test.ts`
-- [ ] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
+- [x] Move/resize balloon as a single command from start/end geometry; undo restores both — unit — `src/lib/model/commands/balloons.test.ts`
+- [x] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
 - [x] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`
 - [x] Serialize → migrate → deserialize round-trips; an unknown future `docVersion` throws — unit — `src/lib/model/serialize.test.ts`
 - [ ] Autosave debounces, queues a follow-up when an edit lands during a save, and marks clean only if the version is unchanged — unit (fake timers) — `src/lib/persistence/autosave.test.ts`

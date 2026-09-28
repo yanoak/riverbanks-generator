@@ -13,10 +13,20 @@ import {
 } from '$lib/model/commands/panels';
 import { PatchCommand } from '$lib/model/commands/patch';
 import { createComic } from '$lib/model/factory';
+import { createBalloon } from '$lib/model/balloons';
 import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { addImage } from '$lib/persistence/assets.svelte';
-import type { Comic, FreePanel, GridSpec, Page, Panel, Rect } from '$lib/model/types';
+import type {
+	Balloon,
+	BalloonType,
+	Comic,
+	FreePanel,
+	GridSpec,
+	Page,
+	Panel,
+	Rect
+} from '$lib/model/types';
 
 export type Selection =
 	{ kind: 'none' } | { kind: 'panels'; ids: string[] } | { kind: 'balloon'; id: string };
@@ -157,10 +167,26 @@ export class Editor {
 		this.record(PatchCommand.fromChange(description, target, before));
 	}
 
-	/** The single selected free panel (or later, balloon) that arrows and z-order act on. */
+	get selectedBalloon(): Balloon | undefined {
+		const sel = this.selection;
+		return sel.kind === 'balloon' ? this.page.balloons.find((b) => b.id === sel.id) : undefined;
+	}
+
+	/** The single selected free panel or balloon that arrows and z-order act on. */
 	get movable(): (Rect & { z: number }) | undefined {
+		if (this.selectedBalloon) return this.selectedBalloon;
 		const [panel] = this.selectedPanels;
 		return this.selectedPanels.length === 1 && panel.kind === 'free' ? panel : undefined;
+	}
+
+	/** Add a balloon inside the selected panel (or the page) and select it. */
+	addBalloon(type: BalloonType): string {
+		const [panel] = this.selectedPanels;
+		const box = panel ? panelBox(this.page, panel) : undefined;
+		const balloon = createBalloon(this.page, type, box);
+		this.run(new InsertCommand(`Add ${type}`, this.page.balloons, balloon));
+		this.select({ kind: 'balloon', id: balloon.id });
+		return balloon.id;
 	}
 
 	nudge(dx: number, dy: number): boolean {
@@ -173,13 +199,20 @@ export class Editor {
 	reorder(to: 'front' | 'back'): void {
 		const target = this.movable;
 		if (!target) return;
-		const zs = this.page.panels.filter((p): p is FreePanel => p.kind === 'free').map((p) => p.z);
+		const zs = this.selectedBalloon
+			? this.page.balloons.map((b) => b.z)
+			: this.page.panels.filter((p): p is FreePanel => p.kind === 'free').map((p) => p.z);
 		const z = to === 'front' ? Math.max(...zs) + 1 : Math.min(...zs) - 1;
 		this.run(new PatchCommand(to === 'front' ? 'Bring to front' : 'Send to back', target, { z }));
 	}
 
 	/** Delete removes free panels; on a lone grid panel it removes the image instead. */
 	deleteSelection(): void {
+		const balloon = this.selectedBalloon;
+		if (balloon) {
+			this.run(new RemoveCommand(`Delete ${balloon.type}`, this.page.balloons, balloon));
+			return this.select({ kind: 'none' });
+		}
 		const free = this.selectedPanels.filter((p) => p.kind === 'free');
 		const [only] = this.selectedPanels;
 		if (!free.length && only?.image) return this.removeImage(only);

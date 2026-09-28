@@ -1,6 +1,16 @@
 import { tick } from 'svelte';
+import type { BalloonType } from '$lib/model/types';
 import type { Editor } from './editor.svelte';
 import { neighbourPanel, type Direction } from './navigation';
+
+const BALLOON_KEYS: Record<string, BalloonType> = {
+	s: 'speech',
+	t: 'thought',
+	w: 'whisper',
+	k: 'shout',
+	c: 'caption',
+	x: 'sfx'
+};
 
 const ARROWS: Record<string, Direction> = {
 	ArrowUp: 'up',
@@ -59,6 +69,12 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 		focusElement(id);
 		return true;
 	}
+	const balloonType = BALLOON_KEYS[key];
+	if (balloonType) {
+		focusElement(editor.addBalloon(balloonType));
+		return true;
+	}
+
 	if (key === 'm' || key === 'M') {
 		if (key === 'm') editor.merge();
 		else editor.split();

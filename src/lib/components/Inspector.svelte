@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import { PatchCommand } from '$lib/model/commands/patch';
-	import type { Panel } from '$lib/model/types';
+	import type { BalloonType, Panel } from '$lib/model/types';
+
+	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
 
 	let { editor }: { editor: Editor } = $props();
 
@@ -21,7 +23,74 @@
 	class="w-64 shrink-0 overflow-y-auto border-l border-stone-200 bg-white p-4 text-sm text-stone-700"
 	aria-label="Inspector"
 >
-	{#if panel}
+	{#if editor.selectedBalloon}
+		{@const b = editor.selectedBalloon}
+		<h2 class="section">Balloon</h2>
+		<label class="row">
+			<span>Type</span>
+			<select
+				class="rounded border border-stone-300 px-1 py-0.5"
+				value={b.type}
+				onchange={(e) =>
+					editor.run(
+						new PatchCommand('Balloon type', b, {
+							type: e.currentTarget.value as BalloonType,
+							tail:
+								b.tail ??
+								(TAILED.includes(e.currentTarget.value)
+									? { x: b.w * 0.35, y: b.h * 1.6 }
+									: undefined)
+						})
+					)}
+			>
+				{#each ['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'] as t (t)}
+					<option value={t}>{t}</option>
+				{/each}
+			</select>
+		</label>
+		<label class="row">
+			<span>Font size</span>
+			<input
+				class="w-16 rounded border border-stone-300 px-2 py-0.5 text-right"
+				type="number"
+				min="8"
+				max="200"
+				value={b.fontSize}
+				onchange={(e) =>
+					editor.run(new PatchCommand('Font size', b, { fontSize: Number(e.currentTarget.value) }))}
+			/>
+		</label>
+		<label class="row">
+			<span>Fill</span>
+			<input
+				type="color"
+				value={b.fill}
+				onchange={(e) =>
+					editor.run(new PatchCommand('Balloon fill', b, { fill: e.currentTarget.value }))}
+			/>
+		</label>
+		<label class="row">
+			<span>Tail</span>
+			<input
+				type="checkbox"
+				checked={!!b.tail}
+				disabled={!TAILED.includes(b.type)}
+				onchange={(e) =>
+					editor.run(
+						new PatchCommand('Toggle tail', b, {
+							tail: e.currentTarget.checked ? { x: b.w * 0.35, y: b.h * 1.6 } : undefined
+						})
+					)}
+			/>
+		</label>
+		<div class="mt-3 grid grid-cols-2 gap-2">
+			<button class="btn" onclick={() => editor.reorder('front')} title="]">To front</button>
+			<button class="btn" onclick={() => editor.reorder('back')} title="[">To back</button>
+		</div>
+		<button class="btn mt-2 text-red-700" onclick={() => editor.deleteSelection()}>
+			Delete balloon
+		</button>
+	{:else if panel}
 		<h2 class="section">Panel</h2>
 		<p class="mb-3 text-stone-500">
 			{panel.kind === 'grid'

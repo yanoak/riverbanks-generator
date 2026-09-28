@@ -10,7 +10,9 @@
 	import Transformer from './Transformer.svelte';
 	import PanelImage from './PanelImage.svelte';
 	import ImageOverlay from './ImageOverlay.svelte';
-	import type { Panel } from '$lib/model/types';
+	import type { Balloon, Panel } from '$lib/model/types';
+	import BalloonView from './BalloonView.svelte';
+	import { PatchCommand } from '$lib/model/commands/patch';
 
 	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
 
@@ -34,6 +36,33 @@
 	const freePanels = $derived(
 		page.panels.filter((p): p is FreePanel => p.kind === 'free').sort((a, b) => a.z - b.z)
 	);
+
+	const balloons = $derived([...page.balloons].sort((a, b) => a.z - b.z));
+	const selectedBalloonId = $derived(
+		editor?.selection.kind === 'balloon' ? editor.selection.id : null
+	);
+
+	let tailDrag: { x: number; y: number; start: Balloon['tail'] } | null = null;
+
+	function tailDown(e: PointerEvent, balloon: Balloon) {
+		e.stopPropagation();
+		(e.currentTarget as Element).setPointerCapture(e.pointerId);
+		tailDrag = { x: e.clientX, y: e.clientY, start: { ...balloon.tail! } };
+	}
+
+	function tailMove(e: PointerEvent, balloon: Balloon) {
+		if (!tailDrag?.start) return;
+		balloon.tail = {
+			x: tailDrag.start.x + (e.clientX - tailDrag.x) / scale,
+			y: tailDrag.start.y + (e.clientY - tailDrag.y) / scale
+		};
+	}
+
+	function tailUp(balloon: Balloon) {
+		if (tailDrag)
+			editor?.record(PatchCommand.fromChange('Move tail', balloon, { tail: tailDrag.start }));
+		tailDrag = null;
+	}
 
 	const selectedIds = $derived(
 		editor?.selection.kind === 'panels' ? new Set(editor.selection.ids) : new Set<string>()
@@ -169,6 +198,53 @@
 			{/if}
 		{/each}
 
+		{#each balloons as balloon, i (balloon.id)}
+			{#if editor}
+				<Transformer
+					target={balloon}
+					{scale}
+					id={balloon.id}
+					label="{balloon.type} balloon {i + 1}"
+					z={100 + i}
+					selected={selectedBalloonId === balloon.id}
+					onselect={() => editor.select({ kind: 'balloon', id: balloon.id })}
+					oncommit={(before, action) =>
+						editor.commitGeometry(
+							balloon,
+							before,
+							action === 'move' ? 'Move balloon' : 'Resize balloon'
+						)}
+				>
+					<BalloonView {balloon} />
+					{#snippet extra()}
+						{#if balloon.tail}
+							<div
+								class="tail-handle"
+								style:left="{balloon.tail.x}px"
+								style:top="{balloon.tail.y}px"
+								style:--size="{14 / scale}px"
+								role="presentation"
+								title="Drag to point the tail"
+								onpointerdown={(e) => tailDown(e, balloon)}
+								onpointermove={(e) => tailMove(e, balloon)}
+								onpointerup={() => tailUp(balloon)}
+							></div>
+						{/if}
+					{/snippet}
+				</Transformer>
+			{:else}
+				<div
+					class="absolute"
+					style:left="{balloon.x}px"
+					style:top="{balloon.y}px"
+					style:width="{balloon.w}px"
+					style:height="{balloon.h}px"
+				>
+					<BalloonView {balloon} />
+				</div>
+			{/if}
+		{/each}
+
 		{#if editor?.mode === 'image' && editor.imagePanel?.image}
 			<ImageOverlay {editor} {page} panel={editor.imagePanel} {scale} />
 		{/if}
@@ -206,6 +282,18 @@
 	.hit.selected {
 		fill: color-mix(in oklab, var(--color-sky-500) 14%, transparent);
 		stroke: var(--color-sky-500);
+	}
+	.tail-handle {
+		position: absolute;
+		width: var(--size);
+		height: var(--size);
+		translate: -50% -50%;
+		border-radius: 9999px;
+		background: var(--color-amber-400);
+		border: calc(var(--size) / 7) solid white;
+		box-shadow: 0 0 0 1px var(--color-amber-700);
+		cursor: crosshair;
+		z-index: 20;
 	}
 	.hit:focus-visible {
 		stroke: var(--color-sky-600);

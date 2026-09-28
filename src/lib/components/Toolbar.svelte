@@ -7,7 +7,18 @@
 	import Maximize from '@lucide/svelte/icons/maximize';
 	import type { Editor } from '$lib/editor/editor.svelte';
 
+	import type { BalloonType } from '$lib/model/types';
+
 	let { editor }: { editor: Editor } = $props();
+
+	const BALLOONS: [BalloonType, string, string][] = [
+		['speech', 'Speech', 'S'],
+		['thought', 'Thought', 'T'],
+		['whisper', 'Whisper', 'W'],
+		['shout', 'Shout', 'K'],
+		['caption', 'Caption', 'C'],
+		['sfx', 'SFX', 'X']
+	];
 
 	const canSplit = $derived(
 		editor.selectedPanels.length === 1 &&
@@ -76,6 +87,14 @@
 	>
 		<Maximize size={16} /> Full page
 	</button>
+
+	<div class="mx-2 h-6 w-px bg-stone-200"></div>
+
+	{#each BALLOONS as [type, label, key] (type)}
+		<button class="tool" onclick={() => editor.addBalloon(type)} title="Add {label} ({key})">
+			{label}
+		</button>
+	{/each}
 
 	<div class="flex-1"></div>
 

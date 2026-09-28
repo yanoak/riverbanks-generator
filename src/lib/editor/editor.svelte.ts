@@ -104,9 +104,13 @@ export class Editor {
 		this.history.clear();
 	}
 
+	/** Called synchronously on every document change (autosave hooks in here). */
+	onchange: (() => void) | null = null;
+
 	/** Mark the document changed without a history entry (e.g. renaming the comic). */
 	changed(): void {
 		this.version++;
+		this.onchange?.();
 	}
 
 	say(message: string | null): void {

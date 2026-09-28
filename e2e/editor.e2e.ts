@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { openEditor, waitForEditor } from './support/editor';
 
 const canvas = (page: import('@playwright/test').Page) => page.locator('main');
 
 test('merge by keyboard, letter a balloon, undo and redo', async ({ page }) => {
-	await page.goto('/');
+	await openEditor(page, '/local');
 	const panels = canvas(page).locator('[data-panel-id]');
 	await expect(panels).toHaveCount(12);
 
@@ -21,7 +22,13 @@ test('merge by keyboard, letter a balloon, undo and redo', async ({ page }) => {
 	const editorBox = canvas(page).locator('.ProseMirror');
 	await expect(editorBox).toBeFocused();
 	await page.keyboard.type('THE TRICK IS TO NEVER MISTAKE THE MESSAGE');
+	// Let ProseMirror absorb the typing before selecting within it.
+	await expect(editorBox).toHaveText('THE TRICK IS TO NEVER MISTAKE THE MESSAGE');
 	await page.keyboard.press('Shift+Alt+ArrowLeft');
+	// ProseMirror picks up native selection changes on the async `selectionchange` event;
+	// automation can press ⌘B inside that gap, which no person can.
+	await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toBe('MESSAGE');
+	await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(null))));
 	await page.keyboard.press('ControlOrMeta+b');
 	await page.keyboard.press('Escape');
 
@@ -49,13 +56,14 @@ test('merge by keyboard, letter a balloon, undo and redo', async ({ page }) => {
 	// Autosave to IndexedDB, then a reload brings everything back.
 	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 	await page.reload();
+	await waitForEditor(page);
 	await expect(panels).toHaveCount(9);
 	await expect(text).toHaveText('THE TRICK IS TO NEVER MISTAKE THE MESSAGE');
 	await expect(text.locator('strong')).toHaveText('MESSAGE');
 });
 
 test('pages: add, reorder, delete, and persist', async ({ page }) => {
-	await page.goto('/');
+	await openEditor(page, '/local');
 	const thumbs = page.getByRole('navigation', { name: 'Pages' }).getByRole('button', {
 		name: /^Page \d+$/
 	});
@@ -79,11 +87,12 @@ test('pages: add, reorder, delete, and persist', async ({ page }) => {
 
 	await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 	await page.reload();
+	await waitForEditor(page);
 	await expect(thumbs).toHaveCount(3);
 });
 
 test('a non-contiguous merge is refused with a reason', async ({ page }) => {
-	await page.goto('/');
+	await openEditor(page, '/local');
 	const panels = canvas(page).locator('[data-panel-id]');
 	await panels.nth(0).click();
 	await panels.nth(5).click({ modifiers: ['Shift'] });

@@ -32,3 +32,6 @@ playwright-report
 
 # Supabase local signing keys
 supabase/signing_keys.json
+
+# Riverbanks studio material (from cosmolocalcnx; names people, local only, never pushed)
+/riverbanks/

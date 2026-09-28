@@ -10,6 +10,7 @@
 	import type { BalloonType } from '$lib/model/types';
 
 	import type { SaveStatus } from '$lib/persistence/autosave';
+	import type { Snippet } from 'svelte';
 
 	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
@@ -18,19 +19,23 @@
 		editor,
 		saveStatus,
 		onexportpng,
-		onexportpdf
+		onexportpdf,
+		nav
 	}: {
 		editor: Editor;
 		saveStatus: SaveStatus;
 		onexportpng: () => void;
 		onexportpdf: () => void;
+		/** Leading slot: back link / account menu. */
+		nav?: Snippet;
 	} = $props();
 
 	const SAVE_LABEL: Record<SaveStatus, string> = {
 		saved: 'Saved',
 		dirty: 'Unsaved',
 		saving: 'Saving…',
-		error: 'Save failed'
+		error: 'Save failed',
+		conflict: 'Changed elsewhere'
 	};
 
 	const BALLOONS: [BalloonType, string, string][] = [
@@ -52,7 +57,9 @@
 <header
 	class="flex h-12 shrink-0 items-center gap-1 border-b border-stone-200 bg-white px-3 text-sm text-stone-700"
 >
-	<span class="mr-2 font-semibold tracking-tight text-stone-900">Riverbanks</span>
+	{#if nav}{@render nav()}{:else}
+		<span class="mr-2 font-semibold tracking-tight text-stone-900">Riverbanks</span>
+	{/if}
 	<input
 		class="w-48 rounded px-2 py-1 text-stone-600 hover:bg-stone-100 focus:bg-stone-100 focus:outline-none"
 		aria-label="Comic title"
@@ -131,8 +138,8 @@
 	</button>
 	<span
 		class="w-20 text-right text-xs"
-		class:text-stone-400={saveStatus !== 'error'}
-		class:text-red-600={saveStatus === 'error'}
+		class:text-stone-400={saveStatus !== 'error' && saveStatus !== 'conflict'}
+		class:text-red-600={saveStatus === 'error' || saveStatus === 'conflict'}
 		aria-live="polite">{SAVE_LABEL[saveStatus]}</span
 	>
 </header>

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAutoSave, type SaveStatus } from './autosave';
+import { ConflictError, createAutoSave, type SaveStatus } from './autosave';
 
 function setup(saveImpl?: (json: string) => Promise<void>) {
 	const doc = { version: 1, text: 'a' };
@@ -66,6 +66,23 @@ describe('createAutoSave', () => {
 		await vi.advanceTimersByTimeAsync(500 + 100 * 3);
 		expect(save).toHaveBeenCalledTimes(4); // first try + 3 retries
 		expect(statuses.at(-1)).toBe('error');
+	});
+
+	it('stops on a conflict without retrying, until resumed', async () => {
+		const { edit, statuses, save, autosave } = setup(async () => {
+			throw new ConflictError();
+		});
+		edit('x');
+		await vi.advanceTimersByTimeAsync(500 + 1000);
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(statuses.at(-1)).toBe('conflict');
+		edit('y'); // further edits don't write while in conflict
+		await vi.advanceTimersByTimeAsync(1000);
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(statuses.at(-1)).toBe('conflict');
+		autosave.resume();
+		await vi.advanceTimersByTimeAsync(500);
+		expect(save).toHaveBeenCalledTimes(2);
 	});
 
 	it('saveNow skips the debounce', async () => {

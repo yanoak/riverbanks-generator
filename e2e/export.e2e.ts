@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openEditor } from './support/editor';
 import { readFile } from 'node:fs/promises';
 
 /** Width and height from a PNG's IHDR chunk. */
@@ -29,7 +30,7 @@ async function dropImage(page: import('@playwright/test').Page, panelIndex: numb
 }
 
 test('exports the current page as a 2× PNG with its image and lettering', async ({ page }) => {
-	await page.goto('/');
+	await openEditor(page, '/local');
 	const panels = page.locator('main [data-panel-id]');
 	await panels.first().click();
 	await page.keyboard.press('Shift+ArrowRight');
@@ -62,7 +63,7 @@ test('exports the current page as a 2× PNG with its image and lettering', async
 
 test('prints every page on its own sheet for PDF', async ({ page, browserName }) => {
 	test.skip(browserName !== 'chromium', 'page.pdf is Chromium-only');
-	await page.goto('/');
+	await openEditor(page, '/local');
 	await page.getByRole('button', { name: 'Add page' }).click();
 	await page.getByRole('button', { name: 'Add page' }).click();
 	const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });

@@ -2,7 +2,14 @@
 // canvas-tool-template (src/lib/stores/persistence.ts @ f07f230), with the Supabase write
 // replaced by an injected save() so any store (IndexedDB now, a server later) plugs in.
 
-export type SaveStatus = 'saved' | 'dirty' | 'saving' | 'error';
+export type SaveStatus = 'saved' | 'dirty' | 'saving' | 'error' | 'conflict';
+
+/** Thrown by save() when someone else wrote first; autosave pauses until resume(). */
+export class ConflictError extends Error {
+	constructor() {
+		super('The document was changed elsewhere.');
+	}
+}
 
 export interface AutoSaveOptions {
 	/** Monotonic document version; bumped on every change. */
@@ -28,13 +35,14 @@ export function createAutoSave({
 	let timer: ReturnType<typeof setTimeout> | null = null;
 	let inflight: Promise<void> | null = null;
 	let pending = false;
+	let conflicted = false;
 
 	const status = (s: SaveStatus) => onStatus?.(s);
 	const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 	async function write(): Promise<void> {
 		const version = getVersion();
-		if (version === savedVersion) return;
+		if (version === savedVersion || conflicted) return;
 		status('saving');
 		const json = serialize();
 		for (let attempt = 0; ; attempt++) {
@@ -45,6 +53,11 @@ export function createAutoSave({
 				status(getVersion() === version ? 'saved' : 'dirty');
 				return;
 			} catch (e) {
+				if (e instanceof ConflictError) {
+					conflicted = true;
+					status('conflict');
+					return;
+				}
 				if (attempt >= maxRetries) {
 					console.error('Autosave failed', e);
 					status('error');
@@ -73,6 +86,7 @@ export function createAutoSave({
 
 	/** Call after every change. */
 	function schedule(): void {
+		if (conflicted) return;
 		if (getVersion() !== savedVersion) status('dirty');
 		if (inflight) {
 			pending = true;
@@ -96,13 +110,19 @@ export function createAutoSave({
 		status('saved');
 	}
 
+	/** After the conflict is resolved (reloaded, or chosen to overwrite): save again. */
+	function resume(): void {
+		conflicted = false;
+		schedule();
+	}
+
 	function cancel(): void {
 		if (timer) clearTimeout(timer);
 		timer = null;
 		pending = false;
 	}
 
-	return { schedule, saveNow, markSaved, cancel };
+	return { schedule, saveNow, markSaved, resume, cancel };
 }
 
 export type AutoSave = ReturnType<typeof createAutoSave>;

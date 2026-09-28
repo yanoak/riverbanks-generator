@@ -23,9 +23,10 @@ Decisions made with the user (2026-09-28):
 | Question | Decision |
 |---|---|
 | Supabase provisioning | **Their own supabase.com account** (free plan), not the Vercel Marketplace |
-| Sign-in | **Email + password** |
+| Sign-in | **Email + password, no emails at all** (revised 2026-09-28: internal seapunk-team tool). Public sign-up is off in Supabase; **admins create accounts** in the dashboard; no confirmation or reset emails; signed-in users can change their password |
 | MCP scope | **Full comic editing**: the agent edits exactly what the UI edits |
 | MCP auth | **OAuth**, so it works as a claude.ai connector as well as in Claude Code and Desktop |
+| Riverbanks source material | Copied from `cosmolocalcnx/riverbanks/` into `riverbanks/`, **gitignored** (it names people; this repo is public) |
 
 Relevant facts, checked against current docs:
 
@@ -192,16 +193,16 @@ the view link instead.
 
 **Auth**
 
-- [ ] Port the template's `@supabase/ssr` hooks and clients; the route guard on the `(app)` group
-- [ ] Sign-up, confirm, sign-in, sign-out, and forgot/reset password pages
+- [x] Port the template's `@supabase/ssr` hooks and clients; the route guard on the `(app)` group
+- [x] ~~Sign-up, confirm, sign-in, sign-out, and forgot/reset password pages~~ → sign-in, sign-out and change password only (admin-created accounts, no emails)
 
 **Cloud persistence**
 
-- [ ] Comics list (`/comics`): create, rename, delete, open; editor moves to `/comics/[id]` with a server load
-- [ ] Documents in Postgres with the `rev` check and a conflict banner; autosave's injected `save()` points at Supabase
-- [ ] Images in Supabase Storage with signed-URL cache; PNG export still embeds them
-- [ ] Import the local IndexedDB comic (and its images) on first sign-in
-- [ ] Realtime: apply remote changes live when clean; banner when there are unsaved edits
+- [x] Comics list (`/comics`): create, rename, delete, open; editor moves to `/comics/[id]` with a server load
+- [x] Documents in Postgres with the `rev` check and a conflict banner; autosave's injected `save()` points at Supabase
+- [x] Images in Supabase Storage with signed-URL cache; PNG export still embeds them
+- [x] Import the local IndexedDB comic (and its images) on first sign-in
+- [x] Realtime: apply remote changes live when clean; banner when there are unsaved edits
 
 **MCP**
 
@@ -292,8 +293,8 @@ OAuth consent:
 - [x] Balloon text input (simple markdown → the TipTap-compatible HTML subset) is sanitised — unit — `src/lib/mcp/text.test.ts`
 - [x] `/mcp` without a token answers 401 with the resource-metadata challenge; the metadata route names the Supabase issuer — integration (the route handler called directly) — `src/routes/mcp/mcp.test.ts`
 - [x] Documents store: the rev-checked update against local Supabase; user B can't read user A's comic (RLS) — integration against `supabase start` — `src/lib/persistence/documents.int.test.ts`
-- [ ] E2E: sign up → confirm (read from local Inbucket/Mailpit) → create a comic → merge, add a balloon → reload → still there → sign out, and the route guard redirects — Playwright + local Supabase — `e2e/auth.e2e.ts`
-- [ ] E2E: an MCP SDK client with a local user's token calls `create_comic`, `merge_panels`, `add_balloon`; the open editor updates live — Playwright + SDK client — `e2e/mcp.e2e.ts`
+- [x] E2E: ~~sign up → confirm (read from local Inbucket/Mailpit)~~ admin-created user signs in → create a comic → merge, add a balloon → reload → still there → sign out, and the route guard redirects — Playwright + local Supabase — `e2e/auth.e2e.ts`
+- [x] E2E: an MCP SDK client with a local user's token calls `create_comic`, `merge_panels`, `add_balloon`; the open editor updates live — Playwright + SDK client — `e2e/mcp.e2e.ts`
 
 ## Verification
 
@@ -335,7 +336,7 @@ On the **production** URL:
 
 ## Open questions
 
-- [ ] **Email sending.** Supabase's built-in sender allows only a few auth emails per hour, which
+- [x] **Email sending.** Resolved: no emails at all (admin-created accounts). Original question: Supabase's built-in sender allows only a few auth emails per hour, which
       is enough to build and test but will block real sign-ups. Add custom SMTP (e.g. Resend's
       free tier) before sharing the URL? Needs a sending domain.
 - [ ] **Free-tier pausing.** The project pauses after about a week of inactivity, and the app

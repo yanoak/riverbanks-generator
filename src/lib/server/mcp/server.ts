@@ -39,6 +39,30 @@ const balloonType = z
 const border = z.enum(['solid', 'none']);
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'a #rrggbb colour');
 
+/**
+ * MCP tool annotations. ChatGPT asks for confirmation before write actions and skips it for
+ * read-only tools; destructive tools get a stronger warning. Claude reads the same hints.
+ */
+const READ = {
+	readOnlyHint: true,
+	destructiveHint: false,
+	idempotentHint: true,
+	openWorldHint: false
+};
+const WRITE = {
+	readOnlyHint: false,
+	destructiveHint: false,
+	idempotentHint: false,
+	openWorldHint: false
+};
+const UPDATE = { ...WRITE, idempotentHint: true };
+const DELETE = {
+	readOnlyHint: false,
+	destructiveHint: true,
+	idempotentHint: true,
+	openWorldHint: false
+};
+
 type Result = { content: { type: 'text'; text: string }[]; isError?: boolean };
 const text = (t: string): Result => ({ content: [{ type: 'text', text: t }] });
 const json = (value: unknown): Result => text(JSON.stringify(value, null, 2));
@@ -78,13 +102,18 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
 	server.registerTool(
 		'list_comics',
-		{ title: 'List comics', description: 'List the user’s comics, most recently edited first.' },
+		{
+			annotations: READ,
+			title: 'List comics',
+			description: 'List the user’s comics, most recently edited first.'
+		},
 		async () => json(await store.list())
 	);
 
 	server.registerTool(
 		'create_comic',
 		{
+			annotations: WRITE,
 			title: 'Create comic',
 			description: 'Create a comic with one page (3×4 grid). Returns its id.',
 			inputSchema: { title: z.string().min(1).max(200) }
@@ -99,6 +128,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'get_comic',
 		{
+			annotations: READ,
 			title: 'Get comic',
 			description:
 				'Describe a comic: pages, grid, panels (ids, cells, bounding boxes, images) and balloons (ids, type, text, rect, tail tip), with view links.',
@@ -114,6 +144,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'rename_comic',
 		{
+			annotations: UPDATE,
 			title: 'Rename comic',
 			inputSchema: { comicId: z.string(), title: z.string().min(1).max(200) }
 		},
@@ -127,10 +158,10 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'delete_comic',
 		{
+			annotations: DELETE,
 			title: 'Delete comic',
 			description: 'Permanently delete a comic. Cannot be undone.',
-			inputSchema: { comicId: z.string() },
-			annotations: { destructiveHint: true }
+			inputSchema: { comicId: z.string() }
 		},
 		async ({ comicId }) =>
 			(await store.delete(comicId))
@@ -143,6 +174,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'add_page',
 		{
+			annotations: WRITE,
 			title: 'Add page',
 			description: 'Add a page after the given page (default: at the end), copying its grid.',
 			inputSchema: {
@@ -160,19 +192,24 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
 	server.registerTool(
 		'delete_page',
-		{ title: 'Delete page', inputSchema: { comicId: z.string(), page } },
+		{ annotations: DELETE, title: 'Delete page', inputSchema: { comicId: z.string(), page } },
 		async ({ comicId, page: n }) => edit(comicId, (c) => ops.deletePage(c, { page: n }))
 	);
 
 	server.registerTool(
 		'move_page',
-		{ title: 'Move page', inputSchema: { comicId: z.string(), page, to: page } },
+		{
+			annotations: WRITE,
+			title: 'Move page',
+			inputSchema: { comicId: z.string(), page, to: page }
+		},
 		async ({ comicId, page: n, to }) => edit(comicId, (c) => ops.movePage(c, { page: n, to }))
 	);
 
 	server.registerTool(
 		'set_grid',
 		{
+			annotations: UPDATE,
 			title: 'Set grid',
 			description:
 				'Change a page’s grid. Rows/cols can only change while no panels are merged (split first); gutter and margin can always change.',
@@ -193,6 +230,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'merge_panels',
 		{
+			annotations: WRITE,
 			title: 'Merge panels',
 			description:
 				'Merge grid panels into one. Give cell numbers (0-based, row-major; on a 3×4 grid the top row is 0–3) or panel ids. The union must be edge-connected with no enclosed gaps; L and U shapes are fine.',
@@ -208,13 +246,18 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
 	server.registerTool(
 		'split_panel',
-		{ title: 'Split panel', inputSchema: { comicId: z.string(), page, panelId: z.string() } },
+		{
+			annotations: WRITE,
+			title: 'Split panel',
+			inputSchema: { comicId: z.string(), page, panelId: z.string() }
+		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.splitPanel(c, args))
 	);
 
 	server.registerTool(
 		'add_free_panel',
 		{
+			annotations: WRITE,
 			title: 'Add free panel',
 			description: 'Add a free-floating (break-out) panel above the grid panels.',
 			inputSchema: {
@@ -231,6 +274,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'update_panel',
 		{
+			annotations: UPDATE,
 			title: 'Update panel',
 			description:
 				'Change a panel’s border or fill; for free panels also its rect and stacking (z).',
@@ -250,6 +294,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'set_panel_image',
 		{
+			annotations: { ...WRITE, openWorldHint: true },
 			title: 'Set panel image',
 			description:
 				'Put an image in a panel, from an https URL or base64 data (PNG/JPEG/WebP/GIF/AVIF, max 10 MB). Fills the panel by default.',
@@ -277,6 +322,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'remove_panel_image',
 		{
+			annotations: DELETE,
 			title: 'Remove panel image',
 			inputSchema: { comicId: z.string(), page, panelId: z.string() }
 		},
@@ -293,6 +339,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'add_balloon',
 		{
+			annotations: WRITE,
 			title: 'Add balloon',
 			description:
 				'Add a balloon. Place it inside a panel with panelId (sits in the panel’s upper third) or give an explicit rect. tailTip points the tail at a speaker (page units).',
@@ -312,6 +359,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	server.registerTool(
 		'update_balloon',
 		{
+			annotations: UPDATE,
 			title: 'Update balloon',
 			description:
 				'Change a balloon’s text, type, rect, tail (null removes it), font size, font or fill.',
@@ -333,7 +381,11 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
 	server.registerTool(
 		'delete_balloon',
-		{ title: 'Delete balloon', inputSchema: { comicId: z.string(), page, balloonId: z.string() } },
+		{
+			annotations: DELETE,
+			title: 'Delete balloon',
+			inputSchema: { comicId: z.string(), page, balloonId: z.string() }
+		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.deleteBalloon(c, args))
 	);
 

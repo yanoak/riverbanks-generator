@@ -56,6 +56,29 @@ describe('Riverbanks MCP server', () => {
 		);
 	});
 
+	it('annotates every tool so clients can skip confirmations on reads and flag deletes', async () => {
+		const { client } = await connect();
+		const tools = (await client.listTools()).tools;
+		const by = Object.fromEntries(tools.map((t) => [t.name, t.annotations ?? {}]));
+		for (const t of tools) expect(t.annotations, `${t.name} has annotations`).toBeDefined();
+
+		for (const read of ['list_comics', 'get_comic']) {
+			expect(by[read].readOnlyHint, read).toBe(true);
+		}
+		for (const del of ['delete_comic', 'delete_page', 'delete_balloon', 'remove_panel_image']) {
+			expect(by[del].destructiveHint, del).toBe(true);
+			expect(by[del].readOnlyHint, del).toBe(false);
+		}
+		for (const write of ['create_comic', 'merge_panels', 'add_balloon', 'update_balloon']) {
+			expect(by[write].readOnlyHint, write).toBe(false);
+			expect(by[write].destructiveHint, write).toBe(false);
+		}
+		expect(by.set_panel_image.openWorldHint).toBe(true);
+		expect(by.list_comics.openWorldHint).toBe(false);
+		expect(by.rename_comic.idempotentHint).toBe(true);
+		expect(by.add_balloon.idempotentHint).toBe(false);
+	});
+
 	it('builds a page the way an agent would', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'Riverbanks' })).text);

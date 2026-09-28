@@ -111,7 +111,7 @@ alone are enough for a comic editor whose real UI is the web app.
 
 - [x] Spike: log token claims (not tokens) at `/mcp` behind an env flag; connect ChatGPT Developer mode to production; record the transport, the DCR request, `aud`/`scope`/`client_id`, and whether consent and tool calls work; turn the flag off
 - [x] Audience check per the spike (verify `aud` includes the MCP resource, or require the OAuth-only `client_id` claim), with tests
-- [ ] Tool annotations on all 18 tools + the resource, with tests
+- [x] Tool annotations on all 18 tools + the resource, with tests
 - [ ] `search` + `fetch` tools in OpenAI's schemas, with `describeComic`-based plain-text rendering, with tests
 - [ ] `whoami` profile tool with `_meta["openai/profile"]`
 - [x] E2E: extend `e2e/oauth.e2e.ts` to send `resource` and assert the audience rule end to end against local Supabase
@@ -122,7 +122,7 @@ alone are enough for a comic editor whose real UI is the web app.
 
 - [x] `verifyAccessToken` accepts a token whose `aud` includes the MCP resource and rejects one for another resource (or, on the fallback rule, rejects a token without `client_id`) — unit — `src/lib/server/mcp/auth.test.ts`
 - [x] The rejection is a `401` carrying the `resource_metadata` challenge with `error="invalid_token"` — unit — `src/routes/mcp/mcp.test.ts`
-- [ ] Every tool has an annotation set; reads are `readOnlyHint`, deletes are `destructiveHint`, `set_panel_image` is `openWorldHint` — unit (in-memory SDK client, `listTools`) — `src/lib/server/mcp/server.test.ts`
+- [x] Every tool has an annotation set; reads are `readOnlyHint`, deletes are `destructiveHint`, `set_panel_image` is `openWorldHint` — unit (in-memory SDK client, `listTools`) — `src/lib/server/mcp/server.test.ts`
 - [ ] `search` finds by title and by balloon text, is case-insensitive, returns `{results:[{id,title,url}]}` in both `structuredContent` and the text content, and empty results are `[]`, not an error — unit — `server.test.ts`
 - [ ] `fetch` returns the script text with pages in order, panels in reading order and balloons as “type: text”, a `url` with `?page=1`, and not-found as a tool error — unit — `src/lib/ops/script.test.ts`, `server.test.ts`
 - [ ] `whoami` returns the verified user's id and carries `_meta["openai/profile"] === true` — unit — `server.test.ts`

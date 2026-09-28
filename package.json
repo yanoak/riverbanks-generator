@@ -45,6 +45,7 @@
 		"@tiptap/extension-text-align": "^3.31.3",
 		"@tiptap/pm": "^3.31.3",
 		"@tiptap/starter-kit": "^3.31.3",
+		"html-to-image": "^1.11.13",
 		"idb-keyval": "^6.3.0"
 	}
 }

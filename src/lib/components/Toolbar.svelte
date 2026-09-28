@@ -11,7 +11,20 @@
 
 	import type { SaveStatus } from '$lib/persistence/autosave';
 
-	let { editor, saveStatus }: { editor: Editor; saveStatus: SaveStatus } = $props();
+	import Download from '@lucide/svelte/icons/download';
+	import FileText from '@lucide/svelte/icons/file-text';
+
+	let {
+		editor,
+		saveStatus,
+		onexportpng,
+		onexportpdf
+	}: {
+		editor: Editor;
+		saveStatus: SaveStatus;
+		onexportpng: () => void;
+		onexportpdf: () => void;
+	} = $props();
 
 	const SAVE_LABEL: Record<SaveStatus, string> = {
 		saved: 'Saved',
@@ -110,6 +123,12 @@
 	{#if editor.status}
 		<p class="mr-3 text-amber-700" role="status">{editor.status}</p>
 	{/if}
+	<button class="tool" onclick={onexportpng} title="Download this page as PNG (⌘E)">
+		<Download size={16} /> PNG
+	</button>
+	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
+		<FileText size={16} /> PDF
+	</button>
 	<span
 		class="w-20 text-right text-xs"
 		class:text-stone-400={saveStatus !== 'error'}

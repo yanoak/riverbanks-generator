@@ -9,6 +9,29 @@
 	import { createAutoSave, type SaveStatus } from '$lib/persistence/autosave';
 	import { loadDocument, saveDocument } from '$lib/persistence/documents';
 	import { onMount } from 'svelte';
+	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
+
+	/** US trim width at 96 CSS px per inch, for the print stylesheet. */
+	const PRINT_SCALE = (6.625 * 96) / 1000;
+	let stage = $state<HTMLElement>();
+
+	async function exportPng() {
+		const node = stage?.firstElementChild as HTMLElement | null;
+		if (!node) return;
+		editor.say('Rendering PNG…');
+		try {
+			const url = await pageToPng(node);
+			downloadDataUrl(url, `${slug(editor.comic.title)}-page-${editor.pageIndex + 1}.png`);
+			editor.say(null);
+		} catch (e) {
+			editor.say(`PNG export failed: ${(e as Error).message}`);
+		}
+	}
+
+	function exportPdf() {
+		editor.select({ kind: 'none' });
+		window.print();
+	}
 
 	const editor = new Editor();
 	let saveStatus = $state<SaveStatus>('saved');
@@ -71,6 +94,11 @@
 	}
 
 	function onkeydown(e: KeyboardEvent) {
+		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
+			e.preventDefault();
+			exportPng();
+			return;
+		}
 		if (handleShortcut(editor, e, fit)) e.preventDefault();
 	}
 
@@ -91,8 +119,22 @@
 <svelte:head><title>{editor.comic.title} — Riverbanks</title></svelte:head>
 <svelte:window {onkeydown} {onpaste} />
 
-<div class="flex h-screen flex-col bg-stone-100 text-stone-900">
-	<Toolbar {editor} {saveStatus} />
+<!-- Offscreen static render of the current page at 1 unit = 1px, for PNG export. -->
+<div class="export-stage" bind:this={stage} aria-hidden="true">
+	{#if loaded}<PageView page={editor.page} scale={1} />{/if}
+</div>
+
+<!-- Every page, one per sheet; only visible when printing (Export → PDF). -->
+<div class="print-pages" aria-hidden="true">
+	{#if loaded}
+		{#each editor.comic.pages as page (page.id)}
+			<div class="print-page"><PageView {page} scale={PRINT_SCALE} /></div>
+		{/each}
+	{/if}
+</div>
+
+<div class="app flex h-screen flex-col bg-stone-100 text-stone-900">
+	<Toolbar {editor} {saveStatus} onexportpng={exportPng} onexportpdf={exportPdf} />
 	<div class="flex min-h-0 flex-1">
 		<PageStrip {editor} />
 		<main class="relative min-w-0 flex-1 overflow-auto" {@attach measure}>
@@ -130,6 +172,38 @@
 
 <style lang="postcss">
 	@reference "./layout.css";
+	.export-stage {
+		position: fixed;
+		left: -100000px;
+		top: 0;
+		pointer-events: none;
+	}
+	.print-pages {
+		display: none;
+	}
+	@media print {
+		@page {
+			size: 6.625in 10.25in;
+			margin: 0;
+		}
+		:global(body) {
+			margin: 0;
+		}
+		.app,
+		.export-stage {
+			display: none !important;
+		}
+		.print-pages {
+			display: block;
+		}
+		.print-page {
+			height: 10.25in;
+			overflow: hidden;
+		}
+		.print-page:not(:last-child) {
+			break-after: page;
+		}
+	}
 	.zoom {
 		@apply grid h-6 min-w-6 place-items-center rounded-full hover:bg-stone-100;
 	}

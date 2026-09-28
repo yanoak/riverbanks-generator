@@ -135,7 +135,7 @@ commits a single "edit text" command.
 - [x] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
 - [x] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
 - [x] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
-- [ ] Export: page → PNG (html-to-image with embedded fonts and images); comic → PDF via print stylesheet
+- [x] Export: page → PNG (html-to-image with embedded fonts and images); comic → PDF via print stylesheet
 - [ ] AI image generation hook: server route + provider adapter, "Generate" in the panel inspector (blocked on the open question below)
 
 ## UI mockups (ASCII)

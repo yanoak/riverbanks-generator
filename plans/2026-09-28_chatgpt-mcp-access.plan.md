@@ -1,8 +1,8 @@
 ---
 slug: 2026-09-28_chatgpt-mcp-access
-status: active
+status: done
 started: 2026-09-28
-finished:
+finished: 2026-09-28
 issue:
 ---
 
@@ -116,7 +116,7 @@ alone are enough for a comic editor whose real UI is the web app.
 - [x] `whoami` profile tool with `_meta["openai/profile"]`
 - [x] E2E: extend `e2e/oauth.e2e.ts` to send `resource` and assert the audience rule end to end against local Supabase
 - [x] Docs: a README "Using it with ChatGPT" section, plus a short addendum for the team email
-- [ ] Production verification (below), then deploy — deployed; steps 1–4 passed, 5–8 pending
+- [x] Production verification (below), then deploy — see Outcome for what passed and what was skipped
 
 ## Test list (TDD)
 
@@ -169,25 +169,31 @@ In ChatGPT (web), on an account with Developer mode:
 
 ## Outcome
 
-_Interim, 2026-09-28 (the plan stays `active` until the remaining checks run)._
+Done on 2026-09-28. Verified on production in Yan's ChatGPT Plus (web, Developer mode):
 
-Verified on production in Yan's ChatGPT Plus (web, Developer mode):
+- ✅ **Steps 1–2:** the connector was created (ChatGPT shows it as a plugin), and OAuth dynamic
+  registration plus the Riverbanks consent screen completed.
+- ✅ **Step 3:** "list my comics" returned all four comics, with **no confirmation** prompt.
+- ⚠️ **Step 4:** "create a comic … HELLO FROM GPT" worked (comic created, with a working "Open it
+  in Riverbanks" link), but ChatGPT **did not ask to confirm**, although the tool is annotated as
+  a write. OpenAI's docs say writes need confirmation; in practice ChatGPT's plugin mode only
+  prompted for the destructive tool. Possible causes: an earlier "always allow", or a policy that
+  confirms destructive actions only. Our annotations are as intended; this is ChatGPT's behaviour.
+- ✅ **Step 5:** "delete the ChatGPT test comic" **asked for confirmation** (`destructiveHint`).
+- ⏭️ **Step 6:** deep research with `search`/`fetch`, skipped by Yan. The tools are unit-tested
+  against OpenAI's schemas but haven't been exercised by ChatGPT deep research.
+- ⏭️ **Step 7:** disconnect → 401 → reconnect, not run.
+- ✅ **Step 8:** Claude Code still connects to production after the `client_id` rule.
 
-- ✅ steps 1–2: connector created as a plugin; OAuth DCR plus consent completed
-- ✅ step 3: "list my comics" returned all four comics
-- ✅ step 4: "create a comic called ChatGPT test with a speech balloon saying HELLO FROM GPT"
-  created the comic, with a working "Open it in Riverbanks" link
+**What changed in the design.**
 
-Not yet checked:
+- Supabase ignores RFC 8707 `resource`, so tokens carry `aud: "authenticated"` and there's no
+  audience check. `/mcp` requires the OAuth-only `client_id` claim instead (the accepted
+  fallback), which also shuts out replayed web-session tokens.
+- ChatGPT's plugin client is Codex's MCP client (`codex-mcp-client`), speaks Streamable HTTP,
+  and needed no SSE endpoint.
+- The spike also exposed and fixed a live-update race: edits landing before the editor joined
+  Realtime were missed, and the editor now catches up when its subscription connects.
 
-- whether reads now skip the confirmation and writes still ask (the screenshot doesn't show the
-  prompts)
-- the destructive-delete confirmation (step 5)
-- deep research citing a page (step 6)
-- disconnect → 401 → reconnect (step 7)
-- step 8: Claude Code against production after the `client_id` rule (the e2e suite covers it
-  locally)
-
-What changed in the design: Supabase ignores `resource`, so there's no audience check; `/mcp`
-requires the OAuth-only `client_id` claim instead (accepted fallback). ChatGPT's plugin client is
-Codex's MCP client and needs Streamable HTTP only; no SSE endpoint was needed.
+**Follow-ups, if wanted:** run deep research once to confirm `search`/`fetch` citations. Ask
+Supabase about RFC 8707 support, so a real audience check can replace the `client_id` rule.

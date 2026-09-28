@@ -116,7 +116,7 @@ alone are enough for a comic editor whose real UI is the web app.
 - [x] `whoami` profile tool with `_meta["openai/profile"]`
 - [x] E2E: extend `e2e/oauth.e2e.ts` to send `resource` and assert the audience rule end to end against local Supabase
 - [x] Docs: a README "Using it with ChatGPT" section, plus a short addendum for the team email
-- [ ] Production verification (below), then deploy
+- [ ] Production verification (below), then deploy — deployed; steps 1–4 passed, 5–8 pending
 
 ## Test list (TDD)
 
@@ -169,4 +169,25 @@ In ChatGPT (web), on an account with Developer mode:
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+_Interim, 2026-09-28 (the plan stays `active` until the remaining checks run)._
+
+Verified on production in Yan's ChatGPT Plus (web, Developer mode):
+
+- ✅ steps 1–2: connector created as a plugin; OAuth DCR plus consent completed
+- ✅ step 3: "list my comics" returned all four comics
+- ✅ step 4: "create a comic called ChatGPT test with a speech balloon saying HELLO FROM GPT"
+  created the comic, with a working "Open it in Riverbanks" link
+
+Not yet checked:
+
+- whether reads now skip the confirmation and writes still ask (the screenshot doesn't show the
+  prompts)
+- the destructive-delete confirmation (step 5)
+- deep research citing a page (step 6)
+- disconnect → 401 → reconnect (step 7)
+- step 8: Claude Code against production after the `client_id` rule (the e2e suite covers it
+  locally)
+
+What changed in the design: Supabase ignores `resource`, so there's no audience check; `/mcp`
+requires the OAuth-only `client_id` claim instead (accepted fallback). ChatGPT's plugin client is
+Codex's MCP client and needs Streamable HTTP only; no SSE endpoint was needed.

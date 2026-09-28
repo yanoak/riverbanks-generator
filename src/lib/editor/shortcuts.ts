@@ -14,6 +14,11 @@ function isTyping(target: EventTarget | null): boolean {
 	return !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
 }
 
+async function focusElement(id: string) {
+	await tick();
+	document.querySelector<HTMLElement>(`[data-element-id="${id}"]`)?.focus();
+}
+
 async function focusPanel(id: string) {
 	await tick();
 	document.querySelector<SVGElement>(`[data-panel-id="${id}"]`)?.focus();
@@ -42,6 +47,14 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	if (key === 'PageDown') return (editor.goToPage(editor.pageIndex + 1), true);
 	if (key === 'PageUp') return (editor.goToPage(editor.pageIndex - 1), true);
 
+	if (key === 'Delete' || key === 'Backspace') return (editor.deleteSelection(), true);
+	if (key === ']') return (editor.reorder('front'), true);
+	if (key === '[') return (editor.reorder('back'), true);
+	if (key === 'p') {
+		const id = editor.addFreePanel();
+		focusElement(id);
+		return true;
+	}
 	if (key === 'm') return (editor.merge(), true);
 	if (key === 'M') return (editor.split(), true);
 
@@ -53,6 +66,12 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	}
 
 	const dir = ARROWS[key];
+	if (dir && editor.movable) {
+		const step = e.shiftKey ? 10 : 1;
+		const [dx, dy] = { up: [0, -step], down: [0, step], left: [-step, 0], right: [step, 0] }[dir];
+		editor.nudge(dx, dy);
+		return true;
+	}
 	if (dir && editor.selection.kind === 'panels') {
 		const from = editor.selection.ids.at(-1)!;
 		const next = neighbourPanel(editor.page, from, dir);

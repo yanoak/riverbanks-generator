@@ -6,7 +6,8 @@
 <script lang="ts">
 	import { clipPathFor, panelOutline, polygonBBox } from '$lib/geometry/grid';
 	import type { Editor } from '$lib/editor/editor.svelte';
-	import type { GridPanel, Page } from '$lib/model/types';
+	import type { FreePanel, GridPanel, Page } from '$lib/model/types';
+	import Transformer from './Transformer.svelte';
 
 	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
 
@@ -25,6 +26,10 @@
 			})
 			// Reading order, so Tab walks the page left-to-right, top-to-bottom.
 			.sort((a, b) => Math.min(...a.panel.cells) - Math.min(...b.panel.cells))
+	);
+
+	const freePanels = $derived(
+		page.panels.filter((p): p is FreePanel => p.kind === 'free').sort((a, b) => a.z - b.z)
 	);
 
 	const selectedIds = $derived(
@@ -110,8 +115,44 @@
 				{/each}
 			</svg>
 		{/if}
+
+		{#each freePanels as panel, i (panel.id)}
+			{#if editor}
+				<Transformer
+					target={panel}
+					{scale}
+					id={panel.id}
+					label="Free panel {i + 1}"
+					z={10 + i}
+					selected={selectedIds.has(panel.id)}
+					onselect={(e) => editor.selectPanel(panel.id, 'shiftKey' in e && e.shiftKey)}
+					oncommit={(before, action) =>
+						editor.commitGeometry(panel, before, action === 'move' ? 'Move panel' : 'Resize panel')}
+				>
+					{@render freePanelBody(panel)}
+				</Transformer>
+			{:else}
+				<div
+					class="absolute"
+					style:left="{panel.x}px"
+					style:top="{panel.y}px"
+					style:width="{panel.w}px"
+					style:height="{panel.h}px"
+				>
+					{@render freePanelBody(panel)}
+				</div>
+			{/if}
+		{/each}
 	</div>
 </div>
+
+{#snippet freePanelBody(panel: FreePanel)}
+	<div
+		class="absolute inset-0 overflow-hidden"
+		style:background={panel.fill}
+		style:box-shadow={panel.border === 'solid' ? 'inset 0 0 0 4px black' : 'none'}
+	></div>
+{/snippet}
 
 <style>
 	.hit {

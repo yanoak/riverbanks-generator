@@ -3,6 +3,8 @@
 	import Undo2 from '@lucide/svelte/icons/undo-2';
 	import Combine from '@lucide/svelte/icons/combine';
 	import Split from '@lucide/svelte/icons/split';
+	import SquarePlus from '@lucide/svelte/icons/square-plus';
+	import Maximize from '@lucide/svelte/icons/maximize';
 	import type { Editor } from '$lib/editor/editor.svelte';
 
 	let { editor }: { editor: Editor } = $props();
@@ -60,6 +62,19 @@
 	</button>
 	<button class="tool" onclick={() => editor.split()} disabled={!canSplit} title="Split panel (⇧M)">
 		<Split size={16} /> Split
+	</button>
+
+	<div class="mx-2 h-6 w-px bg-stone-200"></div>
+
+	<button class="tool" onclick={() => editor.addFreePanel()} title="Add a free break-out panel (P)">
+		<SquarePlus size={16} /> Panel
+	</button>
+	<button
+		class="tool"
+		onclick={() => editor.splash()}
+		title="Turn the whole grid into one borderless full-page panel"
+	>
+		<Maximize size={16} /> Full page
 	</button>
 
 	<div class="flex-1"></div>

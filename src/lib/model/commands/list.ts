@@ -11,6 +11,9 @@ export class InsertCommand<T> implements Command {
 
 	execute(): void {
 		this.list.splice(this.index, 0, this.item);
+		// A $state array wraps what it stores in a proxy; keep that reference so undo's
+		// indexOf finds it.
+		this.item = this.list[this.index];
 	}
 
 	undo(): void {

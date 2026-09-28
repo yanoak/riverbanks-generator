@@ -1,9 +1,9 @@
 import { canMerge } from '$lib/geometry/grid';
-import type { Command } from '$lib/history/command';
+import { BatchCommand, type Command } from '$lib/history/command';
 import { clone } from '../clone';
 import { newId, singleCellPanels } from '../factory';
 import { gridPanels } from '../invariants';
-import type { GridPanel, GridSpec, Page, Panel } from '../types';
+import type { FreePanel, GridPanel, GridSpec, Page, Panel } from '../types';
 
 /** Swaps the page's whole panel list; the shared base of the partition-changing commands. */
 abstract class ReplacePanelsCommand implements Command {
@@ -142,4 +142,51 @@ export class SetGridCommand implements Command {
 		this.page.grid = { ...this.beforeGrid };
 		this.page.panels = this.beforePanels;
 	}
+}
+
+/** The whole grid as one borderless panel — the p.58 full-page background. */
+export function splashCommand(page: Page): Command {
+	const panels = gridPanels(page);
+	const merge =
+		panels.length > 1
+			? MergePanelsCommand.create(
+					page,
+					panels.map((p) => p.id)
+				)
+			: null;
+	const mergeCommand = merge?.ok ? merge.command : null;
+	const targetId = panels[0].id;
+	let before: GridPanel['border'] = panels[0].border;
+	return new BatchCommand('Full-page panel', [
+		...(mergeCommand ? [mergeCommand] : []),
+		{
+			description: 'Remove border',
+			execute: () => {
+				const target = gridPanels(page).find((p) => p.id === targetId)!;
+				before = target.border;
+				target.border = 'none';
+			},
+			undo: () => {
+				const target = gridPanels(page).find((p) => p.id === targetId);
+				if (target) target.border = before;
+			}
+		}
+	]);
+}
+
+export function createFreePanel(page: Page): FreePanel {
+	const w = page.width * 0.45;
+	const h = page.height * 0.22;
+	const z = Math.max(0, ...page.panels.map((p) => (p.kind === 'free' ? p.z : 0))) + 1;
+	return {
+		id: newId(),
+		kind: 'free',
+		x: (page.width - w) / 2,
+		y: (page.height - h) / 2,
+		w,
+		h,
+		z,
+		border: 'solid',
+		fill: '#ffffff'
+	};
 }

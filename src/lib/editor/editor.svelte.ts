@@ -1,11 +1,19 @@
 // Editor state: the comic document, selection, mode and history. Components read from it;
 // every document change goes through run() or record(), so undo, redo and autosave all see it.
 
-import type { Command } from '$lib/history/command';
 import { HistoryManager } from '$lib/history/history.svelte';
-import { MergePanelsCommand, SetGridCommand, SplitPanelCommand } from '$lib/model/commands/panels';
+import { BatchCommand, type Command } from '$lib/history/command';
+import { InsertCommand, RemoveCommand } from '$lib/model/commands/list';
+import {
+	createFreePanel,
+	MergePanelsCommand,
+	SetGridCommand,
+	splashCommand,
+	SplitPanelCommand
+} from '$lib/model/commands/panels';
+import { PatchCommand } from '$lib/model/commands/patch';
 import { createComic } from '$lib/model/factory';
-import type { Comic, GridSpec, Page, Panel } from '$lib/model/types';
+import type { Comic, FreePanel, GridSpec, Page, Panel, Rect } from '$lib/model/types';
 
 export type Selection =
 	{ kind: 'none' } | { kind: 'panels'; ids: string[] } | { kind: 'balloon'; id: string };
@@ -125,6 +133,56 @@ export class Editor {
 		if (!result.ok) return this.say(REASONS[result.reason]);
 		this.run(result.command);
 		this.pruneSelection();
+	}
+
+	addFreePanel(): string {
+		const panel = createFreePanel(this.page);
+		this.run(new InsertCommand('Add free panel', this.page.panels, panel));
+		this.select({ kind: 'panels', ids: [panel.id] });
+		return panel.id;
+	}
+
+	splash(): void {
+		this.run(splashCommand(this.page));
+		this.pruneSelection();
+	}
+
+	/** Record a completed drag or resize of a free panel or balloon. */
+	commitGeometry(target: Rect, before: Rect, description: string): void {
+		this.record(PatchCommand.fromChange(description, target, before));
+	}
+
+	/** The single selected free panel (or later, balloon) that arrows and z-order act on. */
+	get movable(): (Rect & { z: number }) | undefined {
+		const [panel] = this.selectedPanels;
+		return this.selectedPanels.length === 1 && panel.kind === 'free' ? panel : undefined;
+	}
+
+	nudge(dx: number, dy: number): boolean {
+		const target = this.movable;
+		if (!target) return false;
+		this.run(new PatchCommand('Nudge', target, { x: target.x + dx, y: target.y + dy }));
+		return true;
+	}
+
+	reorder(to: 'front' | 'back'): void {
+		const target = this.movable;
+		if (!target) return;
+		const zs = this.page.panels.filter((p): p is FreePanel => p.kind === 'free').map((p) => p.z);
+		const z = to === 'front' ? Math.max(...zs) + 1 : Math.min(...zs) - 1;
+		this.run(new PatchCommand(to === 'front' ? 'Bring to front' : 'Send to back', target, { z }));
+	}
+
+	deleteSelection(): void {
+		const free = this.selectedPanels.filter((p) => p.kind === 'free');
+		if (!free.length) return;
+		this.run(
+			new BatchCommand(
+				'Delete panel',
+				free.map((p) => new RemoveCommand('Delete panel', this.page.panels, p))
+			)
+		);
+		this.select({ kind: 'none' });
 	}
 
 	// --- pages & view ---------------------------------------------------------------------

@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { createPage } from '../factory';
 import { checkPage } from '../invariants';
 import type { GridPanel, Page } from '../types';
-import { MergePanelsCommand, SetGridCommand, SplitPanelCommand } from './panels';
+import {
+	createFreePanel,
+	MergePanelsCommand,
+	SetGridCommand,
+	splashCommand,
+	SplitPanelCommand
+} from './panels';
 
 const grid = (page: Page) => page.panels.filter((p): p is GridPanel => p.kind === 'grid');
 const panelAtCell = (page: Page, cell: number) => grid(page).find((p) => p.cells.includes(cell))!;
@@ -146,5 +152,38 @@ describe('SetGridCommand', () => {
 		if (merge.ok) merge.command.execute();
 		const cmd = SetGridCommand.create(page, { gutter: 30 });
 		expect(cmd.ok).toBe(true);
+	});
+});
+
+describe('splashCommand', () => {
+	it('turns the whole grid into one borderless panel, undoable in one step', () => {
+		const page = createPage();
+		const before = structuredClone(page.panels);
+		const cmd = splashCommand(page);
+		cmd.execute();
+		const panels = grid(page);
+		expect(panels).toHaveLength(1);
+		expect(panels[0].cells).toHaveLength(12);
+		expect(panels[0].border).toBe('none');
+		cmd.undo();
+		expect(page.panels).toEqual(before);
+	});
+
+	it('keeps free panels', () => {
+		const page = createPage();
+		page.panels.push(createFreePanel(page));
+		splashCommand(page).execute();
+		expect(page.panels.filter((p) => p.kind === 'free')).toHaveLength(1);
+	});
+});
+
+describe('createFreePanel', () => {
+	it('centres a panel on the page above existing free panels', () => {
+		const page = createPage();
+		const a = createFreePanel(page);
+		page.panels.push(a);
+		const b = createFreePanel(page);
+		expect(a.x + a.w / 2).toBeCloseTo(page.width / 2);
+		expect(b.z).toBeGreaterThan(a.z);
 	});
 });

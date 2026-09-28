@@ -49,6 +49,15 @@
 				onchange={(e) => patchPanel(panel, { fill: e.currentTarget.value }, 'Panel fill')}
 			/>
 		</label>
+		{#if panel.kind === 'free'}
+			<div class="mt-3 grid grid-cols-2 gap-2">
+				<button class="btn" onclick={() => editor.reorder('front')} title="]">To front</button>
+				<button class="btn" onclick={() => editor.reorder('back')} title="[">To back</button>
+			</div>
+			<button class="btn mt-2 text-red-700" onclick={() => editor.deleteSelection()}>
+				Delete panel
+			</button>
+		{/if}
 		{#if panel.kind === 'grid' && panel.cells.length > 1}
 			<button class="btn mt-3" onclick={() => editor.split()}>Split panel</button>
 		{/if}

@@ -130,7 +130,7 @@ commits a single "edit text" command.
 - [x] Grid geometry: cell rects, contiguity check, lattice outline tracing → page-space polygon (TDD)
 - [x] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
 - [x] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
-- [ ] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
+- [x] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
 - [ ] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
 - [ ] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
 - [ ] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
@@ -210,6 +210,7 @@ message in the inspector with Retry, and the panel is left unchanged.
    - Esc: leave editing mode (commits the text), then clear the selection.
    - In image mode: arrow keys pan, + / − zoom, 0 fits.
    - ⌘V with a panel selected pastes an image into it.
+   - P: add a free panel. ] / [: bring the selected free panel to the front / send it to the back.
    - T / S / K / C / X: add a thought, speech, shout, caption or SFX balloon at the page centre.
    - ⌘E: export the current page as PNG.
    - ⌘0: zoom to fit. ⌘= / ⌘−: zoom the page.

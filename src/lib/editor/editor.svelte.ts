@@ -13,6 +13,9 @@ import {
 } from '$lib/model/commands/panels';
 import { PatchCommand } from '$lib/model/commands/patch';
 import { createComic } from '$lib/model/factory';
+import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
+import { panelBox } from '$lib/geometry/panel';
+import { addImage } from '$lib/persistence/assets.svelte';
 import type { Comic, FreePanel, GridSpec, Page, Panel, Rect } from '$lib/model/types';
 
 export type Selection =
@@ -38,6 +41,8 @@ export class Editor {
 	/** Bumped on every document change; autosave watches it. */
 	version = $state(0);
 	status = $state<string | null>(null);
+	/** The panel whose image is being panned/zoomed while mode === 'image'. */
+	imagePanelId = $state<string | null>(null);
 	readonly history = new HistoryManager();
 
 	get page(): Page {
@@ -88,7 +93,7 @@ export class Editor {
 	select(selection: Selection): void {
 		this.selection = selection;
 		this.status = null;
-		if (selection.kind === 'none') this.mode = 'select';
+		if (this.mode === 'image') this.exitImageMode();
 	}
 
 	selectPanel(id: string, extend = false): void {
@@ -173,8 +178,11 @@ export class Editor {
 		this.run(new PatchCommand(to === 'front' ? 'Bring to front' : 'Send to back', target, { z }));
 	}
 
+	/** Delete removes free panels; on a lone grid panel it removes the image instead. */
 	deleteSelection(): void {
 		const free = this.selectedPanels.filter((p) => p.kind === 'free');
+		const [only] = this.selectedPanels;
+		if (!free.length && only?.image) return this.removeImage(only);
 		if (!free.length) return;
 		this.run(
 			new BatchCommand(
@@ -183,6 +191,64 @@ export class Editor {
 			)
 		);
 		this.select({ kind: 'none' });
+	}
+
+	// --- images ---------------------------------------------------------------------------
+
+	get imagePanel(): Panel | undefined {
+		return this.page.panels.find((p) => p.id === this.imagePanelId);
+	}
+
+	/** Store the blob and place it in the panel, filling it. */
+	async setImage(panelId: string, blob: Blob): Promise<void> {
+		if (!blob.type.startsWith('image/')) return this.say('That file is not an image.');
+		const stored = await addImage(blob);
+		const panel = this.page.panels.find((p) => p.id === panelId);
+		if (!panel) return;
+		const placement = fitImage(stored, panelBox(this.page, panel), 'fill');
+		this.run(new PatchCommand('Set image', panel, { image: { ...stored, ...placement } }));
+		this.select({ kind: 'panels', ids: [panelId] });
+	}
+
+	removeImage(panel: Panel): void {
+		if (panel.image) this.run(new PatchCommand('Remove image', panel, { image: undefined }));
+	}
+
+	enterImageMode(): boolean {
+		const [panel] = this.selectedPanels;
+		if (this.selectedPanels.length !== 1 || !panel.image) return false;
+		this.mode = 'image';
+		this.imagePanelId = panel.id;
+		return true;
+	}
+
+	exitImageMode(): void {
+		this.mode = 'select';
+		this.imagePanelId = null;
+	}
+
+	private placeImage(description: string, place: (panel: Panel) => Panel['image']): void {
+		const panel = this.imagePanel ?? this.selectedPanels[0];
+		if (!panel?.image) return;
+		this.run(new PatchCommand(description, panel, { image: place(panel) }));
+	}
+
+	fitSelectedImage(mode: 'fill' | 'fit'): void {
+		this.placeImage(mode === 'fill' ? 'Fill panel' : 'Fit image', (panel) => ({
+			...panel.image!,
+			...fitImage(panel.image!, panelBox(this.page, panel), mode)
+		}));
+	}
+
+	panSelectedImage(dx: number, dy: number): void {
+		this.placeImage('Pan image', (panel) => panImage(panel.image!, { dx, dy }));
+	}
+
+	zoomSelectedImage(factor: number): void {
+		this.placeImage('Zoom image', (panel) => {
+			const box = panelBox(this.page, panel);
+			return zoomImage(panel.image!, factor, { x: box.w / 2, y: box.h / 2 });
+		});
 	}
 
 	// --- pages & view ---------------------------------------------------------------------

@@ -22,18 +22,31 @@
 	);
 	const scale = $derived(editor.zoom ?? fit);
 
-	/** Track the canvas viewport size (bind:clientWidth did not update inside the flex layout). */
+	/**
+	 * Track the canvas viewport size. Measure once up front as well: ResizeObserver callbacks
+	 * are not delivered while the tab is hidden, which left fit-to-view at its 5% floor.
+	 */
 	function measure(node: HTMLElement) {
-		const ro = new ResizeObserver(() => {
+		const read = () => {
 			viewportWidth = node.clientWidth;
 			viewportHeight = node.clientHeight;
-		});
+		};
+		read();
+		const ro = new ResizeObserver(read);
 		ro.observe(node);
 		return () => ro.disconnect();
 	}
 
 	function onkeydown(e: KeyboardEvent) {
 		if (handleShortcut(editor, e, fit)) e.preventDefault();
+	}
+
+	function onpaste(e: ClipboardEvent) {
+		const file = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith('image/'));
+		const [panel] = editor.selectedPanels;
+		if (!file || !panel || editor.selectedPanels.length !== 1) return;
+		e.preventDefault();
+		editor.setImage(panel.id, file);
 	}
 
 	function onCanvasPointerDown(e: PointerEvent) {
@@ -43,7 +56,7 @@
 </script>
 
 <svelte:head><title>{editor.comic.title} — Riverbanks</title></svelte:head>
-<svelte:window {onkeydown} />
+<svelte:window {onkeydown} {onpaste} />
 
 <div class="flex h-screen flex-col bg-stone-100 text-stone-900">
 	<Toolbar {editor} />

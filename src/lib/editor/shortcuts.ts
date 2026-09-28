@@ -44,6 +44,10 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	if (mod && key === '-') return (editor.zoomBy(1 / 1.2, fit), true);
 	if (mod) return false;
 
+	if (editor.mode === 'image') return imageModeKey(editor, e);
+
+	if (key === 'Enter' && editor.enterImageMode()) return true;
+
 	if (key === 'PageDown') return (editor.goToPage(editor.pageIndex + 1), true);
 	if (key === 'PageUp') return (editor.goToPage(editor.pageIndex - 1), true);
 
@@ -55,8 +59,13 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 		focusElement(id);
 		return true;
 	}
-	if (key === 'm') return (editor.merge(), true);
-	if (key === 'M') return (editor.split(), true);
+	if (key === 'm' || key === 'M') {
+		if (key === 'm') editor.merge();
+		else editor.split();
+		// The focused polygon may have been removed; focus the merged / top-left panel.
+		if (editor.selection.kind === 'panels') focusPanel(editor.selection.ids[0]);
+		return true;
+	}
 
 	if (key === 'Escape') {
 		editor.select({ kind: 'none' });
@@ -83,6 +92,26 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 			editor.selectPanel(next);
 		}
 		focusPanel(next);
+		return true;
+	}
+	return false;
+}
+
+function imageModeKey(editor: Editor, e: KeyboardEvent): boolean {
+	const step = e.shiftKey ? 50 : 10;
+	const dir = ARROWS[e.key];
+	if (dir) {
+		const [dx, dy] = { up: [0, -step], down: [0, step], left: [-step, 0], right: [step, 0] }[dir];
+		editor.panSelectedImage(dx, dy);
+		return true;
+	}
+	if (e.key === '+' || e.key === '=') return (editor.zoomSelectedImage(1.1), true);
+	if (e.key === '-') return (editor.zoomSelectedImage(1 / 1.1), true);
+	if (e.key === '0') return (editor.fitSelectedImage('fill'), true);
+	if (e.key === 'Escape' || e.key === 'Enter') {
+		const id = editor.imagePanelId;
+		editor.exitImageMode();
+		if (id) focusPanel(id);
 		return true;
 	}
 	return false;

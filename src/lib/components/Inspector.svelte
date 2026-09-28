@@ -28,6 +28,30 @@
 				? `${panel.cells.length} cell${panel.cells.length > 1 ? 's' : ''}`
 				: 'Free panel'}
 		</p>
+		<h3 class="mt-1 mb-1 text-xs text-stone-500">Image</h3>
+		{#if panel.image}
+			<div class="mb-2 grid grid-cols-2 gap-2">
+				<button class="btn" onclick={() => editor.fitSelectedImage('fill')}>Fill</button>
+				<button class="btn" onclick={() => editor.fitSelectedImage('fit')}>Fit</button>
+				<button class="btn" onclick={() => editor.enterImageMode()} title="Enter">Crop…</button>
+				<button class="btn" onclick={() => editor.removeImage(panel)}>Remove</button>
+			</div>
+		{:else}
+			<p class="mb-2 text-xs text-stone-500">Drop an image on the panel, paste with ⌘V, or:</p>
+		{/if}
+		<label class="btn mb-3 block cursor-pointer text-center">
+			{panel.image ? 'Replace…' : 'Upload…'}
+			<input
+				type="file"
+				accept="image/*"
+				class="sr-only"
+				onchange={(e) => {
+					const file = e.currentTarget.files?.[0];
+					if (file) editor.setImage(panel.id, file);
+					e.currentTarget.value = '';
+				}}
+			/>
+		</label>
 		<label class="row">
 			<span>Border</span>
 			<input

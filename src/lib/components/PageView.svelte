@@ -8,6 +8,9 @@
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import type { FreePanel, GridPanel, Page } from '$lib/model/types';
 	import Transformer from './Transformer.svelte';
+	import PanelImage from './PanelImage.svelte';
+	import ImageOverlay from './ImageOverlay.svelte';
+	import type { Panel } from '$lib/model/types';
 
 	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
 
@@ -44,6 +47,23 @@
 		requestAnimationFrame(() => (pointerSelecting = false));
 	}
 
+	function ondragover(e: DragEvent) {
+		if (e.dataTransfer?.types.includes('Files')) e.preventDefault();
+	}
+
+	function ondrop(e: DragEvent, id: string) {
+		const file = e.dataTransfer?.files[0];
+		if (!file || !editor) return;
+		e.preventDefault();
+		editor.setImage(id, file);
+	}
+
+	function ondblclick(panel: Panel) {
+		if (!editor) return;
+		editor.selectPanel(panel.id);
+		editor.enterImageMode();
+	}
+
 	function onfocus(id: string) {
 		if (!editor || pointerSelecting || selectedIds.has(id)) return;
 		editor.selectPanel(id);
@@ -67,7 +87,9 @@
 				style:height="{bbox.h}px"
 				style:clip-path={clip}
 				style:background={panel.fill}
-			></div>
+			>
+				{#if panel.image}<PanelImage image={panel.image} />{/if}
+			</div>
 		{/each}
 
 		<svg
@@ -111,6 +133,9 @@
 						class:selected={selectedIds.has(panel.id)}
 						onpointerdown={(e) => onpointerdown(e, panel.id)}
 						onfocus={() => onfocus(panel.id)}
+						{ondragover}
+						ondrop={(e) => ondrop(e, panel.id)}
+						ondblclick={() => ondblclick(panel)}
 					/>
 				{/each}
 			</svg>
@@ -143,6 +168,10 @@
 				</div>
 			{/if}
 		{/each}
+
+		{#if editor?.mode === 'image' && editor.imagePanel?.image}
+			<ImageOverlay {editor} {page} panel={editor.imagePanel} {scale} />
+		{/if}
 	</div>
 </div>
 
@@ -150,8 +179,16 @@
 	<div
 		class="absolute inset-0 overflow-hidden"
 		style:background={panel.fill}
-		style:box-shadow={panel.border === 'solid' ? 'inset 0 0 0 4px black' : 'none'}
-	></div>
+		role="presentation"
+		{ondragover}
+		ondrop={(e) => ondrop(e, panel.id)}
+		ondblclick={() => ondblclick(panel)}
+	>
+		{#if panel.image}<PanelImage image={panel.image} />{/if}
+	</div>
+	{#if panel.border === 'solid'}
+		<div class="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_4px_black]"></div>
+	{/if}
 {/snippet}
 
 <style>

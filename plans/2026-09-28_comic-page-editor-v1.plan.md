@@ -131,7 +131,7 @@ commits a single "edit text" command.
 - [x] Panel commands: merge selected cells/panels, split panel, change grid rows/cols (reflows only if all panels are single cells), with invariant checks
 - [x] Page renderer and editor shell: toolbar, page strip, zoom-to-fit, cell/panel selection, merge/split UI
 - [x] Free panels: add, move, resize, z-order, border on/off; borderless full-page panel preset
-- [ ] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
+- [x] Images: IndexedDB asset store; upload, drop and paste into a panel; fit/fill; pan (drag) and zoom (wheel) in image mode
 - [ ] Balloons: the six types as SVG shapes, add/move/resize, draggable tail, z-order, delete
 - [ ] TipTap in-place text editing: bold, italic, font size, alignment, lettering fonts (Comic Neue, Bangers); commit to history on exit
 - [ ] Local autosave to IndexedDB (port `createAutoSave`'s debounce and in-flight logic without Supabase), load on start, multi-page add/delete/reorder
@@ -241,7 +241,7 @@ message in the inspector with Retry, and the panel is left unchanged.
 - [x] Invariant checker flags overlapping and missing cells — unit — `src/lib/model/invariants.test.ts`
 - [ ] Move/resize balloon as a single command from start/end geometry; undo restores both — unit — `src/lib/model/commands/balloons.test.ts`
 - [ ] Speech tail path: the tail base lies on the ellipse boundary facing the tail point — unit — `src/lib/geometry/balloon.test.ts`
-- [ ] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`
+- [x] Image fit/fill: computed scale and offset centre the image and cover (fill) or contain (fit) the panel's bbox — unit — `src/lib/geometry/image.test.ts`
 - [x] Serialize → migrate → deserialize round-trips; an unknown future `docVersion` throws — unit — `src/lib/model/serialize.test.ts`
 - [ ] Autosave debounces, queues a follow-up when an edit lands during a save, and marks clean only if the version is unchanged — unit (fake timers) — `src/lib/persistence/autosave.test.ts`
 - [ ] E2E: merge four cells with the keyboard, add a speech balloon, type text, reload, and both are still there — Playwright — `e2e/editor.e2e.ts`

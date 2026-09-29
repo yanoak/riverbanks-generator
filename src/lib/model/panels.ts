@@ -46,9 +46,10 @@ export function splitPanel(page: Page, panelId: string): void {
 	page.panels = page.panels.flatMap((p) => {
 		if (p.id !== panelId || p.kind !== 'grid') return [p];
 		const [first, ...rest] = [...p.cells].sort((a, b) => a - b);
-		const { image, ...style } = clone(p);
+		// The image and its prompt stay with the first cell; the new pieces share only the look.
+		const { image, prompt, ...style } = clone(p);
 		return [
-			{ ...style, cells: [first], ...(image ? { image } : {}) },
+			{ ...style, cells: [first], ...(image ? { image } : {}), ...(prompt ? { prompt } : {}) },
 			...rest.map((cell) => ({ ...style, id: newId(), cells: [cell] }))
 		];
 	});

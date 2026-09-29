@@ -35,6 +35,8 @@ function fixture(): Comic {
 	} satisfies FreePanel);
 	const speech = createBalloon(page, 'speech');
 	speech.html = '<p style="text-align: left;">Hi <strong>there</strong><br>you</p>';
+	comic.styleProfileId = 'style-1';
+	page.panels.find((p) => p.id === p4.id)!.prompt = 'Mae on the raft at dawn';
 	const caption = createBalloon(page, 'caption');
 	caption.clipTo = p4.id;
 	page.balloons.push(speech, caption);
@@ -99,6 +101,48 @@ function orderedLikeProjection(comic: Comic): Comic {
 	}
 	return c;
 }
+
+describe('style and prompts', () => {
+	it('sets, changes and clears the comic’s style and a panel’s prompt', () => {
+		const doc = comicToYDoc(createComic('Styled'));
+		const panelId = () => projectComic(doc).pages[0].panels[0].id;
+		edit(doc, (d) => {
+			d.styleProfileId = 'style-1';
+			d.pages[0].panels[0].prompt = 'a raft';
+		});
+		expect(projectComic(doc).styleProfileId).toBe('style-1');
+		expect(projectComic(doc).pages[0].panels[0].prompt).toBe('a raft');
+		edit(doc, (d) => (d.styleProfileId = 'style-2'));
+		expect(projectComic(doc).styleProfileId).toBe('style-2');
+		edit(doc, (d) => {
+			delete d.styleProfileId;
+			delete d.pages[0].panels[0].prompt;
+		});
+		expect(projectComic(doc)).not.toHaveProperty('styleProfileId');
+		expect(projectComic(doc).pages[0].panels.find((p) => p.id === panelId())).not.toHaveProperty(
+			'prompt'
+		);
+	});
+
+	it('a comic from before styles projects without them', () => {
+		const comic = createComic('Old');
+		const projected = projectComic(comicToYDoc(comic));
+		expect(projected).not.toHaveProperty('styleProfileId');
+		expect(projected.pages[0].panels.every((p) => !('prompt' in p))).toBe(true);
+	});
+
+	it('only the piece of a split that keeps the id keeps the prompt, like the image', () => {
+		const doc = comicToYDoc(createComic('Split'));
+		const ids = gridPanels(projectComic(doc).pages[0]).map((p) => p.id);
+		edit(doc, (d) => {
+			mergePanels(page0(d), [ids[0], ids[1]]);
+			page0(d).panels.find((p) => p.id === ids[0])!.prompt = 'wide shot';
+		});
+		edit(doc, (d) => splitPanel(page0(d), ids[0]));
+		const prompts = projectComic(doc).pages[0].panels.filter((p) => p.prompt);
+		expect(prompts.map((p) => p.id)).toEqual([ids[0]]);
+	});
+});
 
 describe('applyComic', () => {
 	it('writes nothing when nothing changed', () => {

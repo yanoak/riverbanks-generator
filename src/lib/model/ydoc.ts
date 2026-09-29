@@ -3,7 +3,7 @@
 // writes an edited draft back as the smallest set of Y changes, addressed by id, so edits made
 // concurrently by different people touch different keys and merge.
 //
-//   comic: Y.Map        id, title, docVersion, pages
+//   comic: Y.Map        id, title, docVersion, styleProfileId?, pages
 //     pages: Y.Map<pageId, Y.Map>     order is a number per page (midpoints on insert/move)
 //       id, width, height, order
 //       grid: Y.Map                   rows, cols, gutter, margin
@@ -94,6 +94,7 @@ export function comicToYDoc(comic: Comic, doc = new Y.Doc()): Y.Doc {
 		root.set('id', comic.id);
 		root.set('title', comic.title);
 		root.set('docVersion', DOC_VERSION);
+		if (comic.styleProfileId) root.set('styleProfileId', comic.styleProfileId);
 		const pages = child(root, 'pages');
 		comic.pages.forEach((page, i) => {
 			writePage(pages, page);
@@ -212,6 +213,10 @@ export function applyComic(doc: Y.Doc, before: Comic, after: Comic, origin: unkn
 	doc.transact(() => {
 		const root = rootOf(doc);
 		if (before.title !== after.title) root.set('title', after.title);
+		if (before.styleProfileId !== after.styleProfileId) {
+			if (after.styleProfileId) root.set('styleProfileId', after.styleProfileId);
+			else root.delete('styleProfileId');
+		}
 		const pages = pagesOf(doc);
 		const old = new Map(before.pages.map((p) => [p.id, p]));
 		for (const p of before.pages) {
@@ -296,8 +301,11 @@ function projectPage(m: YMap): Page {
 			kind: 'grid',
 			cells: d.cells
 		};
-		// Only the piece that kept the id keeps the image.
-		if (d.derived) delete panel.image;
+		// Only the piece that kept the id keeps the image and its prompt.
+		if (d.derived) {
+			delete panel.image;
+			delete panel.prompt;
+		}
 		return panel;
 	});
 
@@ -338,9 +346,11 @@ export function projectComic(doc: Y.Doc): Comic {
 				String(a.get('id')).localeCompare(String(b.get('id')))
 		)
 		.map(projectPage);
+	const styleProfileId = root.get('styleProfileId') as string | undefined;
 	return {
 		id: root.get('id') as string,
 		title: root.get('title') as string,
+		...(styleProfileId && { styleProfileId }),
 		pages,
 		docVersion: DOC_VERSION
 	};

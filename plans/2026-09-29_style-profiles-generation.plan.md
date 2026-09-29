@@ -197,7 +197,7 @@ Stages ship independently; each ends deployable.
 
 **Stage 2 — comics use a profile**
 
-- [ ] `styleProfileId` on the Y.Doc root and projection, and `prompt` on panels (ydoc
+- [x] `styleProfileId` on the Y.Doc root and projection, and `prompt` on panels (ydoc
       read/write/diff and tests)
 - [ ] The New comic dialog on `/comics`, with a profile picker; `create` stores the id
 - [ ] Inspector page section: Style row with Change…, which sets it through an undoable patch

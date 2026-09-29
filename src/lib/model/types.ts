@@ -45,6 +45,8 @@ interface PanelBase {
 	border: 'solid' | 'none';
 	fill: string;
 	image?: PanelImage;
+	/** What to generate for this panel; kept so anyone can tweak it and generate again. */
+	prompt?: string;
 }
 
 /**
@@ -92,6 +94,8 @@ export interface Page extends Size {
 export interface Comic {
 	id: Id;
 	title: string;
+	/** The style profile every generation in this comic follows (a live link, by id). */
+	styleProfileId?: Id;
 	pages: Page[];
 	docVersion: number;
 }

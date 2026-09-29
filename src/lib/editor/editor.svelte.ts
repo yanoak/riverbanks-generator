@@ -6,6 +6,7 @@
 import type { Editor as TipTap } from '@tiptap/core';
 import { ySyncPluginKey } from '@tiptap/y-tiptap';
 import type * as Y from 'yjs';
+import type { Peer, Presence } from '$lib/collab/presence.svelte';
 import { YHistory } from '$lib/history/yhistory.svelte';
 import { createComic, createPage } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
@@ -58,6 +59,8 @@ export class Editor {
 	/** The panel whose image is being panned/zoomed while mode === 'image'. */
 	imagePanelId = $state<string | null>(null);
 	readonly history = new YHistory();
+	/** Who else is here (cloud comics); drives the soft hold. */
+	presence = $state.raw<Presence | null>(null);
 
 	constructor() {
 		this.attach(this.doc);
@@ -160,6 +163,49 @@ export class Editor {
 
 	say(message: string | null): void {
 		this.status = message;
+	}
+
+	// --- soft hold: someone else is moving it ----------------------------------------------
+
+	/** The other person moving `id` right now, if anyone. */
+	heldBy(id: string): Peer | null {
+		return this.presence?.heldBy(id) ?? null;
+	}
+
+	private noun(id: string): string {
+		return this.page.balloons.some((b) => b.id === id) ? 'balloon' : 'panel';
+	}
+
+	/** True (and says who) if someone else is moving `id`. */
+	private refuseHeld(id: string): boolean {
+		const peer = this.heldBy(id);
+		if (peer) this.say(`${peer.user.name} is moving this ${this.noun(id)}.`);
+		return !!peer;
+	}
+
+	/** A drag, resize or pan is starting: claim `id`, unless someone else holds it. */
+	beginMove(id: string, rect: Rect): boolean {
+		if (this.refuseHeld(id)) return false;
+		this.presence?.claim(id, rect);
+		return true;
+	}
+
+	/** Show the others where it is now. */
+	moveTo(rect: Rect): void {
+		this.presence?.moveTo(rect);
+	}
+
+	/** Still ours? False if a simultaneous grab went to someone who started first. */
+	stillMoving(id: string): boolean {
+		if (!this.presence || this.presence.holds(id)) return true;
+		const winner = this.heldBy(id);
+		this.presence.release();
+		this.say(`${winner?.user.name ?? 'Someone'} got there first.`);
+		return false;
+	}
+
+	endMove(): void {
+		this.presence?.release();
 	}
 
 	// --- selection ------------------------------------------------------------------------
@@ -276,6 +322,7 @@ export class Editor {
 	nudge(dx: number, dy: number): boolean {
 		const target = this.movable;
 		if (!target) return false;
+		if (this.refuseHeld(target.id)) return true;
 		this.change('Nudge', (_d, page) => {
 			const t = find(page, target.id) as Rect;
 			t.x += dx;
@@ -286,7 +333,7 @@ export class Editor {
 
 	reorder(to: 'front' | 'back'): void {
 		const target = this.movable;
-		if (!target) return;
+		if (!target || this.refuseHeld(target.id)) return;
 		const zs = this.selectedBalloon
 			? this.page.balloons.map((b) => b.z)
 			: this.page.panels.filter((p): p is FreePanel => p.kind === 'free').map((p) => p.z);
@@ -298,6 +345,7 @@ export class Editor {
 	deleteSelection(): void {
 		const balloon = this.selectedBalloon;
 		if (balloon) {
+			if (this.refuseHeld(balloon.id)) return;
 			this.change(`Delete ${balloon.type}`, (_d, page) => {
 				page.balloons = page.balloons.filter((b) => b.id !== balloon.id);
 			});
@@ -306,7 +354,7 @@ export class Editor {
 		const free = this.selectedPanels.filter((p) => p.kind === 'free').map((p) => p.id);
 		const [only] = this.selectedPanels;
 		if (!free.length && only?.image) return this.removeImage(only);
-		if (!free.length) return;
+		if (!free.length || free.some((id) => this.refuseHeld(id))) return;
 		this.change('Delete panel', (_d, page) => {
 			page.panels = page.panels.filter((p) => !free.includes(p.id));
 		});
@@ -349,7 +397,7 @@ export class Editor {
 
 	private placeImage(description: string, place: (panel: Panel) => Panel['image']): void {
 		const panel = this.imagePanel ?? this.selectedPanels[0];
-		if (!panel?.image) return;
+		if (!panel?.image || this.refuseHeld(panel.id)) return;
 		this.patch(description, panel.id, { image: place(panel) });
 	}
 

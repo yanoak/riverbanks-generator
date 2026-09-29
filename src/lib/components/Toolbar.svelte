@@ -34,6 +34,20 @@
 		nav?: Snippet;
 	} = $props();
 
+	/** Everyone else here, once per person (they may have several tabs open). */
+	const people = $derived(
+		[...new Map((editor.presence?.peers ?? []).map((p) => [p.user.id, p])).values()].sort((a, b) =>
+			a.user.name.localeCompare(b.user.name)
+		)
+	);
+	const pageOf = (id?: string) => editor.comic.pages.findIndex((p) => p.id === id);
+	function describe(p: (typeof people)[number]): string {
+		const n = pageOf(p.page);
+		const where = n >= 0 ? `page ${n + 1}` : 'elsewhere';
+		const sel = p.selection.length;
+		return `${p.user.name} — ${where}${sel ? `, ${sel} selected` : ''}`;
+	}
+
 	const SAVE_LABEL: Record<SaveStatus, string> = {
 		saved: 'Saved',
 		dirty: 'Unsaved',
@@ -140,6 +154,22 @@
 	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
 		<FileText size={16} /> PDF
 	</button>
+	{#if people.length}
+		<ul class="mr-1 flex -space-x-1" aria-label="Also here">
+			{#each people as p (p.user.id)}
+				<li>
+					<button
+						class="grid h-7 w-7 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-white focus:outline-none focus-visible:ring-sky-500"
+						style:background={p.user.color}
+						title={describe(p)}
+						aria-label={describe(p)}
+						onclick={() => editor.goToPage(pageOf(p.page))}
+						>{p.user.name.slice(0, 2).toUpperCase()}</button
+					>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 	{#if onshare}
 		<button class="tool" data-share onclick={onshare} title="Who has access">
 			<Users size={16} /> Share

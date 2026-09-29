@@ -8,6 +8,8 @@
 
 	let { editor }: { editor: Editor } = $props();
 	const THUMB_WIDTH = 88;
+	const peersOn = (pageId: string) =>
+		(editor.presence?.peers ?? []).filter((p) => p.page === pageId);
 </script>
 
 <nav
@@ -19,7 +21,11 @@
 			class="group flex flex-col items-center gap-1 rounded p-1 text-xs text-stone-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
 			class:text-stone-900={i === editor.pageIndex}
 			aria-current={i === editor.pageIndex ? 'page' : undefined}
-			aria-label="Page {i + 1}"
+			aria-label="Page {i + 1}{peersOn(page.id).length
+				? `, ${peersOn(page.id)
+						.map((p) => p.user.name)
+						.join(', ')} here`
+				: ''}"
 			onclick={() => editor.goToPage(i)}
 		>
 			<div
@@ -29,7 +35,17 @@
 			>
 				<PageView {page} scale={THUMB_WIDTH / page.width} />
 			</div>
-			{i + 1}
+			<span class="flex items-center gap-1">
+				{i + 1}
+				{#each peersOn(page.id) as p (p.clientId)}
+					<span
+						class="h-2 w-2 rounded-full"
+						style:background={p.user.color}
+						title={p.user.name}
+						aria-hidden="true"
+					></span>
+				{/each}
+			</span>
 		</button>
 		{#if i === editor.pageIndex}
 			<div class="-mt-2 flex justify-center gap-0.5 text-stone-500">

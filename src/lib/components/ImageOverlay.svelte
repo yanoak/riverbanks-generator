@@ -27,6 +27,8 @@
 
 	function onpointerdown(e: PointerEvent) {
 		e.stopPropagation();
+		// Soft hold: nobody else may pan this image (or move this panel) meanwhile.
+		if (!editor.beginMove(panel.id, box)) return;
 		(e.currentTarget as Element).setPointerCapture(e.pointerId);
 		drag = { x: e.clientX, y: e.clientY, start: snapshot(image) };
 	}
@@ -38,7 +40,10 @@
 	}
 
 	function onpointerup() {
-		if (drag) editor.commit('Pan image', panel, { image: drag.start });
+		if (drag && editor.stillMoving(panel.id))
+			editor.commit('Pan image', panel, { image: drag.start });
+		else if (drag) Object.assign(image, drag.start);
+		if (drag) editor.endMove();
 		drag = null;
 	}
 

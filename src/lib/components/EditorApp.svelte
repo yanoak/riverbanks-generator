@@ -11,6 +11,8 @@
 	import type { CloudDoc } from '$lib/persistence/cloud-doc';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import ShareDialog from './ShareDialog.svelte';
+	import { Presence } from '$lib/collab/presence.svelte';
+	import { colorFor, displayName } from '$lib/collab/hold';
 	import type { DocumentSource } from '$lib/persistence/source';
 	import { onMount, type Snippet } from 'svelte';
 
@@ -26,7 +28,7 @@
 		source?: DocumentSource;
 		cloud?: CloudDoc;
 		/** Cloud comics: enables the Share dialog. */
-		sharing?: { supabase: SupabaseClient; userId: string };
+		sharing?: { supabase: SupabaseClient; userId: string; email: string };
 		initialPage?: number;
 		nav?: Snippet;
 		/** This user no longer has access (removed, or left). */
@@ -81,6 +83,15 @@
 		doc.onlive = (l) => (live = l);
 		doc.onrevoked = () => onrevoked?.();
 		editor.attach(await doc.open());
+		if (sharing) {
+			const presence = new Presence(editor.doc, {
+				id: sharing.userId,
+				name: displayName(sharing.email),
+				color: colorFor(sharing.userId)
+			});
+			editor.presence = presence;
+			doc.attachPresence(presence);
+		}
 		editor.goToPage(initialPage - 1);
 		void doc.connect();
 	}
@@ -102,10 +113,23 @@
 			else void autosave.saveNow();
 		};
 		document.addEventListener('visibilitychange', onHide);
+		// Closing the tab: tell the others we left, rather than letting them time us out.
+		const onPageHide = () => editor.presence?.destroy();
+		window.addEventListener('pagehide', onPageHide);
 		return () => {
 			cloud?.destroy();
 			document.removeEventListener('visibilitychange', onHide);
+			window.removeEventListener('pagehide', onPageHide);
 		};
+	});
+
+	// Publish where we are and what we have selected.
+	$effect(() => {
+		const sel = editor.selection;
+		editor.presence?.set({
+			page: editor.page?.id,
+			selection: sel.kind === 'panels' ? [...sel.ids] : sel.kind === 'balloon' ? [sel.id] : []
+		});
 	});
 
 	// Scheduled synchronously (not from an $effect a tick later), so the toolbar never shows

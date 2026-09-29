@@ -20,7 +20,7 @@
 {#key data.comic.id}
 	<EditorApp
 		{cloud}
-		sharing={{ supabase, userId: data.user.id }}
+		sharing={{ supabase, userId: data.user.id, email: data.user.email }}
 		initialPage={data.page}
 		onrevoked={() => goto('/comics?notice=no-access', { replaceState: true })}
 	>

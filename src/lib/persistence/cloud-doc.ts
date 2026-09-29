@@ -5,12 +5,16 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as Y from 'yjs';
+import type { Presence } from '$lib/collab/presence.svelte';
 import { LOAD } from '$lib/model/ydoc';
 import { compactDoc, isEmptyUpdate, openDoc, type OpenedDoc } from '$lib/ops/ydoc-store';
 import { fromBytea, SupabaseComicStore } from './supabase-store';
 
 /** Row-level security refused the write: this user may no longer edit the comic. */
 const isRefused = (e: unknown) => (e as { code?: string }).code === '42501';
+
+const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+const fromBase64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 /** Origin of updates that arrived from the server (never sent back). */
 export const REMOTE = 'remote';
@@ -32,6 +36,7 @@ export class CloudDoc {
 	private channel: ReturnType<SupabaseClient['channel']> | null = null;
 	private stopped = false;
 	private offUpdate: (() => void) | null = null;
+	private presence: Presence | null = null;
 
 	status: SyncStatus = 'saved';
 	onstatus: ((s: SyncStatus) => void) | null = null;
@@ -64,6 +69,16 @@ export class CloudDoc {
 		return opened.doc;
 	}
 
+	/** Carry presence (who's here, selections, carets, move claims) over the same channel. */
+	attachPresence(presence: Presence): void {
+		this.presence = presence;
+		presence.onsend = (update) => this.broadcast('awareness', { u: toBase64(update) });
+	}
+
+	private broadcast(event: string, payload: object) {
+		void this.channel?.send({ type: 'broadcast', event, payload });
+	}
+
 	/** Join the comic's channel and keep receiving everyone's updates. */
 	async connect(): Promise<void> {
 		// The browser client restores its session asynchronously; joining before that would join
@@ -74,8 +89,15 @@ export class CloudDoc {
 		this.channel = this.supabase
 			.channel(`comic:${this.id}`, { config: { private: true } })
 			.on('broadcast', { event: 'update' }, ({ payload }) => void this.receive(payload))
+			.on('broadcast', { event: 'awareness' }, ({ payload }) =>
+				this.presence?.receive(fromBase64(payload.u))
+			)
+			// Someone joined: tell them about us.
+			.on('broadcast', { event: 'awareness-query' }, () => this.sendPresence())
 			.subscribe((status) => {
 				if (status === 'SUBSCRIBED') {
+					this.sendPresence();
+					this.broadcast('awareness-query', {});
 					void this.catchUp().then(() => this.onlive?.(true));
 					void this.flush(); // anything that failed while we were offline
 				} else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
@@ -99,6 +121,10 @@ export class CloudDoc {
 		}
 	}
 
+	private sendPresence() {
+		if (this.presence) this.broadcast('awareness', { u: toBase64(this.presence.encodeLocal()) });
+	}
+
 	private retryNow = () => {
 		this.failures = 0;
 		void this.flush();
@@ -113,8 +139,7 @@ export class CloudDoc {
 
 	private async receive(payload: { id: number; update?: string; fetch?: boolean }) {
 		if (payload.update !== undefined) {
-			const bytes = Uint8Array.from(atob(payload.update), (c) => c.charCodeAt(0));
-			return this.apply(Number(payload.id), bytes);
+			return this.apply(Number(payload.id), fromBase64(payload.update));
 		}
 		// Too big to broadcast: read the row.
 		const { data } = await this.supabase
@@ -209,6 +234,8 @@ export class CloudDoc {
 	}
 
 	destroy(): void {
+		// Say goodbye while the channel is still open, so others drop us at once.
+		this.presence?.destroy();
 		this.stopped = true;
 		void this.flush();
 		this.offUpdate?.();

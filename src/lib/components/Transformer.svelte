@@ -17,8 +17,14 @@
 		label,
 		z = 0,
 		movable = true,
+		following = false,
+		claim,
+		moving,
+		mine,
+		release,
 		onselect,
 		oncommit,
+		ondblclick,
 		children,
 		extra
 	}: {
@@ -29,8 +35,22 @@
 		label: string;
 		z?: number;
 		movable?: boolean;
+		/** Someone else is moving it: glide between their (10 Hz) position updates. */
+		following?: boolean;
+		/** Soft hold: claim when a drag really starts (false = someone else holds it). */
+		claim?: (rect: Rect) => boolean;
+		/** Soft hold: publish the live rect. */
+		moving?: (rect: Rect) => void;
+		/** Soft hold: is the claim still ours? (A simultaneous grab can go the other way.) */
+		mine?: () => boolean;
+		release?: () => void;
 		onselect: (e: PointerEvent | FocusEvent) => void;
 		oncommit: (before: Rect, action: 'move' | 'resize') => void;
+		/**
+		 * Handled here, not by the content: a press captures the pointer to this element, so the
+		 * browser fires dblclick on it rather than on whatever is inside.
+		 */
+		ondblclick?: (e: MouseEvent) => void;
 		children: Snippet;
 		extra?: Snippet;
 	} = $props();
@@ -51,16 +71,29 @@
 		if (!drag) return;
 		const delta = { dx: (e.clientX - drag.x) / scale, dy: (e.clientY - drag.y) / scale };
 		if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 3) return;
+		if (!drag.moved && claim && !claim(drag.start)) return void (drag = null);
 		drag.moved = true;
+		if (mine && !mine()) return abort();
 		const next =
 			drag.action === 'move'
 				? moveRect(drag.start, delta)
 				: resizeRect(drag.start, drag.action, delta);
 		Object.assign(target, next);
+		moving?.(next);
+	}
+
+	/** Lost the object to someone who grabbed it first: put it back, record nothing. */
+	function abort() {
+		if (drag) Object.assign(target, drag.start);
+		drag = null;
 	}
 
 	function onpointerup() {
-		if (drag?.moved) oncommit(drag.start, drag.action === 'move' ? 'move' : 'resize');
+		if (drag?.moved) {
+			if (mine && !mine()) abort();
+			else oncommit(drag.start, drag.action === 'move' ? 'move' : 'resize');
+			release?.();
+		}
 		drag = null;
 	}
 
@@ -71,6 +104,7 @@
 	class="transformer absolute"
 	class:selected
 	class:cursor-move={movable}
+	class:following
 	style:left="{target.x}px"
 	style:top="{target.y}px"
 	style:width="{target.w}px"
@@ -86,6 +120,7 @@
 	onpointerdown={(e) => begin(e, 'move')}
 	{onpointermove}
 	{onpointerup}
+	{ondblclick}
 	onfocus={(e) => !selected && onselect(e)}
 >
 	{@render children()}
@@ -106,6 +141,13 @@
 <style>
 	.transformer {
 		outline: none;
+	}
+	.transformer.following {
+		transition:
+			left 100ms linear,
+			top 100ms linear,
+			width 100ms linear,
+			height 100ms linear;
 	}
 	.transformer.selected {
 		box-shadow: 0 0 0 var(--ring) var(--color-sky-500);

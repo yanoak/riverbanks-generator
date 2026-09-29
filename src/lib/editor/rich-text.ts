@@ -6,6 +6,7 @@
 
 import { untrack } from 'svelte';
 import { Editor as TipTap, Extension } from '@tiptap/core';
+import CollaborationCaret from '@tiptap/extension-collaboration-caret';
 import { ySyncPlugin } from '@tiptap/y-tiptap';
 import type * as Y from 'yjs';
 import { textInset } from '$lib/geometry/balloon';
@@ -55,7 +56,20 @@ function mount(editor: Editor, balloon: Balloon, selectAll: boolean, node: HTMLE
 
 	const tiptap = new TipTap({
 		element: node,
-		extensions: [...balloonExtensions, yText(editor, fragment)],
+		extensions: [
+			...balloonExtensions,
+			yText(editor, fragment),
+			// Others' carets and selections in this balloon. The whole user goes in: the extension
+			// writes it to our presence state, which also carries the id avatars group by.
+			...(editor.presence
+				? [
+						CollaborationCaret.configure({
+							provider: { awareness: editor.presence.awareness },
+							user: { ...editor.presence.user }
+						})
+					]
+				: [])
+		],
 		autofocus: selectAll ? 'all' : 'end',
 		editorProps: { attributes: { 'aria-label': `${balloon.type} text`, spellcheck: 'false' } },
 		onTransaction: () => {

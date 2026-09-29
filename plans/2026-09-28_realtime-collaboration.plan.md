@@ -368,12 +368,19 @@ limits and the TipTap-Svelte binding.
 
 **Stage 3: presence**
 
-- [ ] Awareness over the channel: user, colour, page, selection, live drag rects
-- [ ] Toolbar avatars; remote selection outlines + name tags on the canvas; page-strip dots
-- [ ] Remote carets in balloon text
-- [ ] Soft hold during drags/resizes/image pans: claim in awareness, live follow + tag for
-      others, refusals for move/resize/nudge/reorder/delete, tie-break with snap-back, 5 s
-      presence timeout
+- [x] Awareness over the channel (`collab/presence.svelte.ts`): user, colour, page, selection
+      and move claims, sent at most every 100 ms, heartbeat every 2 s, dropped after 5 s of
+      silence; joining asks others to resend; leaving (unmount or `pagehide`) says so at once
+- [x] Toolbar avatars (one per person, "name — page N, k selected", click to go to their page);
+      selection outlines and name tags on the canvas; page-strip dots
+- [x] Remote carets in balloon text (`CollaborationCaret` on the same awareness)
+- [x] Soft hold for moves, resizes and image pans (`collab/hold.ts`; `Transformer` claims when a
+      drag really starts and aborts cleanly on a lost tie). Others see the object follow, with
+      "<name> is moving this", and their move, resize, nudge, reorder, delete and image panning
+      are refused with the holder's name. **Not done:** tail drags aren't held; Esc doesn't
+      cancel a drag; no "A. K. edited page 1" announcements. Found and fixed on the way:
+      double-click (to edit a balloon, or to enter image mode on a free panel) never fired,
+      because Transformer's pointer capture retargets `dblclick`
 
 ## UI mockups (ASCII)
 
@@ -532,15 +539,16 @@ e2e = Playwright with two browser contexts.
 
 **Soft hold**
 
-- [ ] `holderOf(id, awarenessStates, now)`: no claim → none; one claim → that user; a claim from
+- [x] `holderOf(id, awarenessStates, now)`: no claim → none; one claim → that user; a claim from
       a stale (> 5 s) state → none — unit — `collab/hold.test.ts`
-- [ ] Two claims on one object → earlier `since` wins, and equal `since` → lower clientID; the
+- [x] Two claims on one object → earlier `since` wins, and equal `since` → lower clientID; the
       loser's drag is cancelled back to its start rect — unit
-- [ ] The editor's move, resize, nudge, reorder and delete on a held object are refused with the
+- [x] The editor's move, resize, nudge, reorder and delete on a held object are refused with the
       holder's name and leave the doc unchanged; select and edit text are allowed — unit —
       `editor/editor.test.ts`
-- [ ] The hold is released on pointer-up, on Esc and on presence removal — unit
-- [ ] An object held by the *local* user is never refused locally — unit
+- [x] The hold is released on pointer-up and on presence removal — unit, e2e (Esc: not
+      implemented)
+- [x] An object held by the *local* user is never refused locally — unit
 
 **MCP**
 

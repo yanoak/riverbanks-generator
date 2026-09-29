@@ -10,7 +10,8 @@
 	import Transformer from './Transformer.svelte';
 	import PanelImage from './PanelImage.svelte';
 	import ImageOverlay from './ImageOverlay.svelte';
-	import type { Balloon, Panel } from '$lib/model/types';
+	import type { Balloon, Panel, Rect } from '$lib/model/types';
+	import type { Peer } from '$lib/collab/presence.svelte';
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
 
@@ -62,6 +63,43 @@
 		if (tailDrag) editor?.commit('Move tail', balloon, { tail: tailDrag.start });
 		tailDrag = null;
 	}
+
+	// --- other people: where they are, what they have selected, what they are moving --------
+
+	const peersHere = $derived(editor?.presence?.peers.filter((p) => p.page === page.id) ?? []);
+
+	/** Someone else's live position for `id` while they move it. */
+	function heldRect(id: string): Rect | undefined {
+		return peersHere.find((p) => p.moving?.id === id)?.moving?.rect;
+	}
+
+	/** What to draw: the object, or where its mover has it right now. */
+	function shown<T extends Rect & { id: string }>(item: T): T {
+		const rect = heldRect(item.id);
+		return rect ? { ...item, ...rect } : item;
+	}
+
+	type Outline = { id: string; points?: string; box: Rect; moving: boolean };
+	function outlinesOf(peer: Peer): Outline[] {
+		const ids = new Set([...peer.selection, ...(peer.moving ? [peer.moving.id] : [])]);
+		return [...ids].flatMap((id): Outline[] => {
+			const moving = peer.moving?.id === id;
+			const shape = shapes.find((s) => s.panel.id === id);
+			if (shape) return [{ id, points: shape.svgPoints, box: shape.bbox, moving }];
+			const item = page.balloons.find((b) => b.id === id) ?? freePanels.find((p) => p.id === id);
+			if (!item) return [];
+			const r = (moving && peer.moving?.rect) || item;
+			return [{ id, box: { x: r.x, y: r.y, w: r.w, h: r.h }, moving }];
+		});
+	}
+
+	/** Soft-hold hooks for a Transformer on `id`. */
+	const hold = (id: string) => ({
+		claim: (r: Rect) => editor!.beginMove(id, r),
+		moving: (r: Rect) => editor!.moveTo(r),
+		mine: () => editor!.stillMoving(id),
+		release: () => editor!.endMove()
+	});
 
 	const selectedIds = $derived(
 		editor?.selection.kind === 'panels' ? new Set(editor.selection.ids) : new Set<string>()
@@ -172,13 +210,16 @@
 		{#each freePanels as panel, i (panel.id)}
 			{#if editor}
 				<Transformer
-					target={panel}
+					target={shown(panel)}
+					following={!!heldRect(panel.id)}
+					{...hold(panel.id)}
 					{scale}
 					id={panel.id}
 					label="Free panel {i + 1}"
 					z={10 + i}
 					selected={selectedIds.has(panel.id)}
 					onselect={(e) => editor.selectPanel(panel.id, 'shiftKey' in e && e.shiftKey)}
+					ondblclick={() => ondblclick(panel)}
 					oncommit={(before, action) =>
 						editor.commitGeometry(panel, before, action === 'move' ? 'Move panel' : 'Resize panel')}
 				>
@@ -197,10 +238,13 @@
 			{/if}
 		{/each}
 
-		{#each balloons as balloon, i (balloon.id)}
+		{#each balloons as original, i (original.id)}
+			{@const balloon = shown(original)}
 			{#if editor}
 				<Transformer
 					target={balloon}
+					following={balloon !== original}
+					{...hold(balloon.id)}
 					{scale}
 					id={balloon.id}
 					label="{balloon.type} balloon {i + 1}"
@@ -208,24 +252,21 @@
 					selected={selectedBalloonId === balloon.id}
 					movable={editor.editingBalloonId !== balloon.id}
 					onselect={() => editor.select({ kind: 'balloon', id: balloon.id })}
+					ondblclick={() => editor.startEditing(balloon.id)}
 					oncommit={(before, action) =>
 						editor.commitGeometry(
-							balloon,
+							original,
 							before,
 							action === 'move' ? 'Move balloon' : 'Resize balloon'
 						)}
 				>
-					<div
-						class="contents"
-						role="presentation"
-						ondblclick={() => editor.startEditing(balloon.id)}
-					>
+					<div class="contents" role="presentation">
 						{#if editor.editingBalloonId === balloon.id}
 							<BalloonView {balloon}>
 								{#snippet text()}
 									<div
 										class="rich-text cursor-text"
-										{@attach richText(editor, balloon, editor.selectAllOnEdit)}
+										{@attach richText(editor, original, editor.selectAllOnEdit)}
 									></div>
 								{/snippet}
 							</BalloonView>
@@ -262,6 +303,55 @@
 			{/if}
 		{/each}
 
+		{#if peersHere.length}
+			<svg
+				class="pointer-events-none absolute inset-0 overflow-visible"
+				style:z-index="10000"
+				width={page.width}
+				height={page.height}
+				viewBox="0 0 {page.width} {page.height}"
+				aria-hidden="true"
+			>
+				{#each peersHere as peer (peer.clientId)}
+					{#each outlinesOf(peer) as o (o.id)}
+						{#if o.points}
+							<polygon
+								points={o.points}
+								fill="none"
+								stroke={peer.user.color}
+								stroke-width={3 / scale}
+							/>
+						{:else}
+							<rect
+								x={o.box.x}
+								y={o.box.y}
+								width={o.box.w}
+								height={o.box.h}
+								fill="none"
+								stroke={peer.user.color}
+								stroke-width={3 / scale}
+								stroke-dasharray={o.moving ? `${8 / scale} ${5 / scale}` : undefined}
+								class:glide={o.moving}
+							/>
+						{/if}
+						<text
+							data-peer-label
+							x={o.box.x}
+							y={o.box.y - 6 / scale}
+							font-size={13 / scale}
+							font-weight="600"
+							fill={peer.user.color}
+							stroke="white"
+							stroke-width={3 / scale}
+							paint-order="stroke"
+							class:glide={o.moving}
+							>{o.moving ? `${peer.user.name} is moving this` : peer.user.name}</text
+						>
+					{/each}
+				{/each}
+			</svg>
+		{/if}
+
 		{#if editor?.mode === 'image' && editor.imagePanel?.image}
 			<ImageOverlay {editor} {page} panel={editor.imagePanel} {scale} />
 		{/if}
@@ -275,7 +365,6 @@
 		role="presentation"
 		{ondragover}
 		ondrop={(e) => ondrop(e, panel.id)}
-		ondblclick={() => ondblclick(panel)}
 	>
 		{#if panel.image}<PanelImage image={panel.image} />{/if}
 	</div>
@@ -285,6 +374,34 @@
 {/snippet}
 
 <style>
+	:global(.collaboration-carets__caret) {
+		position: relative;
+		margin: 0 -1px;
+		border-left: 2px solid;
+		border-right: 0;
+		pointer-events: none;
+		word-break: normal;
+	}
+	:global(.collaboration-carets__label) {
+		position: absolute;
+		top: -1.4em;
+		left: -2px;
+		padding: 0 4px;
+		border-radius: 3px 3px 3px 0;
+		color: white;
+		font:
+			600 12px/1.4 system-ui,
+			sans-serif;
+		white-space: nowrap;
+		user-select: none;
+	}
+	.glide {
+		transition:
+			x 100ms linear,
+			y 100ms linear,
+			width 100ms linear,
+			height 100ms linear;
+	}
 	.hit {
 		fill: transparent;
 		stroke: transparent;

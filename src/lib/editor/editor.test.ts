@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { clone } from '$lib/model/clone';
 import { createComic } from '$lib/model/factory';
-import type { Comic } from '$lib/model/types';
+import type { Comic, FreePanel } from '$lib/model/types';
+import { Presence } from '$lib/collab/presence.svelte';
 import { applyComic, projectComic } from '$lib/model/ydoc';
 import { Editor } from './editor.svelte';
 
@@ -188,5 +189,90 @@ describe('Editor commands on the Y.Doc', () => {
 		editor.setTitle('  New name ');
 		expect(editor.comic.title).toBe('New name');
 		expect(editor.history.canUndo).toBe(false);
+	});
+});
+
+describe('Editor soft hold (someone else is moving it)', () => {
+	// Presence sends at most every 100 ms; tests step through that window.
+	beforeEach(() => vi.useFakeTimers());
+	afterEach(() => vi.useRealTimers());
+	const flush = () => vi.advanceTimersByTime(100);
+	/** An editor plus another person's presence, wired together. */
+	function withOther() {
+		const editor = new Editor();
+		const mine = new Presence(editor.doc, { id: 'me', name: 'me', color: '#000' }, Date.now, {
+			timers: false
+		});
+		const theirs = new Presence(new Y.Doc(), { id: 'ak', name: 'ak', color: '#f00' }, Date.now, {
+			timers: false
+		});
+		mine.onsend = (u) => theirs.receive(u);
+		theirs.onsend = (u) => mine.receive(u);
+		mine.receive(theirs.encodeLocal());
+		theirs.receive(mine.encodeLocal());
+		editor.presence = mine;
+		return { editor, theirs };
+	}
+
+	it('refuses to nudge, reorder or delete what someone else is moving, and says who', () => {
+		const { editor, theirs } = withOther();
+		const id = editor.addBalloon('speech');
+		editor.stopEditing();
+		const b = () => editor.page.balloons.find((x) => x.id === id);
+		const before = { x: b()!.x, z: b()!.z };
+		theirs.claim(id, b()!);
+
+		expect(editor.nudge(10, 0)).toBe(true); // handled (so the key does nothing else)
+		expect(editor.status).toBe('ak is moving this balloon.');
+		editor.reorder('front');
+		editor.deleteSelection();
+		expect(b()).toMatchObject(before);
+		expect(editor.history.lastCommandDescription).toBe('Add speech');
+
+		// Selecting it and editing its text still work.
+		expect(editor.startEditing(id)).toBe(true);
+	});
+
+	it('a drag cannot start on a held object; it can once they let go', () => {
+		const { editor, theirs } = withOther();
+		const id = editor.addFreePanel();
+		const panel = editor.page.panels.find((p) => p.id === id) as FreePanel;
+		theirs.claim(id, panel);
+		expect(editor.beginMove(id, panel)).toBe(false);
+		expect(editor.status).toBe('ak is moving this panel.');
+		theirs.release();
+		flush();
+		expect(editor.beginMove(id, panel)).toBe(true);
+		flush();
+		expect(theirs.heldBy(id)?.user.name).toBe('me');
+		editor.endMove();
+		flush();
+		expect(theirs.heldBy(id)).toBeNull();
+	});
+
+	it('losing a simultaneous grab cancels the drag and says who got there first', () => {
+		const { editor, theirs } = withOther();
+		const id = editor.addFreePanel();
+		const panel = editor.page.panels.find((p) => p.id === id) as FreePanel;
+		const start = { x: panel.x, y: panel.y, w: panel.w, h: panel.h };
+		// They grabbed it a moment earlier, but their claim arrives after ours began.
+		const send = theirs.onsend;
+		theirs.onsend = null;
+		theirs.set({ moving: { id, since: Date.now() - 50, rect: start } });
+		expect(editor.beginMove(id, start)).toBe(true);
+		theirs.onsend = send;
+		flush();
+		theirs.heartbeat();
+		expect(editor.stillMoving(id)).toBe(false);
+		expect(editor.status).toBe('ak got there first.');
+	});
+
+	it('my own claim never blocks me', () => {
+		const { editor } = withOther();
+		const id = editor.addFreePanel();
+		const panel = editor.page.panels.find((p) => p.id === id) as FreePanel;
+		expect(editor.beginMove(id, panel)).toBe(true);
+		expect(editor.nudge(5, 0)).toBe(true);
+		expect(editor.status).toBeNull();
 	});
 });

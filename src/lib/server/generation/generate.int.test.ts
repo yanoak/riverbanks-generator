@@ -134,6 +134,32 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 		expect(data).toEqual({ status: 'failed', error: 'Gemini: quota exceeded' });
 	});
 
+	it('Higgsfield gets a signed link for each reference; an edit model needs one', async () => {
+		const { calls, provider } = recording();
+		await generatePanelImage(
+			member,
+			{
+				comicId,
+				panelId,
+				prompt: 'x',
+				profileId,
+				modelKey: 'hf-grok-image-2',
+				box: { w: 1, h: 1 }
+			},
+			{ provider }
+		);
+		expect(calls[0].refs).toHaveLength(2);
+		for (const r of calls[0].refs) expect(r.url).toMatch(/^http.*style-refs.*token=/);
+
+		await expect(
+			generatePanelImage(
+				member,
+				{ comicId, panelId, prompt: 'x', modelKey: 'hf-qwen-edit', box: { w: 1, h: 1 } },
+				{ provider }
+			)
+		).rejects.toThrow(/at least 1/);
+	});
+
 	it('an empty prompt or unknown model is refused', async () => {
 		const { provider } = recording();
 		const req = { comicId, panelId, prompt: '  ', box: { w: 1, h: 1 } };

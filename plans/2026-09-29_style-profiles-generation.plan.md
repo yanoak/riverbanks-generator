@@ -213,9 +213,9 @@ Stages ship independently; each ends deployable.
 
 **Stage 4 — Higgsfield**
 
-- [ ] Higgsfield provider: submit, poll, download, and statuses mapped to messages (nsfw becomes
+- [x] Higgsfield provider: submit, poll, download, and statuses mapped to messages (nsfw becomes
       "The model refused this prompt")
-- [ ] Registry entries: Grok Image 2.0, Marketing Studio Image, Qwen Image 3 edit, Soul V2
+- [x] Registry entries: Grok Image 2.0, Marketing Studio Image, Qwen Image 3 edit, Soul V2
       (text-only models warn that references are ignored)
 
 **Stage 5 — MCP**

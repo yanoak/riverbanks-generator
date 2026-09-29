@@ -58,6 +58,11 @@ export async function generatePanelImage(
 	if (!model) throw new OpError('invalid', `Unknown model “${modelKey}”.`);
 
 	const { used, dropped } = selectRefs(profile?.refs ?? [], model);
+	if (used.length < (model.minRefs ?? 0))
+		throw new OpError(
+			'invalid',
+			`${model.label} redraws reference images: give the comic a style with at least ${model.minRefs}.`
+		);
 	const aspect = nearestAspect(input.box, model.aspects);
 	const fullPrompt = composePrompt({ profile: profile ?? undefined, refs: used, prompt });
 

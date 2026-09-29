@@ -17,6 +17,10 @@ export interface ModelInfo extends RefLimits {
 	aspects: string[];
 	/** Shown under the picker. */
 	note?: string;
+	/** Some models only edit: they need at least this many references. */
+	minRefs?: number;
+	/** Extra request fields for this model (Higgsfield: its resolution setting). */
+	params?: Record<string, string>;
 }
 
 const GEMINI_ASPECTS = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'];
@@ -41,6 +45,49 @@ export const MODELS: ModelInfo[] = [
 		maxRefs: 11,
 		roleCaps: { style: 3, character: 5, object: 3 },
 		note: 'Gemini · slower, about $0.13 an image'
+	},
+	// Higgsfield's public API (https://docs.higgsfield.ai/docs/models/image-generation). The ratio
+	// lists of Qwen and Soul, and the request field names, are unverified until a live call.
+	{
+		key: 'hf-grok-image-2',
+		provider: 'higgsfield',
+		id: '/xai/grok-imagine-image-2.0',
+		label: 'Grok Image 2.0',
+		aspects: ['1:1', '1:2', '2:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16'],
+		maxRefs: 10,
+		params: { resolution: '2k' },
+		note: 'Higgsfield'
+	},
+	{
+		key: 'hf-marketing-studio',
+		provider: 'higgsfield',
+		id: '/marketing-studio/image',
+		label: 'Marketing Studio Image',
+		aspects: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16', '21:9'],
+		maxRefs: 16,
+		params: { resolution: '2k' },
+		note: 'Higgsfield · takes the most references'
+	},
+	{
+		key: 'hf-qwen-edit',
+		provider: 'higgsfield',
+		id: '/alibaba/qwen-image-3/edit',
+		label: 'Qwen Image 3 (edit)',
+		aspects: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16'],
+		maxRefs: 3,
+		minRefs: 1,
+		params: { resolution: '2k' },
+		note: 'Higgsfield · redraws from 1–3 references'
+	},
+	{
+		key: 'hf-soul-v2',
+		provider: 'higgsfield',
+		id: '/higgsfield-ai/soul/v2/standard',
+		label: 'Soul V2',
+		aspects: ['1:1', '3:4', '4:3', '2:3', '3:2', '9:16', '16:9'],
+		maxRefs: 0,
+		params: { resolution: '1080p' },
+		note: 'Higgsfield · text only: ignores the style’s images'
 	},
 	{
 		key: 'fake',

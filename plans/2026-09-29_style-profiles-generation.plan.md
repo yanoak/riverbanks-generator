@@ -436,6 +436,27 @@ Run on local first, with the real Gemini key (not the fake), then on production 
 - [ ] Default Gemini size: 2K ($0.10) or 1K ($0.067)? The plan assumes 2K, since panels print
       large.
 
+## Progress notes
+
+2026-09-29: all five stages are built and tested with the fake provider. **Not yet run against
+the real APIs**, because no keys are set.
+
+**Unverified until the keys are in:**
+
+- Gemini: the generateContent image request shape (`imageConfig`), the 2K output size, and the
+  model id `gemini-3.1-flash-lite` for Describe.
+- Higgsfield:
+  - the field names `aspect_ratio`, `resolution` and `image_urls`;
+  - the aspect lists for Qwen and Soul;
+  - whether it accepts Supabase signed URLs.
+
+**Left out of the stages above (follow-ups, not blockers):**
+
+- reordering references (the order is upload order; it decides which references are dropped
+  when a model's cap is hit);
+- a spinner on the canvas panel while it generates (the Inspector shows the timer);
+- "AK is generating…" through presence.
+
 ## Outcome
 
 _Filled in when done._

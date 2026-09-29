@@ -3,7 +3,7 @@
 A comic page maker for the seapunk team:
 
 - panel grids that merge into any contiguous layout, plus break-out panels
-- per-panel images (mostly AI-generated)
+- per-panel images, generated in the app from a prompt in a saved art style, or uploaded
 - WYSIWYG captions, speech, thought, whisper and shout balloons, and SFX
 
 Comics are saved to Supabase. An MCP server lets Claude build and edit pages alongside you, and
@@ -22,6 +22,30 @@ in the Supabase dashboard: **Authentication → Users → Add user → Create ne
 
 `/local` works without an account and saves in that browser only. After signing in, the comics
 page offers to import that local comic.
+
+## Styles and generating images
+
+A **style** (the **Styles** tab) is up to 14 reference images plus a written description,
+a palette and an "avoid" list. Every account sees every style; only its maker can change it.
+
+- Mark each reference as a **style** image (sets the look), a **character** or an **object**,
+  and give characters and objects a name ("Mae") to use in prompts.
+- **Describe from references** asks Gemini to draft the description, palette and avoid list
+  from the images. Edit what it writes.
+
+Pick a style when you create a comic (**New comic**, or `N`), or later from the Inspector with
+nothing selected. The comic follows the style as it is edited: a change to a style applies to
+the next images generated in every comic using it.
+
+To generate, select a panel, press `G`, describe what happens in it, and press ⌘Enter. The
+image comes back at the supported shape nearest the panel's and fills it. The prompt stays on
+the panel, and every take is kept under **Takes** to switch back to (←/→, or click). Undo works
+as for any edit.
+
+Models: **Nano Banana 2** (the default) and **Nano Banana Pro** through the Gemini API, and
+**Grok Image 2.0**, **Marketing Studio Image**, **Qwen Image 3 (edit)** and **Soul V2** through
+Higgsfield. A model whose key is missing is not offered. Every attempt is logged in the
+`generations` table, with the exact prompt sent.
 
 ## Using it with Claude or ChatGPT (MCP)
 
@@ -62,6 +86,7 @@ The tools are:
 - **Panels:** `merge_panels`, `split_panel`, `add_free_panel`, `update_panel`
 - **Images:** `set_panel_image`, `remove_panel_image`
 - **Balloons:** `add_balloon`, `update_balloon`, `delete_balloon`
+- **Styles and generation:** `list_style_profiles`, `set_comic_style`, `generate_panel_image`
 - **Search and account:** `search`, `fetch` (the comic as a script, for deep research), `whoami`
 
 Each page is also available as the resource `comic://{id}/page/{n}`. Agents get the same
@@ -76,7 +101,15 @@ npm run dev                            # http://localhost:5173, uses .env.develo
 ```
 
 Create `.env.development.local` from `supabase status -o env`, with `PUBLIC_SUPABASE_URL` set to
-`API_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY` set to `PUBLISHABLE_KEY`. Create a local user
+`API_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY` set to `PUBLISHABLE_KEY`.
+
+Image generation reads server-side keys, in `.env.development.local` locally and with
+`vercel env add` for Production and Preview:
+
+- `GEMINI_API_KEY`: Gemini (Nano Banana models, and Describe from references)
+- `HF_API_KEY` and `HF_API_SECRET` (or `HF_CREDENTIALS=id:secret`): Higgsfield
+- `GENERATION_PROVIDER=fake`: every model returns a flat test image for free. The e2e tests
+  set this. Create a local user
 with Supabase Studio (http://127.0.0.1:54323) or the admin API.
 
 ```sh

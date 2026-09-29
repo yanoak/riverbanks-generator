@@ -28,7 +28,9 @@ export default defineConfig({
 		port: 4318,
 		env: {
 			PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL,
-			PUBLIC_SUPABASE_PUBLISHABLE_KEY: env.PUBLIC_SUPABASE_PUBLISHABLE_KEY
+			PUBLIC_SUPABASE_PUBLISHABLE_KEY: env.PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+			// Never spend money in tests: every image and describe call gets a stand-in.
+			GENERATION_PROVIDER: 'fake'
 		}
 	},
 	use: { baseURL: 'http://localhost:4318' },

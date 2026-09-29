@@ -192,8 +192,8 @@ Stages ship independently; each ends deployable.
       `generations`; integration tests for RLS
 - [x] `src/lib/styles/` data module: list, get, save, and add, remove or reorder references
       (browser upload straight to Storage, downscaled first)
-- [ ] `/styles` list and `/styles/[id]` editor pages, plus an account-menu link
-- [ ] "Describe from references": Gemini client, JSON schema, route, button
+- [x] `/styles` list and `/styles/[id]` editor pages, plus an account-menu link
+- [x] "Describe from references": Gemini client, JSON schema, route, button
 
 **Stage 2 — comics use a profile**
 

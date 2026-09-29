@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import AccountMenu from '$lib/components/AccountMenu.svelte';
+	import AppHeader from '$lib/components/AppHeader.svelte';
 	import PageView from '$lib/components/PageView.svelte';
 	import type { Comic } from '$lib/model/types';
 	import { useAssetBackend } from '$lib/persistence/assets.svelte';
@@ -67,11 +67,7 @@
 <svelte:window {onkeydown} />
 
 <div class="min-h-screen bg-stone-100 text-stone-900">
-	<header class="flex h-12 items-center border-b border-stone-200 bg-white px-4">
-		<span class="font-semibold tracking-tight">Riverbanks</span>
-		<div class="flex-1"></div>
-		<AccountMenu email={data.user.email} />
-	</header>
+	<AppHeader email={data.user.email} />
 
 	<main class="mx-auto max-w-5xl px-4 py-8">
 		<div class="mb-6 flex items-center">

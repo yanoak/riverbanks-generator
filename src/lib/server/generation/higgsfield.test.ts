@@ -8,7 +8,7 @@ const png = new Uint8Array([137, 80, 78, 71]);
 /** A scripted Higgsfield: submit, then each status in turn, then the image. */
 function server(statuses: object[]) {
 	const queue = [...statuses];
-	return vi.fn(async (input: string | URL, init?: RequestInit) => {
+	return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
 		const url = String(input);
 		if (init?.method === 'POST')
 			return Response.json({ status: 'queued', request_id: 'req-1', status_url: '…' });

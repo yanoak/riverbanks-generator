@@ -188,9 +188,9 @@ Stages ship independently; each ends deployable.
 
 **Stage 1 — profiles**
 
-- [ ] Migration: `style_profiles`, `style_refs`, the `style-refs` bucket and its policies,
+- [x] Migration: `style_profiles`, `style_refs`, the `style-refs` bucket and its policies,
       `generations`; integration tests for RLS
-- [ ] `src/lib/styles/` data module: list, get, save, and add, remove or reorder references
+- [x] `src/lib/styles/` data module: list, get, save, and add, remove or reorder references
       (browser upload straight to Storage, downscaled first)
 - [ ] `/styles` list and `/styles/[id]` editor pages, plus an account-menu link
 - [ ] "Describe from references": Gemini client, JSON schema, route, button

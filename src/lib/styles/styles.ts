@@ -35,6 +35,15 @@ export interface StyleProfile {
 	refs: StyleRef[];
 }
 
+/** Enough to pick a style from a list. */
+export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette'>;
+
+export const summarize = (p: StyleProfile): StyleSummary => ({
+	id: p.id,
+	name: p.name,
+	palette: p.palette
+});
+
 export type ProfilePatch = Partial<
 	Pick<StyleProfile, 'name' | 'style' | 'palette' | 'avoid' | 'model'>
 >;

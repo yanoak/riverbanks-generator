@@ -14,3 +14,13 @@ export async function waitForEditor(page: Page) {
 export async function waitForLive(page: Page) {
 	await expect(page.locator('[data-canvas][data-live="true"]')).toBeVisible();
 }
+
+/** From /comics: New comic → Create (no title, no style), then wait for the editor. */
+export async function newComic(page: Page) {
+	await page.getByRole('button', { name: '+ New comic' }).click();
+	await page
+		.getByRole('dialog', { name: 'New comic' })
+		.getByRole('button', { name: 'Create' })
+		.click();
+	await page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
+}

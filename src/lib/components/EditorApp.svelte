@@ -15,6 +15,7 @@
 	import { colorFor, displayName } from '$lib/collab/hold';
 	import type { DocumentSource } from '$lib/persistence/source';
 	import { onMount, type Snippet } from 'svelte';
+	import type { StyleSummary } from '$lib/styles/styles';
 
 	/** A cloud comic (`cloud`, synced live through Yjs) or the local one (`source`). */
 	let {
@@ -23,7 +24,8 @@
 		sharing,
 		initialPage = 1,
 		nav,
-		onrevoked
+		onrevoked,
+		styles
 	}: {
 		source?: DocumentSource;
 		cloud?: CloudDoc;
@@ -33,6 +35,8 @@
 		nav?: Snippet;
 		/** This user no longer has access (removed, or left). */
 		onrevoked?: () => void;
+		/** Cloud comics: the team's style profiles, for picking this comic's style. */
+		styles?: StyleSummary[];
 	} = $props();
 
 	let sharingOpen = $state(false);
@@ -269,7 +273,7 @@
 				<button class="zoom px-2" onclick={() => (editor.zoom = null)}>Fit</button>
 			</div>
 		</main>
-		<Inspector {editor} />
+		<Inspector {editor} {styles} />
 	</div>
 </div>
 

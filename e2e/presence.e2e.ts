@@ -1,6 +1,6 @@
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { createUser, signIn } from './support/accounts';
-import { openEditor, waitForEditor, waitForLive } from './support/editor';
+import { openEditor, waitForEditor, waitForLive, newComic } from './support/editor';
 
 async function session(browser: Browser, email: string) {
 	const context = await browser.newContext();
@@ -27,8 +27,7 @@ test('people see each other, their selections and carets; a moving balloon is he
 	const [ownerName, editorName] = [nameOf(ownerAccount.email), nameOf(editorAccount.email)];
 
 	const owner = await session(browser, ownerAccount.email);
-	await owner.page.getByRole('button', { name: '+ New comic' }).click();
-	await owner.page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
+	await newComic(owner.page);
 	await waitForEditor(owner.page);
 	await waitForLive(owner.page);
 	const path = new URL(owner.page.url()).pathname;

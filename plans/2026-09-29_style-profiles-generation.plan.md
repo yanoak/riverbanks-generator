@@ -199,8 +199,8 @@ Stages ship independently; each ends deployable.
 
 - [x] `styleProfileId` on the Y.Doc root and projection, and `prompt` on panels (ydoc
       read/write/diff and tests)
-- [ ] The New comic dialog on `/comics`, with a profile picker; `create` stores the id
-- [ ] Inspector page section: Style row with Change…, which sets it through an undoable patch
+- [x] The New comic dialog on `/comics`, with a profile picker; `create` stores the id
+- [x] Inspector page section: Style row with Change…, which sets it through an undoable patch
 
 **Stage 3 — generate with Gemini**
 

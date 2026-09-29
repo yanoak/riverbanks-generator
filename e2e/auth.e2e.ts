@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { waitForEditor } from './support/editor';
+import { waitForEditor, newComic } from './support/editor';
 import { createClient } from '@supabase/supabase-js';
 import { createUser, PASSWORD, signIn, uniqueEmail } from './support/accounts';
 
@@ -16,8 +16,7 @@ test('an admin-created account signs in, makes a comic, and keeps it across relo
 	await page.waitForURL('**/comics');
 	await expect(page.getByText('No comics yet')).toBeVisible();
 
-	await page.getByRole('button', { name: '+ New comic' }).click();
-	await page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
+	await newComic(page);
 	await waitForEditor(page);
 	const panels = page.locator('main [data-panel-id]');
 	await expect(panels).toHaveCount(12);
@@ -75,7 +74,10 @@ test('another account cannot open my comic', async ({ browser }) => {
 	const b = await createUser('intruder');
 	const pa = await (await browser.newContext()).newPage();
 	await signIn(pa, a.email);
+	// By keyboard: N opens New comic with the title focused, and Enter creates it.
 	await pa.keyboard.press('n');
+	await expect(pa.getByRole('textbox', { name: 'Title' })).toBeFocused();
+	await pa.keyboard.press('Enter');
 	await pa.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
 	const url = pa.url();
 

@@ -276,3 +276,18 @@ describe('Editor soft hold (someone else is moving it)', () => {
 		expect(editor.status).toBeNull();
 	});
 });
+
+describe('Editor.setStyle', () => {
+	it('sets and clears the comic’s style as one undoable step', () => {
+		const editor = new Editor();
+		editor.setStyle('style-1');
+		expect(editor.comic.styleProfileId).toBe('style-1');
+		editor.setStyle('style-1'); // unchanged: no extra step
+		editor.setStyle(undefined);
+		expect(editor.comic.styleProfileId).toBeUndefined();
+		editor.undo();
+		expect(editor.comic.styleProfileId).toBe('style-1');
+		editor.undo();
+		expect(editor.comic.styleProfileId).toBeUndefined();
+	});
+});

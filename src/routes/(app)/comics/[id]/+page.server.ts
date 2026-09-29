@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { listProfiles, summarize } from '$lib/styles/styles';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
@@ -7,7 +8,9 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		? await locals.supabase.from('comics').select('id, title').eq('id', params.id).maybeSingle()
 		: { data: null };
 	if (!data) error(404, 'Comic not found');
+	const styles = await listProfiles(locals.supabase).catch(() => []);
 	return {
+		styles: styles.map(summarize),
 		comic: { id: data.id as string, title: data.title as string },
 		page: Math.max(1, Number(url.searchParams.get('page')) || 1)
 	};

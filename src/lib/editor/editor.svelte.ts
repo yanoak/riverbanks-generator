@@ -161,6 +161,15 @@ export class Editor {
 		this.change('Rename', (d) => (d.title = trimmed), { origin: TITLE });
 	}
 
+	/** Pick the style profile generations follow (undefined: none). Undoable. */
+	setStyle(profileId: string | undefined): void {
+		if (profileId === this.comic.styleProfileId) return;
+		this.change(profileId ? 'Change style' : 'Remove style', (d) => {
+			if (profileId) d.styleProfileId = profileId;
+			else delete d.styleProfileId;
+		});
+	}
+
 	say(message: string | null): void {
 		this.status = message;
 	}

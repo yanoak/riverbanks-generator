@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
+	import StyleChoices from '$lib/components/StyleChoices.svelte';
 	import PageView from '$lib/components/PageView.svelte';
 	import type { Comic } from '$lib/model/types';
 	import { useAssetBackend } from '$lib/persistence/assets.svelte';
@@ -18,7 +19,8 @@
 	let importing = $state(false);
 	let confirmDelete = $state<string | null>(null);
 	let renaming = $state<string | null>(null);
-	let createForm = $state<HTMLFormElement>();
+	let creating = $state(false);
+	let newStyle = $state('');
 
 	const mine = $derived(data.comics.filter((c) => !c.sharedBy));
 	const shared = $derived(data.comics.filter((c) => c.sharedBy));
@@ -57,7 +59,7 @@
 		const t = e.target as HTMLElement;
 		if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !['INPUT', 'TEXTAREA'].includes(t.tagName)) {
 			e.preventDefault();
-			createForm?.requestSubmit();
+			creating = true;
 		}
 	}
 	const THUMB = 180;
@@ -72,14 +74,14 @@
 	<main class="mx-auto max-w-5xl px-4 py-8">
 		<div class="mb-6 flex items-center">
 			<h1 class="flex-1 text-2xl font-semibold">My comics</h1>
-			<form method="POST" action="?/create" bind:this={createForm} use:enhance>
-				<button
-					class="rounded bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800"
-					title="New comic (N)"
-				>
-					+ New comic
-				</button>
-			</form>
+			<button
+				class="rounded bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800"
+				title="New comic (N)"
+				data-new-comic
+				onclick={() => (creating = true)}
+			>
+				+ New comic
+			</button>
 		</div>
 
 		{#if page.url.searchParams.get('notice') === 'no-access'}
@@ -131,6 +133,42 @@
 		{/if}
 	</main>
 </div>
+
+{#if creating}
+	<dialog
+		class="m-auto w-96 rounded-lg p-0 shadow-xl backdrop:bg-black/30"
+		aria-label="New comic"
+		{@attach (d) => d.showModal()}
+		onclose={() => {
+			creating = false;
+			document.querySelector<HTMLElement>('[data-new-comic]')?.focus();
+		}}
+	>
+		<form method="POST" action="?/create" class="p-4 text-sm" use:enhance>
+			<h2 class="mb-3 font-semibold">New comic</h2>
+			<label class="mb-4 block">
+				<span class="mb-1 block text-xs text-stone-500">Title</span>
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					name="title"
+					autofocus
+					placeholder="Untitled comic"
+					class="w-full rounded border border-stone-300 px-2 py-1.5"
+				/>
+			</label>
+			<p class="mb-1 text-xs text-stone-500">Style</p>
+			<StyleChoices styles={data.styles} bind:value={newStyle} />
+			<div class="mt-4 flex justify-end gap-2">
+				<button
+					type="button"
+					class="rounded border border-stone-300 px-3 py-1.5"
+					onclick={(e) => e.currentTarget.closest('dialog')?.close()}>Cancel</button
+				>
+				<button class="rounded bg-stone-900 px-3 py-1.5 font-medium text-white">Create</button>
+			</div>
+		</form>
+	</dialog>
+{/if}
 
 {#snippet card(comic: (typeof data.comics)[number])}
 	<li class="group">

@@ -9,6 +9,9 @@
 	import AlignCenter from '@lucide/svelte/icons/align-center';
 	import AlignRight from '@lucide/svelte/icons/align-right';
 	import { LETTERING_FONT, SFX_FONT } from '$lib/model/balloons';
+	import type { StyleSummary } from '$lib/styles/styles';
+	import StyleDialog from './StyleDialog.svelte';
+	import { tick } from 'svelte';
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
 
@@ -43,7 +46,11 @@
 		{ label: 'right', title: 'Align right', icon: AlignRight, ...align('right') }
 	];
 
-	let { editor }: { editor: Editor } = $props();
+	let { editor, styles }: { editor: Editor; styles?: StyleSummary[] } = $props();
+
+	let choosingStyle = $state(false);
+	const styleId = $derived(editor.comic.styleProfileId);
+	const style = $derived(styles?.find((s) => s.id === styleId));
 
 	const panel = $derived(editor.selectedPanels.length === 1 ? editor.selectedPanels[0] : undefined);
 
@@ -222,6 +229,26 @@
 		<h2 class="section">{editor.selectedPanels.length} panels</h2>
 		<button class="btn" onclick={() => editor.merge()}>Merge panels</button>
 	{:else}
+		{#if styles}
+			<h2 class="section">Comic</h2>
+			<div class="row mb-3">
+				<span>Style</span>
+				<span class="flex min-w-0 items-center gap-2">
+					<span class="truncate {styleId && !style ? 'text-amber-700' : ''}" data-comic-style>
+						{#if style}
+							<a class="hover:underline" href="/styles/{style.id}" target="_blank">{style.name}</a>
+						{:else}
+							{styleId ? 'Style deleted' : 'None'}
+						{/if}
+					</span>
+					<button
+						class="shrink-0 rounded border border-stone-300 px-2 py-0.5 text-xs hover:bg-stone-50"
+						data-change-style
+						onclick={() => (choosingStyle = true)}>Change…</button
+					>
+				</span>
+			</div>
+		{/if}
 		<h2 class="section">Page {editor.pageIndex + 1}</h2>
 		{#each [['rows', 'Rows', 1, 12], ['cols', 'Columns', 1, 12], ['gutter', 'Gutter', 0, 80], ['margin', 'Margin', 0, 200]] as const as [key, label, min, max] (key)}
 			<label class="row">
@@ -241,6 +268,20 @@
 		</p>
 	{/if}
 </aside>
+
+{#if choosingStyle && styles}
+	<StyleDialog
+		{styles}
+		current={style ? styleId : undefined}
+		onpick={(id) => editor.setStyle(id)}
+		onclose={async () => {
+			choosingStyle = false;
+			// Once the modal is gone: until then everything outside it is inert.
+			await tick();
+			document.querySelector<HTMLElement>('[data-change-style]')?.focus();
+		}}
+	/>
+{/if}
 
 <style lang="postcss">
 	@reference "../../routes/layout.css";

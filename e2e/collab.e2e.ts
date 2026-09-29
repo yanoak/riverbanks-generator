@@ -1,6 +1,6 @@
 import { expect, test, type Browser } from '@playwright/test';
 import { createUser, signIn } from './support/accounts';
-import { openEditor, waitForEditor, waitForLive } from './support/editor';
+import { openEditor, waitForEditor, waitForLive, newComic } from './support/editor';
 
 /** A separate browser session (its own cookies and connection), signed in as `email`. */
 async function session(browser: Browser, email: string) {
@@ -16,8 +16,7 @@ test('two editors on one comic see each other’s edits live; offline edits sync
 }) => {
 	const { email } = await createUser('collab');
 	const a = await session(browser, email);
-	await a.page.getByRole('button', { name: '+ New comic' }).click();
-	await a.page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
+	await newComic(a.page);
 	await waitForEditor(a.page);
 	await waitForLive(a.page);
 	const path = new URL(a.page.url()).pathname;

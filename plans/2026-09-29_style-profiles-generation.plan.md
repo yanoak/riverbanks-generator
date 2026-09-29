@@ -220,7 +220,7 @@ Stages ship independently; each ends deployable.
 
 **Stage 5 — MCP**
 
-- [ ] Tools: `list_style_profiles`, `set_comic_style`, `generate_panel_image` (writes the image
+- [x] Tools: `list_style_profiles`, `set_comic_style`, `generate_panel_image` (writes the image
       on the server)
 - [ ] README: profiles, generation, keys; the diary; deploy with `supabase db push` and the env
       vars

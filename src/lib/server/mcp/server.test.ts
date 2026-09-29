@@ -2,11 +2,30 @@ import { describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { MemoryStore } from '$lib/ops/memory-store';
+import { loadComic } from '$lib/ops/ops';
+import type { GenerateInput } from '$lib/server/generation/generate';
+import type { StyleProfile } from '$lib/styles/styles';
 import { createMcpServer } from './server';
+
+const INK: StyleProfile = {
+	id: '11111111-1111-4111-8111-111111111111',
+	createdBy: 'user-2',
+	creatorEmail: 'ak@test.local',
+	name: 'Tidewater ink',
+	style: 'Loose brush ink',
+	palette: [{ hex: '#1d3557', name: 'deep navy' }],
+	avoid: 'gradients',
+	model: null,
+	updatedAt: '2026-09-29T00:00:00Z',
+	refs: [
+		{ id: 'r1', profileId: 'p', role: 'character', label: 'Mae', sort: 0, width: 1, height: 1 }
+	]
+};
 
 async function connect() {
 	const store = new MemoryStore();
 	const imported: string[] = [];
+	const generated: GenerateInput[] = [];
 	const server = createMcpServer({
 		store,
 		user: { id: 'user-1', email: 'yan@test.local' },
@@ -14,6 +33,20 @@ async function connect() {
 		importImage: async (_comicId, { url }) => {
 			imported.push(url ?? 'base64');
 			return { assetId: 'asset-1', naturalWidth: 800, naturalHeight: 600 };
+		},
+		listStyles: async () => [INK],
+		generate: async (input) => {
+			if (input.prompt === 'fail') throw new Error('Gemini: quota exceeded');
+			generated.push(input);
+			return {
+				generationId: 'gen-1',
+				assetId: 'generated-1',
+				naturalWidth: 1600,
+				naturalHeight: 900,
+				aspect: '16:9',
+				model: input.modelKey ?? 'gemini-flash',
+				dropped: 0
+			};
 		}
 	});
 	const [a, b] = InMemoryTransport.createLinkedPair();
@@ -27,7 +60,7 @@ async function connect() {
 		};
 		return { text: res.content[0].text, isError: !!res.isError, structured: res.structuredContent };
 	};
-	return { client, call, store, imported };
+	return { client, call, store, imported, generated };
 }
 
 describe('Riverbanks MCP server', () => {
@@ -51,6 +84,9 @@ describe('Riverbanks MCP server', () => {
 				'rename_comic',
 				'set_grid',
 				'set_panel_image',
+				'list_style_profiles',
+				'set_comic_style',
+				'generate_panel_image',
 				'split_panel',
 				'search',
 				'fetch',
@@ -67,7 +103,15 @@ describe('Riverbanks MCP server', () => {
 		const by = Object.fromEntries(tools.map((t) => [t.name, t.annotations ?? {}]));
 		for (const t of tools) expect(t.annotations, `${t.name} has annotations`).toBeDefined();
 
-		for (const read of ['list_comics', 'get_comic', 'search', 'fetch', 'whoami']) {
+		expect(by.generate_panel_image.openWorldHint).toBe(true);
+		for (const read of [
+			'list_comics',
+			'get_comic',
+			'search',
+			'fetch',
+			'whoami',
+			'list_style_profiles'
+		]) {
 			expect(by[read].readOnlyHint, read).toBe(true);
 		}
 		for (const del of ['delete_comic', 'delete_page', 'delete_balloon', 'remove_panel_image']) {
@@ -82,6 +126,85 @@ describe('Riverbanks MCP server', () => {
 		expect(by.list_comics.openWorldHint).toBe(false);
 		expect(by.rename_comic.idempotentHint).toBe(true);
 		expect(by.add_balloon.idempotentHint).toBe(false);
+	});
+
+	describe('styles and generation', () => {
+		it('lists the team’s styles with what an agent needs to prompt well', async () => {
+			const { call } = await connect();
+			const styles = JSON.parse((await call('list_style_profiles')).text);
+			expect(styles).toEqual([
+				{
+					id: INK.id,
+					name: 'Tidewater ink',
+					style: 'Loose brush ink',
+					palette: [{ hex: '#1d3557', name: 'deep navy' }],
+					avoid: 'gradients',
+					model: null,
+					references: [{ role: 'character', label: 'Mae' }]
+				}
+			]);
+		});
+
+		it('sets and clears a comic’s style; an unknown style is refused', async () => {
+			const { call, store } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Sediment' })).text);
+			const set = await call('set_comic_style', { comicId: id, styleProfileId: INK.id });
+			expect(set.text).toMatch(/Style set to Tidewater ink\. \(rev \d+\)/);
+			expect((await loadComic(store, id)).comic.styleProfileId).toBe(INK.id);
+			expect(JSON.parse((await call('get_comic', { comicId: id })).text).style).toEqual({
+				id: INK.id,
+				name: 'Tidewater ink'
+			});
+
+			const bad = await call('set_comic_style', { comicId: id, styleProfileId: 'nope' });
+			expect(bad).toMatchObject({ isError: true, text: expect.stringMatching(/No style/) });
+
+			await call('set_comic_style', { comicId: id, styleProfileId: null });
+			expect((await loadComic(store, id)).comic.styleProfileId).toBeUndefined();
+		});
+
+		it('generates into a panel in the comic’s style, filling it, and keeps the prompt', async () => {
+			const { call, store, generated } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Sediment' })).text);
+			await call('set_comic_style', { comicId: id, styleProfileId: INK.id });
+			const panelId = (await loadComic(store, id)).comic.pages[0].panels[0].id;
+
+			const res = await call('generate_panel_image', {
+				comicId: id,
+				page: 1,
+				panelId,
+				prompt: 'Mae on the raft at dawn'
+			});
+			expect(res.isError).toBe(false);
+			expect(res.text).toMatch(/Generated a 16:9 image with gemini-flash .* \(rev \d+\)/);
+			expect(generated[0]).toMatchObject({
+				comicId: id,
+				panelId,
+				prompt: 'Mae on the raft at dawn',
+				profileId: INK.id
+			});
+			expect(generated[0].box.w).toBeGreaterThan(0);
+
+			const panel = (await loadComic(store, id)).comic.pages[0].panels.find(
+				(p) => p.id === panelId
+			)!;
+			expect(panel.image).toMatchObject({ assetId: 'generated-1', naturalWidth: 1600 });
+			expect(panel.prompt).toBe('Mae on the raft at dawn');
+		});
+
+		it('a failed generation is a readable tool error and changes nothing', async () => {
+			const { call, store } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'x' })).text);
+			const panelId = (await loadComic(store, id)).comic.pages[0].panels[0].id;
+			const res = await call('generate_panel_image', {
+				comicId: id,
+				page: 1,
+				panelId,
+				prompt: 'fail'
+			});
+			expect(res).toMatchObject({ isError: true, text: expect.stringContaining('quota exceeded') });
+			expect((await loadComic(store, id)).comic.pages[0].panels[0].image).toBeUndefined();
+		});
 	});
 
 	it('builds a page the way an agent would', async () => {

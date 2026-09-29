@@ -70,6 +70,18 @@ test('an MCP agent edits a comic that is open in the editor, live', async ({ pag
 	await expect(text).toHaveText('HELLO FROM CLAUDE');
 	await expect(text.locator('strong')).toHaveText('CLAUDE');
 
+	// Agent generates the big panel's image (the fake provider here); the editor shows it and
+	// the prompt, as it would any edit.
+	await expect(page.locator('main img')).toHaveCount(0);
+	const made = await call('generate_panel_image', {
+		comicId: id,
+		page: 1,
+		panelId: big.id,
+		prompt: 'A heron over the river'
+	});
+	expect(made).toMatch(/Generated a \d+:\d+ image/);
+	await expect(page.locator('main img').first()).toBeVisible();
+
 	// A local edit and an agent edit at the same moment both survive: no conflict, no overwrite.
 	await panels.nth(3).click();
 	await page.keyboard.press('Shift+ArrowDown');

@@ -12,6 +12,9 @@ import { comicScript, searchComic } from '$lib/ops/script';
 import { loadComic, mutateComic, OpError } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
 import type { ComicStore } from '$lib/ops/store';
+import { panelBox } from '$lib/geometry/panel';
+import type { GenerateInput, GenerateResult } from '$lib/server/generation/generate';
+import type { StyleProfile } from '$lib/styles/styles';
 
 export interface ImportedImage {
 	assetId: string;
@@ -35,6 +38,10 @@ export interface McpContext {
 	) => Promise<ImportedImage>;
 	/** Public origin of the app, for view links. */
 	appUrl: string;
+	/** The team's style profiles. */
+	listStyles: () => Promise<StyleProfile[]>;
+	/** Generate a panel image into the comic's folder (not yet placed). */
+	generate: (input: GenerateInput) => Promise<GenerateResult>;
 }
 
 const page = z.number().int().min(1).describe('1-based page number');
@@ -146,7 +153,20 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		async ({ comicId }) =>
 			guard(async () => {
 				const { record, comic } = await loadComic(store, comicId);
-				return json(describeComic(comic, { id: record.id, rev: record.rev, appUrl: ctx.appUrl }));
+				const described = describeComic(comic, {
+					id: record.id,
+					rev: record.rev,
+					appUrl: ctx.appUrl
+				});
+				const style = comic.styleProfileId
+					? (await ctx.listStyles()).find((s) => s.id === comic.styleProfileId)
+					: undefined;
+				return json({
+					...described,
+					style: comic.styleProfileId
+						? { id: comic.styleProfileId, name: style?.name ?? '(deleted)' }
+						: null
+				});
 			})
 	);
 
@@ -325,6 +345,116 @@ export function createMcpServer(ctx: McpContext): McpServer {
 					ops.setPanelImage(c, { page: n, panelId, image, fit })
 				);
 				return text(`${summary} (rev ${rev})`);
+			})
+	);
+
+	// --- styles and generation ------------------------------------------------------------
+
+	server.registerTool(
+		'list_style_profiles',
+		{
+			annotations: READ,
+			title: 'List style profiles',
+			description:
+				'The team’s art styles: written style, palette, things to avoid, and reference images (role and name). A comic with a style generates every image in it. Name characters and objects from the references in prompts.'
+		},
+		async () =>
+			guard(async () =>
+				json(
+					(await ctx.listStyles()).map((s) => ({
+						id: s.id,
+						name: s.name,
+						style: s.style,
+						palette: s.palette,
+						avoid: s.avoid,
+						model: s.model,
+						references: s.refs.map((r) => ({ role: r.role, label: r.label }))
+					}))
+				)
+			)
+	);
+
+	server.registerTool(
+		'set_comic_style',
+		{
+			annotations: UPDATE,
+			title: 'Set comic style',
+			description:
+				'Choose the style profile generated images in this comic follow, or null for none.',
+			inputSchema: { comicId: z.string(), styleProfileId: z.string().nullable() }
+		},
+		async ({ comicId, styleProfileId }) =>
+			guard(async () => {
+				const style = styleProfileId
+					? (await ctx.listStyles()).find((s) => s.id === styleProfileId)
+					: undefined;
+				if (styleProfileId && !style)
+					throw new OpError('invalid', 'No style with that id; see list_style_profiles.');
+				const { rev, summary } = await mutateComic(store, comicId, (c) => {
+					if (style) c.styleProfileId = style.id;
+					else delete c.styleProfileId;
+					return style ? `Style set to ${style.name}.` : 'Style removed.';
+				});
+				return text(`${summary} (rev ${rev})`);
+			})
+	);
+
+	server.registerTool(
+		'generate_panel_image',
+		{
+			annotations: { ...WRITE, openWorldHint: true },
+			title: 'Generate panel image',
+			description:
+				'Generate an image for a panel from a prompt, in the comic’s style (its references are attached automatically), at the aspect ratio nearest the panel’s, and fill the panel with it. Describe only what happens in the panel: the style, palette and “no lettering” are added for you, and balloons are separate. Takes 10–60 s.',
+			inputSchema: {
+				comicId: z.string(),
+				page,
+				panelId: z.string(),
+				prompt: z.string().min(1).max(4000),
+				model: z
+					.string()
+					.optional()
+					.describe(
+						'Model key, e.g. gemini-flash (default), gemini-pro, hf-grok-image-2. Defaults to the style’s model.'
+					)
+			}
+		},
+		async ({ comicId, page: n, panelId, prompt, model }) =>
+			guard(async () => {
+				const { comic } = await loadComic(store, comicId);
+				const at = ops.pageAt(comic, n);
+				const target = at.panels.find((p) => p.id === panelId);
+				if (!target) throw new OpError('invalid', `Page ${n} has no panel ${panelId}.`);
+				let made: GenerateResult;
+				try {
+					made = await ctx.generate({
+						comicId,
+						panelId,
+						prompt,
+						profileId: comic.styleProfileId,
+						modelKey: model,
+						box: panelBox(at, target)
+					});
+				} catch (e) {
+					if (e instanceof OpError) throw e;
+					throw new OpError('invalid', (e as Error).message);
+				}
+				const image = {
+					assetId: made.assetId,
+					naturalWidth: made.naturalWidth,
+					naturalHeight: made.naturalHeight
+				};
+				const { rev } = await mutateComic(store, comicId, (c) => {
+					ops.setPanelImage(c, { page: n, panelId, image });
+					ops.pageAt(c, n).panels.find((p) => p.id === panelId)!.prompt = prompt.trim();
+					return '';
+				});
+				const note = made.dropped
+					? ` ${made.dropped} reference image(s) did not fit this model.`
+					: '';
+				return text(
+					`Generated a ${made.aspect} image with ${made.model} and filled panel ${panelId}.${note} (rev ${rev})`
+				);
 			})
 	);
 

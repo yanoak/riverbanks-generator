@@ -7,6 +7,9 @@ import { supabaseEnv } from '$lib/server/supabase-env';
 import { bearerToken, CORS, unauthorized, verifyAccessToken } from '$lib/server/mcp/auth';
 import { importImage } from '$lib/server/mcp/images';
 import { createMcpServer } from '$lib/server/mcp/server';
+import { generatePanelImage } from '$lib/server/generation/generate';
+import { providerFor } from '$lib/server/generation/providers';
+import { listProfiles } from '$lib/styles/styles';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import type { RequestHandler } from './$types';
 
@@ -30,7 +33,10 @@ const handle: RequestHandler = async ({ request, url }) => {
 		store: new SupabaseComicStore(supabase),
 		user: { id: user.userId, email: user.email },
 		importImage: (comicId, source) => importImage(supabase, comicId, source),
-		appUrl: url.origin
+		appUrl: url.origin,
+		listStyles: () => listProfiles(supabase),
+		generate: (input) =>
+			generatePanelImage(supabase, input, { provider: providerFor, signal: request.signal })
 	});
 	const transport = new WebStandardStreamableHTTPServerTransport({
 		sessionIdGenerator: undefined,
@@ -49,6 +55,9 @@ const handle: RequestHandler = async ({ request, url }) => {
 	for (const [k, v] of Object.entries(CORS)) response.headers.set(k, v);
 	return response;
 };
+
+// generate_panel_image waits on the image model (Higgsfield's queue can take minutes).
+export const config = { maxDuration: 300 };
 
 export const GET = handle;
 export const POST = handle;

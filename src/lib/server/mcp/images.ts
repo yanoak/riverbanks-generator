@@ -91,6 +91,11 @@ export async function readImage(
 		if (bytes.byteLength > MAX_BYTES)
 			throw new OpError('invalid', 'Images must be 10 MB or smaller.');
 	}
+	return measureImage(bytes, mimeType);
+}
+
+/** Check the bytes really are a supported image, and read its size and type. */
+export function measureImage(bytes: Uint8Array, mimeType = ''): ReadImage {
 	let size: { width?: number; height?: number; type?: string };
 	try {
 		size = imageSize(bytes);

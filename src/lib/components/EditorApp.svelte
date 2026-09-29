@@ -16,6 +16,7 @@
 	import type { DocumentSource } from '$lib/persistence/source';
 	import { onMount, type Snippet } from 'svelte';
 	import type { StyleSummary } from '$lib/styles/styles';
+	import type { ModelOption } from '$lib/generation/models';
 
 	/** A cloud comic (`cloud`, synced live through Yjs) or the local one (`source`). */
 	let {
@@ -25,7 +26,8 @@
 		initialPage = 1,
 		nav,
 		onrevoked,
-		styles
+		styles,
+		models
 	}: {
 		source?: DocumentSource;
 		cloud?: CloudDoc;
@@ -37,7 +39,15 @@
 		onrevoked?: () => void;
 		/** Cloud comics: the team's style profiles, for picking this comic's style. */
 		styles?: StyleSummary[];
+		/** Cloud comics: the image models this server can use. */
+		models?: ModelOption[];
 	} = $props();
+
+	const gen = $derived(
+		cloud && sharing && models
+			? { comicId: cloud.id, supabase: sharing.supabase, models }
+			: undefined
+	);
 
 	let sharingOpen = $state(false);
 	function closeSharing() {
@@ -273,7 +283,7 @@
 				<button class="zoom px-2" onclick={() => (editor.zoom = null)}>Fit</button>
 			</div>
 		</main>
-		<Inspector {editor} {styles} />
+		<Inspector {editor} {styles} {gen} />
 	</div>
 </div>
 

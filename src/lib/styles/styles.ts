@@ -36,12 +36,13 @@ export interface StyleProfile {
 }
 
 /** Enough to pick a style from a list. */
-export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette'>;
+export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette' | 'model'>;
 
 export const summarize = (p: StyleProfile): StyleSummary => ({
 	id: p.id,
 	name: p.name,
-	palette: p.palette
+	palette: p.palette,
+	model: p.model
 });
 
 export type ProfilePatch = Partial<

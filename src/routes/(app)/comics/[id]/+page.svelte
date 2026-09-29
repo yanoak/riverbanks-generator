@@ -21,6 +21,7 @@
 	<EditorApp
 		{cloud}
 		styles={data.styles}
+		models={data.models}
 		sharing={{ supabase, userId: data.user.id, email: data.user.email }}
 		initialPage={data.page}
 		onrevoked={() => goto('/comics?notice=no-access', { replaceState: true })}

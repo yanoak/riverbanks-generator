@@ -1,4 +1,6 @@
 import { error } from '@sveltejs/kit';
+import { availableModels, toOption } from '$lib/generation/models';
+import { configuredProviders } from '$lib/server/generation/providers';
 import { listProfiles, summarize } from '$lib/styles/styles';
 import type { PageServerLoad } from './$types';
 
@@ -11,6 +13,9 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const styles = await listProfiles(locals.supabase).catch(() => []);
 	return {
 		styles: styles.map(summarize),
+		models: availableModels(configuredProviders())
+			.filter((m) => m.provider !== 'fake')
+			.map(toOption),
 		comic: { id: data.id as string, title: data.title as string },
 		page: Math.max(1, Number(url.searchParams.get('page')) || 1)
 	};

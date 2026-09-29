@@ -11,6 +11,7 @@
 	import { LETTERING_FONT, SFX_FONT } from '$lib/model/balloons';
 	import type { StyleSummary } from '$lib/styles/styles';
 	import StyleDialog from './StyleDialog.svelte';
+	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
 	import { tick } from 'svelte';
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
@@ -46,7 +47,11 @@
 		{ label: 'right', title: 'Align right', icon: AlignRight, ...align('right') }
 	];
 
-	let { editor, styles }: { editor: Editor; styles?: StyleSummary[] } = $props();
+	let {
+		editor,
+		styles,
+		gen
+	}: { editor: Editor; styles?: StyleSummary[]; gen?: GenerationContext } = $props();
 
 	let choosingStyle = $state(false);
 	const styleId = $derived(editor.comic.styleProfileId);
@@ -168,6 +173,13 @@
 				? `${panel.cells.length} cell${panel.cells.length > 1 ? 's' : ''}`
 				: 'Free panel'}
 		</p>
+		{#if gen}
+			{#key panel.id}
+				<GeneratePanel {editor} {panel} {gen} {style} />
+			{/key}
+		{:else}
+			<p class="mb-3 text-xs text-stone-500">Sign in to generate images from a prompt.</p>
+		{/if}
 		<h3 class="mt-1 mb-1 text-xs text-stone-500">Image</h3>
 		{#if panel.image}
 			<div class="mb-2 grid grid-cols-2 gap-2">

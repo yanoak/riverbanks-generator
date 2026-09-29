@@ -291,3 +291,28 @@ describe('Editor.setStyle', () => {
 		expect(editor.comic.styleProfileId).toBeUndefined();
 	});
 });
+
+describe('Editor.placeStoredImage', () => {
+	const stored = { assetId: 'gen-1', naturalWidth: 1600, naturalHeight: 900 };
+
+	it('fills the panel, on whatever page it is, with its prompt, as one undo step', () => {
+		const editor = new Editor();
+		const panelId = editor.page.panels[0].id;
+		editor.addPage();
+		expect(editor.pageIndex).toBe(1);
+		expect(editor.placeStoredImage(panelId, stored, { prompt: 'a heron' })).toBe(true);
+		const panel = editor.comic.pages[0].panels.find((p) => p.id === panelId)!;
+		expect(panel.image).toMatchObject({ assetId: 'gen-1', naturalWidth: 1600 });
+		expect(panel.image!.scale).toBeGreaterThan(0);
+		expect(panel.prompt).toBe('a heron');
+		editor.undo();
+		const undone = editor.comic.pages[0].panels.find((p) => p.id === panelId)!;
+		expect(undone.image).toBeUndefined();
+		expect(undone.prompt).toBeUndefined();
+	});
+
+	it('a panel that has gone is reported, not an error', () => {
+		const editor = new Editor();
+		expect(editor.placeStoredImage('gone', stored)).toBe(false);
+	});
+});

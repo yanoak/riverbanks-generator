@@ -157,3 +157,6 @@ create policy "Starters finish generations" on public.generations
   for update to authenticated
   using (created_by = (select auth.uid()) and public.can_access_comic(comic_id))
   with check (created_by = (select auth.uid()));
+
+-- Generated panels come back as 2K PNGs, which can run past the original 10 MB.
+update storage.buckets set file_size_limit = 25 * 1024 * 1024 where id = 'assets';

@@ -59,3 +59,14 @@ export const modelFor = (key: string | null | undefined) => MODELS.find((m) => m
 
 export const availableModels = (providers: Set<Provider>) =>
 	MODELS.filter((m) => providers.has(m.provider));
+
+/** What the browser needs to offer a model. */
+export type ModelOption = Pick<ModelInfo, 'key' | 'label' | 'note' | 'aspects' | 'maxRefs'>;
+
+export const toOption = ({ key, label, note, aspects, maxRefs }: ModelInfo): ModelOption => ({
+	key,
+	label,
+	note,
+	aspects,
+	maxRefs
+});

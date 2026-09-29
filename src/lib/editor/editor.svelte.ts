@@ -387,6 +387,27 @@ export class Editor {
 		this.select({ kind: 'panels', ids: [panelId] });
 	}
 
+	/**
+	 * Place an image that is already stored (a generated one) in a panel on any page, filling
+	 * it, with `extra` fields (its prompt) in the same undo step. False if the panel has gone.
+	 */
+	placeStoredImage(
+		panelId: string,
+		stored: { assetId: string; naturalWidth: number; naturalHeight: number },
+		extra: Partial<Panel> = {},
+		description = 'Generate image'
+	): boolean {
+		const at = this.comic.pages.find((p) => p.panels.some((q) => q.id === panelId));
+		if (!at) return false;
+		this.change(description, (d) => {
+			const page = d.pages.find((p) => p.id === at.id)!;
+			const panel = page.panels.find((p) => p.id === panelId)!;
+			const placement = fitImage(stored, panelBox(page, panel), 'fill');
+			Object.assign(panel, extra, { image: { ...stored, ...placement } });
+		});
+		return true;
+	}
+
 	removeImage(panel: Panel): void {
 		if (panel.image) this.patch('Remove image', panel.id, { image: undefined });
 	}

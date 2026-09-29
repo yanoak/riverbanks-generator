@@ -74,6 +74,11 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 	if (key === 'Delete' || key === 'Backspace') return (editor.deleteSelection(), true);
 	if (key === ']') return (editor.reorder('front'), true);
 	if (key === '[') return (editor.reorder('back'), true);
+	if (key === 'g' && editor.selectedPanels.length === 1) {
+		// The Inspector's prompt for this panel (cloud comics only).
+		const prompt = document.querySelector<HTMLElement>('[data-prompt]');
+		if (prompt) return (prompt.focus(), true);
+	}
 	if (key === 'p') {
 		const id = editor.addFreePanel();
 		focusElement(id);

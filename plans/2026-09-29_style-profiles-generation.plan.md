@@ -204,12 +204,12 @@ Stages ship independently; each ends deployable.
 
 **Stage 3 — generate with Gemini**
 
-- [ ] `models.ts` registry, `nearestAspect`, `composePrompt` (test-first)
-- [ ] Provider interface, Gemini provider, fake provider
-- [ ] `POST /api/generate`: generations row, references, provider, store, respond
-- [ ] Inspector Generate block: prompt (saved to the panel on blur), model picker, Generate
+- [x] `models.ts` registry, `nearestAspect`, `composePrompt` (test-first)
+- [x] Provider interface, Gemini provider, fake provider
+- [x] `POST /api/generate`: generations row, references, provider, store, respond
+- [x] Inspector Generate block: prompt (saved to the panel on blur), model picker, Generate
       (⌘Enter), spinner, error, a strip of takes (`GET /api/generations?comic&panel`)
-- [ ] Hide the generation UI in `/local`; show "Sign in to generate"
+- [x] Hide the generation UI in `/local`; show "Sign in to generate"
 
 **Stage 4 — Higgsfield**
 

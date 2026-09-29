@@ -4,6 +4,7 @@
 	import X from '@lucide/svelte/icons/x';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import AppHeader from '$lib/components/AppHeader.svelte';
+	import { DEFAULT_MODEL } from '$lib/generation/models';
 	import { downscale } from '$lib/styles/downscale';
 	import {
 		MAX_REFS,
@@ -30,6 +31,7 @@
 	let style = $state(initial.style);
 	let palette = $state<PaletteColor[]>(initial.palette);
 	let avoid = $state(initial.avoid);
+	let model = $state(initial.model ?? '');
 	let refs = $state<StyleRef[]>(initial.refs);
 	// svelte-ignore state_referenced_locally
 	let urls = $state<Record<string, string>>({ ...data.thumbs });
@@ -402,6 +404,27 @@
 					{readonly}
 					oninput={() => queue({ avoid })}
 				/>
+			</section>
+
+			<section>
+				<label class="section block" for="model">Default model</label>
+				<select
+					id="model"
+					class="field"
+					bind:value={model}
+					disabled={readonly}
+					onchange={() => queue({ model: model || null })}
+				>
+					<option value=""
+						>App default ({data.models.find((m) => m.key === DEFAULT_MODEL)?.label})</option
+					>
+					{#each data.models as m (m.key)}
+						<option value={m.key}>{m.label}{m.note ? ` — ${m.note}` : ''}</option>
+					{/each}
+				</select>
+				<p class="mt-1 text-xs text-stone-500">
+					Comics with this style start on this model; anyone can switch per panel.
+				</p>
 			</section>
 		</fieldset>
 	</main>

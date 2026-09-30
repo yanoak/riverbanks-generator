@@ -132,6 +132,10 @@ create table public.generations (
   prompt text not null check (char_length(prompt) <= 4000),
   full_prompt text not null,
   aspect text not null,
+  -- Drafts are small and cheap; a print version redraws a chosen image at 4K.
+  quality text not null default 'draft' check (quality in ('draft', 'print')),
+  -- For a print version, the image it was redrawn from.
+  source_asset_id text,
   status text not null default 'running' check (status in ('running', 'done', 'failed')),
   error text,
   asset_id text,

@@ -27,6 +27,7 @@ const request = (extra = {}) => ({
 		{ bytes: png, mimeType: 'image/png', url: 'https://storage.example/ref-2' }
 	],
 	aspect: '16:9',
+	size: '2k',
 	...extra
 });
 
@@ -66,12 +67,13 @@ describe('higgsfieldProvider', () => {
 			{ status: 'completed', images: [{ url: 'https://cdn.example/out.png' }] }
 		]);
 		const done = higgsfieldProvider({ keyId: 'id', secret: 'sec', fetch }).generate(
-			request({ model: modelFor('hf-soul-v2')!, refs: [] })
+			request({ model: modelFor('hf-soul-v2')!, refs: [], size: '720p' })
 		);
 		await vi.runAllTimersAsync();
 		await done;
 		const body = JSON.parse((fetch.mock.calls[0][1] as RequestInit).body as string);
 		expect(body).not.toHaveProperty('image_urls');
+		expect(body.resolution).toBe('720p');
 	});
 
 	it.each([

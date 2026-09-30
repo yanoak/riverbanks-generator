@@ -25,7 +25,8 @@ describe('geminiProvider', () => {
 			model,
 			prompt: 'Draw one comic panel.',
 			refs: [ref, ref],
-			aspect: '21:9'
+			aspect: '21:9',
+			size: '512'
 		});
 		expect(out).toEqual({ bytes: new Uint8Array([4, 5, 6]), mimeType: 'image/png' });
 
@@ -40,7 +41,7 @@ describe('geminiProvider', () => {
 		]);
 		expect(parts[2].text).toBe('Draw one comic panel.');
 		expect(body.generationConfig.responseModalities).toContain('IMAGE');
-		expect(body.generationConfig.imageConfig).toEqual({ aspectRatio: '21:9', imageSize: '2K' });
+		expect(body.generationConfig.imageConfig).toEqual({ aspectRatio: '21:9', imageSize: '512' });
 	});
 
 	it('a blocked prompt says so', async () => {
@@ -50,7 +51,8 @@ describe('geminiProvider', () => {
 				model,
 				prompt: 'x',
 				refs: [],
-				aspect: '1:1'
+				aspect: '1:1',
+				size: '1K'
 			})
 		).rejects.toThrow('Gemini refused this prompt (SAFETY).');
 	});
@@ -66,7 +68,8 @@ describe('geminiProvider', () => {
 				model,
 				prompt: 'x',
 				refs: [],
-				aspect: '1:1'
+				aspect: '1:1',
+				size: '1K'
 			})
 		).rejects.toThrow('Gemini returned no image: I can only describe this.');
 	});
@@ -78,7 +81,8 @@ describe('geminiProvider', () => {
 				model,
 				prompt: 'x',
 				refs: [],
-				aspect: '1:1'
+				aspect: '1:1',
+				size: '1K'
 			})
 		).rejects.toThrow('Gemini returned no image (IMAGE_SAFETY).');
 	});

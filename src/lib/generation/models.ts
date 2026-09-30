@@ -19,8 +19,8 @@ export interface ModelInfo extends RefLimits {
 	note?: string;
 	/** Some models only edit: they need at least this many references. */
 	minRefs?: number;
-	/** Extra request fields for this model (Higgsfield: its resolution setting). */
-	params?: Record<string, string>;
+	/** The provider's size setting for drafts (cheap, for iterating) and for print. */
+	sizes: { draft: string; print: string };
 }
 
 const GEMINI_ASPECTS = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'];
@@ -34,7 +34,8 @@ export const MODELS: ModelInfo[] = [
 		aspects: [...GEMINI_ASPECTS, '1:4', '4:1', '1:8', '8:1'],
 		maxRefs: 14,
 		roleCaps: { style: 3, character: 4, object: 10 },
-		note: 'Gemini · about $0.10 an image'
+		sizes: { draft: '512', print: '4K' },
+		note: 'Gemini · drafts $0.045, 4K print $0.15'
 	},
 	{
 		key: 'gemini-pro',
@@ -44,7 +45,8 @@ export const MODELS: ModelInfo[] = [
 		aspects: GEMINI_ASPECTS,
 		maxRefs: 11,
 		roleCaps: { style: 3, character: 5, object: 3 },
-		note: 'Gemini · slower, about $0.13 an image'
+		sizes: { draft: '1K', print: '4K' },
+		note: 'Gemini · slower, drafts $0.13'
 	},
 	// Higgsfield's public API (https://docs.higgsfield.ai/docs/models/image-generation). The ratio
 	// lists of Qwen and Soul, and the request field names, are unverified until a live call.
@@ -55,8 +57,8 @@ export const MODELS: ModelInfo[] = [
 		label: 'Grok Image 2.0',
 		aspects: ['1:1', '1:2', '2:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16'],
 		maxRefs: 10,
-		params: { resolution: '2k' },
-		note: 'Higgsfield'
+		sizes: { draft: '1k', print: '2k' },
+		note: 'Higgsfield · drafts about $0.05'
 	},
 	{
 		key: 'hf-marketing-studio',
@@ -65,7 +67,7 @@ export const MODELS: ModelInfo[] = [
 		label: 'Marketing Studio Image',
 		aspects: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16', '21:9'],
 		maxRefs: 16,
-		params: { resolution: '2k' },
+		sizes: { draft: '1k', print: '4k' },
 		note: 'Higgsfield · takes the most references'
 	},
 	{
@@ -76,7 +78,7 @@ export const MODELS: ModelInfo[] = [
 		aspects: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16'],
 		maxRefs: 3,
 		minRefs: 1,
-		params: { resolution: '2k' },
+		sizes: { draft: '1k', print: '2k' },
 		note: 'Higgsfield · redraws from 1–3 references'
 	},
 	{
@@ -86,7 +88,7 @@ export const MODELS: ModelInfo[] = [
 		label: 'Soul V2',
 		aspects: ['1:1', '3:4', '4:3', '2:3', '3:2', '9:16', '16:9'],
 		maxRefs: 0,
-		params: { resolution: '1080p' },
+		sizes: { draft: '720p', print: '1080p' },
 		note: 'Higgsfield · text only: ignores the style’s images'
 	},
 	{
@@ -96,11 +98,15 @@ export const MODELS: ModelInfo[] = [
 		label: 'Test pattern',
 		aspects: [...GEMINI_ASPECTS, '1:4', '4:1'],
 		maxRefs: 14,
+		sizes: { draft: 'draft', print: 'print' },
 		note: 'Free stand-in for tests'
 	}
 ];
 
 export const DEFAULT_MODEL = 'gemini-flash';
+
+/** Print versions are always redrawn by Nano Banana 2: it makes 4K and keeps the image. */
+export const PRINT_MODEL = 'gemini-flash';
 
 export const modelFor = (key: string | null | undefined) => MODELS.find((m) => m.key === key);
 

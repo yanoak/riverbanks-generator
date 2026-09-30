@@ -38,14 +38,16 @@ async function connect() {
 		generate: async (input) => {
 			if (input.prompt === 'fail') throw new Error('Gemini: quota exceeded');
 			generated.push(input);
+			const print = input.quality === 'print';
 			return {
-				generationId: 'gen-1',
-				assetId: 'generated-1',
-				naturalWidth: 1600,
-				naturalHeight: 900,
+				generationId: `gen-${generated.length}`,
+				assetId: `generated-${generated.length}`,
+				naturalWidth: print ? 6400 : 1600,
+				naturalHeight: print ? 3600 : 900,
 				aspect: '16:9',
 				model: input.modelKey ?? 'gemini-flash',
-				dropped: 0
+				dropped: 0,
+				quality: input.quality ?? 'draft'
 			};
 		}
 	});
@@ -87,6 +89,7 @@ describe('Riverbanks MCP server', () => {
 				'list_style_profiles',
 				'set_comic_style',
 				'generate_panel_image',
+				'make_print_version',
 				'split_panel',
 				'search',
 				'fetch',
@@ -190,6 +193,25 @@ describe('Riverbanks MCP server', () => {
 			)!;
 			expect(panel.image).toMatchObject({ assetId: 'generated-1', naturalWidth: 1600 });
 			expect(panel.prompt).toBe('Mae on the raft at dawn');
+		});
+
+		it('makes a print version of the panel’s image, keeping its framing', async () => {
+			const { call, store, generated } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Print' })).text);
+			const panelId = (await loadComic(store, id)).comic.pages[0].panels[0].id;
+			const none = await call('make_print_version', { comicId: id, page: 1, panelId });
+			expect(none).toMatchObject({ isError: true, text: expect.stringMatching(/no image/) });
+
+			await call('generate_panel_image', { comicId: id, page: 1, panelId, prompt: 'a heron' });
+			const before = (await loadComic(store, id)).comic.pages[0].panels[0].image!;
+			const res = await call('make_print_version', { comicId: id, page: 1, panelId });
+			expect(res.isError).toBe(false);
+			expect(res.text).toMatch(/print version/i);
+			expect(generated[1]).toMatchObject({ quality: 'print', sourceAssetId: 'generated-1' });
+
+			const after = (await loadComic(store, id)).comic.pages[0].panels[0].image!;
+			expect(after.offsetX).toBe(before.offsetX);
+			expect(after.scale * after.naturalWidth).toBeCloseTo(before.scale * before.naturalWidth);
 		});
 
 		it('a failed generation is a readable tool error and changes nothing', async () => {

@@ -31,7 +31,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					prompt: body.prompt,
 					profileId: typeof body.profileId === 'string' ? body.profileId : undefined,
 					modelKey: typeof body.model === 'string' ? body.model : undefined,
-					box: { w: Number(box.w), h: Number(box.h) }
+					box: { w: Number(box.w), h: Number(box.h) },
+					quality: body.quality === 'print' ? 'print' : 'draft',
+					sourceAssetId: typeof body.sourceAssetId === 'string' ? body.sourceAssetId : undefined
 				},
 				{ provider: providerFor, signal: request.signal }
 			)

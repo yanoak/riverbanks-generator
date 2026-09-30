@@ -42,10 +42,10 @@ export function higgsfieldProvider(opts: HiggsfieldOptions): ImageProvider {
 	const deadlineMs = opts.deadlineMs ?? 240_000;
 
 	return {
-		async generate({ model, prompt, refs, aspect, signal, onJob }) {
+		async generate({ model, prompt, refs, aspect, size, signal, onJob }) {
 			if (refs.some((r) => !r.url))
 				throw new Error('Higgsfield needs a reference URL for every reference image.');
-			const body: Record<string, unknown> = { prompt, aspect_ratio: aspect, ...model.params };
+			const body: Record<string, unknown> = { prompt, aspect_ratio: aspect, resolution: size };
 			if (refs.length) body.image_urls = refs.map((r) => r.url);
 
 			const submitted = await f(`${HIGGSFIELD_BASE}${model.id}`, {

@@ -5,6 +5,8 @@ import { SvelteMap } from 'svelte/reactivity';
 export interface Pending {
 	started: number;
 	error?: string;
+	/** A print version rather than a draft. */
+	print?: boolean;
 }
 
 export const pending = new SvelteMap<string, Pending>();

@@ -225,7 +225,20 @@ Stages ship independently; each ends deployable.
 - [ ] README: profiles, generation, keys; the diary; deploy with `supabase db push` and the env
       vars
 
-## UI mockups (ASCII)
+**Stage 6 — draft and print quality** (added 2026-09-30; Yan: "for iteration and testing we
+don't need hi res at all, only the finals we print on an A1 sheet")
+
+- [x] Every model gets a draft size and a print size (Nano Banana 2: 512 for $0.045, and 4K for
+      $0.151). Generate always makes drafts.
+- [x] **Print version** redraws the panel's current image at 4K with Nano Banana 2. The only
+      reference is the image itself, and the prompt says to change nothing. Regenerating the
+      prompt at 4K was rejected: it gives a different picture, and the point is to print the
+      take you chose.
+- [x] `generations` records `quality` (draft or print) and the source image. Print takes are
+      marked 4K in the strip.
+- [x] MCP: `make_print_version`.
+
+
 
 `/styles`: the list of profiles
 
@@ -433,8 +446,8 @@ Run on local first, with the real Gemini key (not the fake), then on production 
       `/files/generate-upload-url` upload before each call. This will be checked in stage 4.
 - [ ] Does Yan's Higgsfield API account reach the models listed above, and what does each cost
       in credits? Use `/estimate` once the key is in.
-- [ ] Default Gemini size: 2K ($0.10) or 1K ($0.067)? The plan assumes 2K, since panels print
-      large. Asked Yan on 2026-09-30.
+- [x] Default Gemini size: neither. Drafts are cheap, and prints are made on request
+      (stage 6).
 
 ## Progress notes
 
@@ -454,6 +467,10 @@ the real APIs**, because no keys are set.
 - **Gemini images:** at first refused with "exceeded your current quota": image models have no
   free tier. After Yan prepaid on 2026-09-30, Nano Banana 2 made a 2752×1536 JPEG of 1.6 MB at
   2K in 18 s, in the reference's style.
+- **Draft to print, live:** a 512 draft (688×384) takes 8 s. Its print version comes back at
+  5504×3072 (6.8 MB) in 25 s, with composition and lines identical. But the colours drifted
+  (terracotta `#df704f` became salmon `#f28376`) until the prompt named the style's palette;
+  with it, `#e06e53`. A comic with no style has no palette to name, so its prints may drift.
 - **Nano Banana through Higgsfield's API is not available.** `/nano-banana-pro` answers 503
   `model_disabled`, and the other likely paths answer 404. So Google direct is the only route
   from a server.

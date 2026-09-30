@@ -6,7 +6,7 @@ import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import { addRef, createProfile, saveProfile, updateRef } from '$lib/styles/styles';
 import { fakeProvider, solidPng } from './fake';
-import { generatePanelImage } from './generate';
+import { PRINT_PROMPT, generatePanelImage } from './generate';
 import type { GenerateRequest, ImageProvider } from './provider';
 
 const url = process.env.SUPABASE_TEST_URL;
@@ -48,7 +48,11 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 		comicId = (await new SupabaseComicStore(member).create('Gen', comic, initialState(comic))).id;
 
 		profileId = await createProfile(member, 'Ink');
-		await saveProfile(member, profileId, { style: 'Loose ink', avoid: 'gradients' });
+		await saveProfile(member, profileId, {
+			style: 'Loose ink',
+			avoid: 'gradients',
+			palette: [{ hex: '#1d3557', name: 'deep navy' }]
+		});
 		const png = new Blob([solidPng(4, 4, [10, 20, 30]) as BlobPart], { type: 'image/png' });
 		await addRef(member, profileId, png, { width: 4, height: 4 });
 		const mae = await addRef(member, profileId, png, { width: 4, height: 4 });
@@ -69,7 +73,13 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 			},
 			{ provider }
 		);
-		expect(out).toMatchObject({ aspect: '21:9', model: 'gemini-flash', dropped: 0 });
+		expect(out).toMatchObject({
+			aspect: '21:9',
+			model: 'gemini-flash',
+			dropped: 0,
+			quality: 'draft'
+		});
+		expect(calls[0].size).toBe('512');
 		expect(out.naturalWidth / out.naturalHeight).toBeCloseTo(21 / 9, 1);
 
 		expect(calls[0].refs).toHaveLength(2);
@@ -91,6 +101,60 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 			aspect: '21:9',
 			full_prompt: calls[0].prompt
 		});
+	});
+
+	it('a print version redraws the chosen image at 4K, with it as the only reference', async () => {
+		const { calls, provider } = recording();
+		const draft = await generatePanelImage(
+			member,
+			{ comicId, panelId, prompt: 'Mae on the raft', profileId, box: { w: 900, h: 300 } },
+			{ provider }
+		);
+		const print = await generatePanelImage(
+			member,
+			{
+				comicId,
+				panelId,
+				prompt: 'Mae on the raft',
+				profileId,
+				modelKey: 'hf-grok-image-2', // ignored: prints are always Nano Banana 2
+				box: { w: 900, h: 300 },
+				quality: 'print',
+				sourceAssetId: draft.assetId
+			},
+			{ provider }
+		);
+		const req = calls[1];
+		expect(req.model.key).toBe('gemini-flash');
+		expect(req.size).toBe('4K');
+		expect(req.prompt.startsWith(PRINT_PROMPT)).toBe(true);
+		// Colours drift in a redraw (seen live: terracotta went salmon), so the palette is named.
+		expect(req.prompt).toContain('#1d3557');
+		expect(req.refs).toHaveLength(1);
+		expect(req.aspect).toBe('21:9'); // the source image's shape, not recomputed from the box
+		expect(print).toMatchObject({ quality: 'print', model: 'gemini-flash' });
+
+		const { data: row } = await member
+			.from('generations')
+			.select('quality, source_asset_id, prompt')
+			.eq('id', print.generationId)
+			.single();
+		expect(row).toEqual({
+			quality: 'print',
+			source_asset_id: draft.assetId,
+			prompt: 'Mae on the raft'
+		});
+	});
+
+	it('a print version needs an image to start from', async () => {
+		const { provider } = recording();
+		await expect(
+			generatePanelImage(
+				member,
+				{ comicId, panelId, prompt: 'x', box: { w: 1, h: 1 }, quality: 'print' },
+				{ provider }
+			)
+		).rejects.toThrow(/Generate or place an image first/);
 	});
 
 	it('without a style it sends the bare prompt and no references', async () => {

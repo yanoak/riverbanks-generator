@@ -408,6 +408,32 @@ export class Editor {
 		return true;
 	}
 
+	/**
+	 * Swap a panel's image (`fromAssetId`) for its print version, keeping the framing: the same
+	 * offsets, and a scale that covers the same area. False if the panel shows something else now.
+	 */
+	placePrintVersion(
+		panelId: string,
+		fromAssetId: string,
+		stored: { assetId: string; naturalWidth: number; naturalHeight: number }
+	): boolean {
+		const at = this.comic.pages.find((p) =>
+			p.panels.some((q) => q.id === panelId && q.image?.assetId === fromAssetId)
+		);
+		if (!at) return false;
+		this.change('Print version', (d) => {
+			const panel = d.pages.find((p) => p.id === at.id)!.panels.find((p) => p.id === panelId)!;
+			const old = panel.image!;
+			panel.image = {
+				...stored,
+				offsetX: old.offsetX,
+				offsetY: old.offsetY,
+				scale: old.scale * (old.naturalWidth / stored.naturalWidth)
+			};
+		});
+		return true;
+	}
+
 	removeImage(panel: Panel): void {
 		if (panel.image) this.patch('Remove image', panel.id, { image: undefined });
 	}

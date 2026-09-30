@@ -316,3 +316,47 @@ describe('Editor.placeStoredImage', () => {
 		expect(editor.placeStoredImage('gone', stored)).toBe(false);
 	});
 });
+
+describe('Editor.placePrintVersion', () => {
+	it('swaps in the larger image with the same framing, as one undo step', () => {
+		const editor = new Editor();
+		const panelId = editor.page.panels[0].id;
+		editor.placeStoredImage(panelId, { assetId: 'draft', naturalWidth: 512, naturalHeight: 288 });
+		editor.patch('Pan', panelId, {
+			image: { ...editor.page.panels[0].image!, offsetX: -30, offsetY: -10, scale: 1.5 }
+		});
+
+		expect(
+			editor.placePrintVersion(panelId, 'draft', {
+				assetId: 'print',
+				naturalWidth: 4096,
+				naturalHeight: 2304
+			})
+		).toBe(true);
+		const image = editor.page.panels[0].image!;
+		expect(image).toEqual({
+			assetId: 'print',
+			naturalWidth: 4096,
+			naturalHeight: 2304,
+			offsetX: -30,
+			offsetY: -10,
+			scale: 1.5 * (512 / 4096)
+		});
+		editor.undo();
+		expect(editor.page.panels[0].image!.assetId).toBe('draft');
+	});
+
+	it('does nothing if the panel moved on to another image meanwhile', () => {
+		const editor = new Editor();
+		const panelId = editor.page.panels[0].id;
+		editor.placeStoredImage(panelId, { assetId: 'other', naturalWidth: 10, naturalHeight: 10 });
+		expect(
+			editor.placePrintVersion(panelId, 'draft', {
+				assetId: 'print',
+				naturalWidth: 40,
+				naturalHeight: 40
+			})
+		).toBe(false);
+		expect(editor.page.panels[0].image!.assetId).toBe('other');
+	});
+});

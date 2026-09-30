@@ -5,7 +5,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { nearestAspect } from '$lib/generation/aspect';
-import { DEFAULT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
+import { DEFAULT_MODEL, PRINT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
 import { composePrompt } from '$lib/generation/prompt';
 import { selectRefs } from '$lib/generation/refs';
 import { newId } from '$lib/model/factory';
@@ -25,7 +25,19 @@ export interface GenerateInput {
 	modelKey?: string;
 	/** The panel's size in page units, for choosing the aspect. */
 	box: { w: number; h: number };
+	/** A cheap draft (the default), or a print version of `sourceAssetId` at 4K. */
+	quality?: Quality;
+	/** For a print version: the comic's image to redraw. */
+	sourceAssetId?: string;
 }
+
+export type Quality = 'draft' | 'print';
+
+/** A print version redraws the chosen image at 4K; it must not become a different picture. */
+export const PRINT_PROMPT =
+	'Redraw this image at high resolution for print. Keep everything exactly as it is: the ' +
+	'composition, framing, characters, poses, colours, linework and texture. Do not add, remove ' +
+	'or change anything, and do not add any text.';
 
 export interface GenerateResult {
 	generationId: string;
@@ -36,6 +48,7 @@ export interface GenerateResult {
 	model: string;
 	/** References the model had no room for. */
 	dropped: number;
+	quality: Quality;
 }
 
 export interface GenerateDeps {
@@ -52,6 +65,9 @@ export async function generatePanelImage(
 	if (!prompt) throw new OpError('invalid', 'Write a prompt first.');
 	if (prompt.length > 4000) throw new OpError('invalid', 'Keep the prompt under 4000 characters.');
 
+	const quality = input.quality ?? 'draft';
+	if (quality === 'print') return printVersion(supabase, { ...input, prompt }, deps);
+
 	const profile = input.profileId ? await getProfile(supabase, input.profileId) : null;
 	const modelKey = input.modelKey ?? profile?.model ?? DEFAULT_MODEL;
 	const model = modelFor(modelKey);
@@ -66,16 +82,101 @@ export async function generatePanelImage(
 	const aspect = nearestAspect(input.box, model.aspects);
 	const fullPrompt = composePrompt({ profile: profile ?? undefined, refs: used, prompt });
 
+	const refs: RefImage[] = await loadRefImages(supabase, used);
+	if (model.provider === 'higgsfield' && used.length) {
+		// Higgsfield fetches references itself: give it short-lived links.
+		const { data } = await supabase.storage
+			.from(REFS_BUCKET)
+			.createSignedUrls(used.map(refPath), 60 * 10);
+		data?.forEach((d, i) => (refs[i].url = d.signedUrl ?? undefined));
+	}
+	return run(
+		supabase,
+		deps,
+		{ ...input, prompt, profileId: profile?.id },
+		{
+			model,
+			aspect,
+			fullPrompt,
+			quality: 'draft',
+			size: model.sizes.draft,
+			dropped: dropped.length
+		},
+		async () => refs
+	);
+}
+
+/** Redraw an image already in the comic at 4K, with it as the only reference. */
+async function printVersion(
+	supabase: SupabaseClient,
+	input: GenerateInput,
+	deps: GenerateDeps
+): Promise<GenerateResult> {
+	if (!input.sourceAssetId)
+		throw new OpError('invalid', 'Generate or place an image first: a print version redraws it.');
+	const model = modelFor(PRINT_MODEL)!;
+	const path = `${input.comicId}/${input.sourceAssetId}`;
+	// Redraws drift in colour (terracotta turned salmon in a live test): name the exact palette.
+	const profile = input.profileId ? await getProfile(supabase, input.profileId) : null;
+	const palette = profile?.palette.map((c) => (c.name ? `${c.hex} (${c.name})` : c.hex)) ?? [];
+	const fullPrompt = palette.length
+		? `${PRINT_PROMPT} Match the image's colours exactly; they come from this palette: ${palette.join(', ')}.`
+		: PRINT_PROMPT;
+	const load = async (): Promise<RefImage[]> => {
+		const { data, error } = await supabase.storage.from('assets').download(path);
+		if (error || !data) throw new Error(`Could not read the image to redraw: ${error?.message}`);
+		const bytes = new Uint8Array(await data.arrayBuffer());
+		return [{ bytes, mimeType: measureImage(bytes, data.type || '').mimeType }];
+	};
+	// Keep the source's shape: the panel may have been reshaped since, and the crop is set.
+	const source = measureImage((await load())[0].bytes);
+	const aspect = nearestAspect({ w: source.width, h: source.height }, model.aspects);
+	return run(
+		supabase,
+		deps,
+		input,
+		{
+			model,
+			aspect,
+			fullPrompt,
+			quality: 'print',
+			size: model.sizes.print,
+			dropped: 0
+		},
+		load
+	);
+}
+
+interface Plan {
+	model: ModelInfo;
+	aspect: string;
+	fullPrompt: string;
+	quality: Quality;
+	size: string;
+	dropped: number;
+}
+
+/** Log the attempt, generate, store the image, log the result. */
+async function run(
+	supabase: SupabaseClient,
+	deps: GenerateDeps,
+	input: GenerateInput,
+	plan: Plan,
+	refs: () => Promise<RefImage[]>
+): Promise<GenerateResult> {
+	const { model, aspect, fullPrompt, quality, size } = plan;
 	const { data: row, error } = await supabase
 		.from('generations')
 		.insert({
 			comic_id: input.comicId,
 			panel_id: input.panelId,
-			profile_id: profile?.id ?? null,
+			profile_id: input.profileId ?? null,
 			model: model.key,
-			prompt,
+			prompt: input.prompt,
 			full_prompt: fullPrompt,
-			aspect
+			aspect,
+			quality,
+			source_asset_id: input.sourceAssetId ?? null
 		})
 		.select('id')
 		.single();
@@ -92,19 +193,12 @@ export async function generatePanelImage(
 			.eq('id', generationId);
 
 	try {
-		const refs: RefImage[] = await loadRefImages(supabase, used);
-		if (model.provider === 'higgsfield' && used.length) {
-			// Higgsfield fetches references itself: give it short-lived links.
-			const { data } = await supabase.storage
-				.from(REFS_BUCKET)
-				.createSignedUrls(used.map(refPath), 60 * 10);
-			data?.forEach((d, i) => (refs[i].url = d.signedUrl ?? undefined));
-		}
 		const image = await deps.provider(model).generate({
 			model,
 			prompt: fullPrompt,
-			refs,
+			refs: await refs(),
 			aspect,
+			size,
 			signal: deps.signal,
 			onJob: (ref) => void finish({ provider_ref: ref }).then(() => {})
 		});
@@ -128,7 +222,8 @@ export async function generatePanelImage(
 			naturalHeight: measured.height,
 			aspect,
 			model: model.key,
-			dropped: dropped.length
+			dropped: plan.dropped,
+			quality
 		};
 	} catch (e) {
 		await finish({ status: 'failed', error: (e as Error).message.slice(0, 1000) });

@@ -17,7 +17,7 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import { nearestAspect } from '$lib/generation/aspect';
-	import { DEFAULT_MODEL } from '$lib/generation/models';
+	import { DEFAULT_MODEL, PRINT_MODEL } from '$lib/generation/models';
 	import { pending } from '$lib/generation/pending.svelte';
 	import { panelBox } from '$lib/geometry/panel';
 	import type { Panel } from '$lib/model/types';
@@ -37,6 +37,7 @@
 		width: number;
 		height: number;
 		prompt: string;
+		quality: 'draft' | 'print';
 	}
 
 	// svelte-ignore state_referenced_locally
@@ -74,7 +75,7 @@
 	async function loadTakes(panelId: string) {
 		const { data } = await gen.supabase
 			.from('generations')
-			.select('id, asset_id, width, height, prompt')
+			.select('id, asset_id, width, height, prompt, quality')
 			.eq('comic_id', gen.comicId)
 			.eq('panel_id', panelId)
 			.eq('status', 'done')
@@ -132,6 +133,45 @@
 		}
 	}
 
+	/** Redraw the panel's current image at 4K for print, keeping its framing. */
+	async function makePrint() {
+		const from = panel.image?.assetId;
+		if (!from || busy) return;
+		const panelId = panel.id;
+		const box = panelBox(editor.page, panel);
+		notice = '';
+		pending.set(panelId, { started: Date.now(), print: true });
+		now = Date.now();
+		try {
+			const res = await fetch('/api/generate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					comicId: gen.comicId,
+					panelId,
+					prompt: panel.prompt || 'print version',
+					box: { w: box.w, h: box.h },
+					quality: 'print',
+					sourceAssetId: from
+				})
+			});
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok)
+				throw new Error(body.message ?? `The print version failed (HTTP ${res.status}).`);
+			pending.delete(panelId);
+			const stored = {
+				assetId: body.assetId,
+				naturalWidth: body.naturalWidth,
+				naturalHeight: body.naturalHeight
+			};
+			if (!editor.placePrintVersion(panelId, from, stored))
+				editor.say('The print version is in Takes: the panel shows a different image now.');
+			if (panelId === panel.id) loadTakes(panelId);
+		} catch (e) {
+			pending.set(panelId, { started: 0, error: (e as Error).message, print: true });
+		}
+	}
+
 	function useTake(take: Take) {
 		if (panel.image?.assetId === take.asset_id) return;
 		editor.placeStoredImage(
@@ -174,6 +214,8 @@
 	}
 
 	const current = $derived(takes.findIndex((t) => t.asset_id === panel.image?.assetId));
+	const isPrint = $derived(takes[current]?.quality === 'print');
+	const canPrint = $derived(gen.models.some((m) => m.key === PRINT_MODEL));
 </script>
 
 <section class="mb-4" aria-label="Generate">
@@ -224,7 +266,7 @@
 	{#if job?.error}
 		<p class="mt-2 text-xs text-red-700" role="alert">
 			{job.error}
-			<button class="ml-1 underline" onclick={generate}>Retry</button>
+			<button class="ml-1 underline" onclick={job.print ? makePrint : generate}>Retry</button>
 		</p>
 	{/if}
 	{#if notice}<p class="mt-2 text-xs text-stone-500" role="status">{notice}</p>{/if}
@@ -236,10 +278,12 @@
 				<button
 					role="radio"
 					aria-checked={i === current}
-					aria-label="Take {takes.length - i}: {take.prompt}"
+					aria-label="Take {takes.length - i}{take.quality === 'print'
+						? ' (4K print)'
+						: ''}: {take.prompt}"
 					title={take.prompt}
 					tabindex={i === (current < 0 ? 0 : current) ? 0 : -1}
-					class="h-12 w-12 overflow-hidden rounded {i === current
+					class="relative h-12 w-12 overflow-hidden rounded {i === current
 						? 'ring-2 ring-sky-500'
 						: 'ring-1 ring-stone-200 hover:ring-stone-400'}"
 					onclick={() => useTake(take)}
@@ -248,8 +292,25 @@
 					{#if assetUrl(take.asset_id)}
 						<img src={assetUrl(take.asset_id)} alt="" class="h-full w-full object-cover" />
 					{/if}
+					{#if take.quality === 'print'}
+						<span
+							class="absolute right-0.5 bottom-0.5 rounded bg-stone-900/80 px-1 text-[9px] font-semibold text-white"
+							>4K</span
+						>
+					{/if}
 				</button>
 			{/each}
 		</div>
+	{/if}
+
+	{#if panel.image && canPrint}
+		<button
+			class="mt-3 w-full rounded border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-50 disabled:opacity-50"
+			disabled={busy || isPrint}
+			title="Redraw this image at 4K for print, changing nothing (Nano Banana 2, about $0.15)"
+			onclick={makePrint}
+		>
+			{isPrint ? 'Print version ✓' : 'Print version (4K)'}
+		</button>
 	{/if}
 </section>

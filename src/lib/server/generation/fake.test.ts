@@ -9,7 +9,8 @@ describe('fakeProvider', () => {
 			model: modelFor('fake')!,
 			prompt: 'a heron',
 			refs: [],
-			aspect: '16:9'
+			aspect: '16:9',
+			size: '512'
 		});
 		expect(out.mimeType).toBe('image/png');
 		const size = imageSize(out.bytes);
@@ -19,7 +20,13 @@ describe('fakeProvider', () => {
 
 	it('different prompts give different images', async () => {
 		const gen = (prompt: string) =>
-			fakeProvider().generate({ model: modelFor('fake')!, prompt, refs: [], aspect: '1:1' });
+			fakeProvider().generate({
+				model: modelFor('fake')!,
+				prompt,
+				refs: [],
+				aspect: '1:1',
+				size: '512'
+			});
 		const [a, b] = await Promise.all([gen('a'), gen('b')]);
 		expect(Buffer.from(a.bytes).equals(Buffer.from(b.bytes))).toBe(false);
 	});

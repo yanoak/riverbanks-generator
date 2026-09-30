@@ -61,6 +61,13 @@ test('prompt a panel in the comic’s style, keep takes, switch between them', a
 	await expect(takes.first()).toHaveAttribute('aria-checked', 'true');
 	await expect(prompt).toHaveValue('Mae on the raft at dusk');
 
+	// A print version of the chosen take: a third take, marked 4K, now current.
+	await page.getByRole('button', { name: 'Print version (4K)' }).click();
+	await expect(takes).toHaveCount(3);
+	await expect(takes.first()).toHaveAccessibleName(/4K print/);
+	await expect(takes.first()).toHaveAttribute('aria-checked', 'true');
+	await expect(page.getByRole('button', { name: 'Print version ✓' })).toBeDisabled();
+
 	// Esc in the prompt returns to the panel on the canvas.
 	await prompt.focus();
 	await page.keyboard.press('Escape');
@@ -71,5 +78,5 @@ test('prompt a panel in the comic’s style, keep takes, switch between them', a
 	await waitForEditor(page);
 	await page.locator('main [data-panel-id]').first().click();
 	await expect(prompt).toHaveValue('Mae on the raft at dusk');
-	await expect(takes).toHaveCount(2);
+	await expect(takes).toHaveCount(3);
 });

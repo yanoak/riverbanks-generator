@@ -3,19 +3,16 @@
 import { generateContent, inline, type GeminiOptions } from './gemini';
 import type { ImageProvider } from './provider';
 
-/** Panels print large; 2K is Gemini's middle size (1K, 2K, 4K). */
-export const GEMINI_IMAGE_SIZE = '2K';
-
 export function geminiProvider(opts: Omit<GeminiOptions, 'signal'>): ImageProvider {
 	return {
-		async generate({ model, prompt, refs, aspect, signal }) {
+		async generate({ model, prompt, refs, aspect, size, signal }) {
 			const response = await generateContent(
 				model.id,
 				{
 					contents: [{ role: 'user', parts: [...refs.map(inline), { text: prompt }] }],
 					generationConfig: {
 						responseModalities: ['TEXT', 'IMAGE'],
-						imageConfig: { aspectRatio: aspect, imageSize: GEMINI_IMAGE_SIZE }
+						imageConfig: { aspectRatio: aspect, imageSize: size }
 					}
 				},
 				{ ...opts, signal }

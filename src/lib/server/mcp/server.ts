@@ -459,6 +459,62 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	);
 
 	server.registerTool(
+		'make_print_version',
+		{
+			annotations: { ...WRITE, openWorldHint: true },
+			title: 'Make print version',
+			description:
+				'Redraw a panel’s current image at 4K for print (Nano Banana 2, about $0.15), changing nothing and keeping its crop. Generate drafts with generate_panel_image first; make print versions only of the chosen ones.',
+			inputSchema: { comicId: z.string(), page, panelId: z.string() }
+		},
+		async ({ comicId, page: n, panelId }) =>
+			guard(async () => {
+				const { comic } = await loadComic(store, comicId);
+				const at = ops.pageAt(comic, n);
+				const target = at.panels.find((p) => p.id === panelId);
+				if (!target) throw new OpError('invalid', `Page ${n} has no panel ${panelId}.`);
+				const from = target.image;
+				if (!from)
+					throw new OpError('invalid', `Panel ${panelId} has no image to make a print version of.`);
+				let made: GenerateResult;
+				try {
+					made = await ctx.generate({
+						comicId,
+						panelId,
+						prompt: target.prompt || 'print version',
+						profileId: comic.styleProfileId,
+						box: panelBox(at, target),
+						quality: 'print',
+						sourceAssetId: from.assetId
+					});
+				} catch (e) {
+					if (e instanceof OpError) throw e;
+					throw new OpError('invalid', (e as Error).message);
+				}
+				const { rev } = await mutateComic(store, comicId, (c) => {
+					const panel = ops.pageAt(c, n).panels.find((p) => p.id === panelId);
+					if (panel?.image?.assetId !== from.assetId)
+						throw new OpError(
+							'conflict',
+							'The panel’s image changed while the print version was made.'
+						);
+					panel.image = {
+						assetId: made.assetId,
+						naturalWidth: made.naturalWidth,
+						naturalHeight: made.naturalHeight,
+						offsetX: from.offsetX,
+						offsetY: from.offsetY,
+						scale: from.scale * (from.naturalWidth / made.naturalWidth)
+					};
+					return '';
+				});
+				return text(
+					`Made a ${made.naturalWidth}×${made.naturalHeight} print version of panel ${panelId}, keeping its crop. (rev ${rev})`
+				);
+			})
+	);
+
+	server.registerTool(
 		'remove_panel_image',
 		{
 			annotations: DELETE,

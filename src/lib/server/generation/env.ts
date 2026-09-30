@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/private';
 
 export const useFake = () => env.GENERATION_PROVIDER === 'fake';
 export const geminiKey = () => env.GEMINI_API_KEY || undefined;
+export const anthropicKey = () => env.ANTHROPIC_API_KEY || undefined;
 
 export const NO_GEMINI =
 	'Gemini isn’t set up on this server: add GEMINI_API_KEY to the environment.';

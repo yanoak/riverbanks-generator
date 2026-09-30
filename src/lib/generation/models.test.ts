@@ -26,6 +26,20 @@ describe('model registry', () => {
 		});
 	});
 
+	it('the Claude sketcher takes any shape and a few references; the agent entry is hidden', () => {
+		expect(modelFor('sketch-claude')).toMatchObject({
+			provider: 'anthropic',
+			id: 'claude-sonnet-5',
+			anyAspect: true,
+			vector: true,
+			maxRefs: 4
+		});
+		expect(modelFor('svg-agent')).toMatchObject({ provider: 'agent', vector: true });
+		expect(availableModels(new Set(['gemini', 'anthropic'])).map((m) => m.key)).not.toContain(
+			'svg-agent'
+		);
+	});
+
 	it('the default is a Gemini model', () => {
 		expect(modelFor(DEFAULT_MODEL)?.provider).toBe('gemini');
 	});

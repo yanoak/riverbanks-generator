@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nearestAspect, ratioOf } from './aspect';
+import { exactAspect, nearestAspect, ratioOf, viewBoxFor } from './aspect';
 
 const GEMINI = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'];
 
@@ -27,4 +27,17 @@ describe('nearestAspect', () => {
 
 describe('ratioOf', () => {
 	it('parses W:H', () => expect(ratioOf('16:9')).toBeCloseTo(16 / 9));
+});
+
+describe('exactAspect and viewBoxFor (vector sketches take the panel’s own shape)', () => {
+	it('scales the box to 1000 on its long side', () => {
+		expect(exactAspect({ w: 900, h: 300 })).toBe('1000:333');
+		expect(exactAspect({ w: 300, h: 460 })).toBe('652:1000');
+		expect(exactAspect({ w: 5, h: 5 })).toBe('1000:1000');
+	});
+
+	it('turns an aspect into a viewBox', () => {
+		expect(viewBoxFor('1000:333')).toBe('0 0 1000 333');
+		expect(viewBoxFor('16:9')).toBe('0 0 1000 563');
+	});
 });

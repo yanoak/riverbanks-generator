@@ -6,7 +6,7 @@ import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import { addRef, createProfile, saveProfile, updateRef } from '$lib/styles/styles';
 import { fakeProvider, solidPng } from './fake';
-import { PRINT_PROMPT, generatePanelImage } from './generate';
+import { PRINT_PROMPT, generatePanelImage, saveAgentSketch } from './generate';
 import type { GenerateRequest, ImageProvider } from './provider';
 
 const url = process.env.SUPABASE_TEST_URL;
@@ -155,6 +155,70 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 				{ provider }
 			)
 		).rejects.toThrow(/Generate or place an image first/);
+	});
+
+	it('a Claude sketch is stored as SVG at the panel’s exact shape', async () => {
+		const { calls, provider } = recording();
+		const out = await generatePanelImage(
+			member,
+			{
+				comicId,
+				panelId,
+				prompt: 'a heron',
+				profileId,
+				modelKey: 'sketch-claude',
+				box: { w: 900, h: 300 }
+			},
+			{ provider }
+		);
+		expect(calls[0].aspect).toBe('1000:333');
+		expect(out).toMatchObject({ aspect: '1000:333', naturalWidth: 1000, naturalHeight: 333 });
+		const { data } = await member.storage.from('assets').download(`${comicId}/${out.assetId}`);
+		expect(data?.type).toBe('image/svg+xml');
+		expect(await data?.text()).toMatch(/^<svg xmlns/);
+	});
+
+	it('a sketch has no print version: it is vector already', async () => {
+		const { provider } = recording();
+		const sketch = await generatePanelImage(
+			member,
+			{ comicId, panelId, prompt: 'a heron', modelKey: 'sketch-claude', box: { w: 1, h: 1 } },
+			{ provider }
+		);
+		await expect(
+			generatePanelImage(
+				member,
+				{
+					comicId,
+					panelId,
+					prompt: 'x',
+					box: { w: 1, h: 1 },
+					quality: 'print',
+					sourceAssetId: sketch.assetId
+				},
+				{ provider }
+			)
+		).rejects.toThrow(/vector/);
+	});
+
+	it('an agent’s own SVG is sanitised, stored and logged as svg-agent', async () => {
+		const out = await saveAgentSketch(member, {
+			comicId,
+			panelId,
+			prompt: 'a heron at dawn',
+			box: { w: 900, h: 300 },
+			svg: '<svg viewBox="0 0 1000 333"><script>alert(1)</script><circle r="9"/></svg>'
+		});
+		const { data } = await member.storage.from('assets').download(`${comicId}/${out.assetId}`);
+		const text = await data!.text();
+		expect(text).toContain('<circle r="9"/>');
+		expect(text).not.toContain('script');
+		const { data: row } = await member
+			.from('generations')
+			.select('model, status')
+			.eq('id', out.generationId)
+			.single();
+		expect(row).toEqual({ model: 'svg-agent', status: 'done' });
 	});
 
 	it('without a style it sends the bare prompt and no references', async () => {

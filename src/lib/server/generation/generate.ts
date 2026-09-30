@@ -4,14 +4,15 @@
 // the caller's job: the editor does it as an undoable step, MCP on the server.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { nearestAspect } from '$lib/generation/aspect';
+import { exactAspect, nearestAspect } from '$lib/generation/aspect';
+import { sanitizeSvg } from '$lib/generation/svg';
 import { DEFAULT_MODEL, PRINT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
 import { composePrompt } from '$lib/generation/prompt';
 import { selectRefs } from '$lib/generation/refs';
 import { newId } from '$lib/model/factory';
 import { OpError } from '$lib/ops/ops';
 import { REFS_BUCKET, getProfile, refPath } from '$lib/styles/styles';
-import { measureImage } from '../mcp/images';
+import { GENERATED_TYPES, measureImage } from '../mcp/images';
 import { loadRefImages } from './refs';
 import type { ImageProvider, RefImage } from './provider';
 
@@ -79,7 +80,7 @@ export async function generatePanelImage(
 			'invalid',
 			`${model.label} redraws reference images: give the comic a style with at least ${model.minRefs}.`
 		);
-	const aspect = nearestAspect(input.box, model.aspects);
+	const aspect = model.anyAspect ? exactAspect(input.box) : nearestAspect(input.box, model.aspects);
 	const fullPrompt = composePrompt({ profile: profile ?? undefined, refs: used, prompt });
 
 	const refs: RefImage[] = await loadRefImages(supabase, used);
@@ -126,10 +127,12 @@ async function printVersion(
 		const { data, error } = await supabase.storage.from('assets').download(path);
 		if (error || !data) throw new Error(`Could not read the image to redraw: ${error?.message}`);
 		const bytes = new Uint8Array(await data.arrayBuffer());
-		return [{ bytes, mimeType: measureImage(bytes, data.type || '').mimeType }];
+		return [{ bytes, mimeType: measureImage(bytes, data.type || '', GENERATED_TYPES).mimeType }];
 	};
 	// Keep the source's shape: the panel may have been reshaped since, and the crop is set.
-	const source = measureImage((await load())[0].bytes);
+	const source = measureImage((await load())[0].bytes, '', GENERATED_TYPES);
+	if (source.mimeType === 'image/svg+xml')
+		throw new OpError('invalid', 'Sketches are vector: they print at any size already.');
 	const aspect = nearestAspect({ w: source.width, h: source.height }, model.aspects);
 	return run(
 		supabase,
@@ -144,6 +147,39 @@ async function printVersion(
 			dropped: 0
 		},
 		load
+	);
+}
+
+/**
+ * SVG an agent drew itself (MCP draw_panel_svg): sanitised, then stored and logged through the
+ * same path as a generation, as model `svg-agent`.
+ */
+export async function saveAgentSketch(
+	supabase: SupabaseClient,
+	input: Pick<GenerateInput, 'comicId' | 'panelId' | 'box'> & { prompt?: string; svg: string }
+): Promise<GenerateResult> {
+	let svg: string;
+	try {
+		svg = sanitizeSvg(input.svg);
+	} catch (e) {
+		throw new OpError('invalid', (e as Error).message);
+	}
+	const model = modelFor('svg-agent')!;
+	const prompt = input.prompt?.trim() || 'sketch';
+	const bytes = new TextEncoder().encode(svg);
+	return run(
+		supabase,
+		{ provider: () => ({ generate: async () => ({ bytes, mimeType: 'image/svg+xml' }) }) },
+		{ ...input, prompt },
+		{
+			model,
+			aspect: exactAspect(input.box),
+			fullPrompt: prompt,
+			quality: 'draft',
+			size: 'svg',
+			dropped: 0
+		},
+		async () => []
 	);
 }
 
@@ -202,7 +238,7 @@ async function run(
 			signal: deps.signal,
 			onJob: (ref) => void finish({ provider_ref: ref }).then(() => {})
 		});
-		const measured = measureImage(image.bytes, image.mimeType);
+		const measured = measureImage(image.bytes, image.mimeType, GENERATED_TYPES);
 		const assetId = newId();
 		const up = await supabase.storage
 			.from('assets')

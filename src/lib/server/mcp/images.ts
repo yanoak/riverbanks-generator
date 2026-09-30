@@ -94,8 +94,14 @@ export async function readImage(
 	return measureImage(bytes, mimeType);
 }
 
-/** Check the bytes really are a supported image, and read its size and type. */
-export function measureImage(bytes: Uint8Array, mimeType = ''): ReadImage {
+/** Types a generated image may have: sketches are SVG, sanitised before they get here. */
+export const GENERATED_TYPES = [...TYPES, 'image/svg+xml'];
+
+/**
+ * Check the bytes really are a supported image, and read its size and type. SVG is allowed
+ * only where the caller has sanitised it (`types`); URL imports keep the raster list.
+ */
+export function measureImage(bytes: Uint8Array, mimeType = '', types = TYPES): ReadImage {
 	let size: { width?: number; height?: number; type?: string };
 	try {
 		size = imageSize(bytes);
@@ -104,8 +110,14 @@ export function measureImage(bytes: Uint8Array, mimeType = ''): ReadImage {
 	}
 	if (!size.width || !size.height)
 		throw new OpError('invalid', 'Could not read that file as an image.');
-	if (!mimeType) mimeType = size.type === 'jpg' ? 'image/jpeg' : `image/${size.type}`;
-	if (!TYPES.includes(mimeType))
+	if (!mimeType)
+		mimeType =
+			size.type === 'jpg'
+				? 'image/jpeg'
+				: size.type === 'svg'
+					? 'image/svg+xml'
+					: `image/${size.type}`;
+	if (!types.includes(mimeType))
 		throw new OpError('invalid', `Unsupported image type ${mimeType}.`);
 	return { bytes, width: size.width, height: size.height, mimeType };
 }

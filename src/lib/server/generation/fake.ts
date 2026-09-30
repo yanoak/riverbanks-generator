@@ -1,7 +1,7 @@
 // The free stand-in (GENERATION_PROVIDER=fake): a flat PNG in the requested shape, its colour
 // taken from the prompt so each take looks different. Tests and e2e never spend money.
 import { deflateSync } from 'node:zlib';
-import { ratioOf } from '$lib/generation/aspect';
+import { ratioOf, viewBoxFor } from '$lib/generation/aspect';
 import type { ImageProvider } from './provider';
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
@@ -52,7 +52,12 @@ export function solidPng(width: number, height: number, [r, g, b]: number[]): Ui
 
 export function fakeProvider(): ImageProvider {
 	return {
-		async generate({ prompt, aspect }) {
+		async generate({ model, prompt, aspect }) {
+			if (model.vector) {
+				const [, , w, h] = viewBoxFor(aspect).split(' ');
+				const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><rect x="8" y="8" width="${Number(w) - 16}" height="${Number(h) - 16}" fill="none" stroke="#1d3557" stroke-width="8"/><path d="M40 ${Number(h) - 40} L${Number(w) / 2} 40 L${Number(w) - 40} ${Number(h) - 40}" fill="none" stroke="#e76f51" stroke-width="6"/></svg>`;
+				return { bytes: new TextEncoder().encode(svg), mimeType: 'image/svg+xml' };
+			}
 			const ratio = ratioOf(aspect);
 			const long = 480;
 			const [w, h] =

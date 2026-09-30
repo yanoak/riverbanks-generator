@@ -93,11 +93,11 @@ What this plan relies on:
 
 ## Tasks
 
-- [ ] `svg.ts` sanitiser, test-first
-- [ ] Migration: `image/svg+xml` in `assets`; `measureImage` gains an allowed-types option
-- [ ] Registry: `sketch-claude` (anyAspect, maxRefs 4) and `svg-agent` (hidden); exact aspect
+- [x] `svg.ts` sanitiser, test-first
+- [x] Migration: `image/svg+xml` in `assets`; `measureImage` gains an allowed-types option
+- [x] Registry: `sketch-claude` (anyAspect, maxRefs 4) and `svg-agent` (hidden); exact aspect
       in `generatePanelImage`; print refuses SVG
-- [ ] Anthropic sketch provider plus the `ANTHROPIC_API_KEY` wiring, test-first with a mocked
+- [x] Anthropic sketch provider plus the `ANTHROPIC_API_KEY` wiring, test-first with a mocked
       client
 - [ ] Inspector: Sketch in the model menu, no Print button on sketch takes
 - [ ] MCP `draw_panel_svg`

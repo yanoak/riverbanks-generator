@@ -17,3 +17,16 @@ export function nearestAspect(box: { w: number; h: number }, aspects: string[]):
 	}
 	return best;
 }
+
+/** Vector sketches take the panel's own shape: the box scaled to 1000 on its long side. */
+export function exactAspect(box: { w: number; h: number }): string {
+	const k = 1000 / Math.max(box.w, box.h, 1e-6);
+	return `${Math.max(1, Math.round(box.w * k))}:${Math.max(1, Math.round(box.h * k))}`;
+}
+
+/** The SVG viewBox for an aspect, 1000 on its long side. */
+export function viewBoxFor(aspect: string): string {
+	const r = ratioOf(aspect);
+	const [w, h] = r >= 1 ? [1000, Math.round(1000 / r)] : [Math.round(1000 * r), 1000];
+	return `0 0 ${w} ${h}`;
+}

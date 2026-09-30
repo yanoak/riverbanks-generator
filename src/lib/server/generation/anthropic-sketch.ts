@@ -48,7 +48,9 @@ export function anthropicSketchProvider(client: Anthropic): ImageProvider {
 			try {
 				svg = sanitizeSvg(text);
 			} catch (e) {
-				throw new Error(`Claude did not return a drawing we can use (${(e as Error).message})`);
+				throw new Error(`Claude did not return a drawing we can use (${(e as Error).message})`, {
+					cause: e
+				});
 			}
 			return { bytes: new TextEncoder().encode(svg), mimeType: 'image/svg+xml' };
 		}

@@ -42,6 +42,14 @@ export interface McpContext {
 	listStyles: () => Promise<StyleProfile[]>;
 	/** Generate a panel image into the comic's folder (not yet placed). */
 	generate: (input: GenerateInput) => Promise<GenerateResult>;
+	/** Sanitise and store SVG the agent drew itself (not yet placed). */
+	saveSketch: (input: {
+		comicId: string;
+		panelId: string;
+		prompt?: string;
+		box: { w: number; h: number };
+		svg: string;
+	}) => Promise<GenerateResult>;
 }
 
 const page = z.number().int().min(1).describe('1-based page number');
@@ -511,6 +519,53 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				return text(
 					`Made a ${made.naturalWidth}×${made.naturalHeight} print version of panel ${panelId}, keeping its crop. (rev ${rev})`
 				);
+			})
+	);
+
+	server.registerTool(
+		'draw_panel_svg',
+		{
+			annotations: WRITE,
+			title: 'Draw panel as SVG',
+			description:
+				'Draw a panel yourself as an SVG sketch, at no image-generation cost. Write one <svg> with a viewBox matching the panel’s shape: take its bbox from get_comic and scale the long side to 1000 (a 900×300 panel is viewBox="0 0 1000 333"). Draw line art with paths, shapes, groups and gradients in the comic’s style (list_style_profiles has its palette and description). No <text>, <image>, scripts or external links: they are removed, and lettering belongs in balloons. The sketch fills the panel and is kept as a take.',
+			inputSchema: {
+				comicId: z.string(),
+				page,
+				panelId: z.string(),
+				svg: z.string().min(1).max(500_000),
+				prompt: z
+					.string()
+					.max(4000)
+					.optional()
+					.describe('What the panel shows; kept on the panel for anyone generating it again.')
+			}
+		},
+		async ({ comicId, page: n, panelId, svg, prompt }) =>
+			guard(async () => {
+				const { comic } = await loadComic(store, comicId);
+				const at = ops.pageAt(comic, n);
+				const target = at.panels.find((p) => p.id === panelId);
+				if (!target) throw new OpError('invalid', `Page ${n} has no panel ${panelId}.`);
+				const made = await ctx.saveSketch({
+					comicId,
+					panelId,
+					prompt,
+					box: panelBox(at, target),
+					svg
+				});
+				const image = {
+					assetId: made.assetId,
+					naturalWidth: made.naturalWidth,
+					naturalHeight: made.naturalHeight
+				};
+				const { rev } = await mutateComic(store, comicId, (c) => {
+					ops.setPanelImage(c, { page: n, panelId, image });
+					if (prompt?.trim())
+						ops.pageAt(c, n).panels.find((p) => p.id === panelId)!.prompt = prompt.trim();
+					return '';
+				});
+				return text(`Drew panel ${panelId} as an SVG sketch (${made.aspect}). (rev ${rev})`);
 			})
 	);
 

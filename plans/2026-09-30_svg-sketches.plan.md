@@ -99,8 +99,8 @@ What this plan relies on:
       in `generatePanelImage`; print refuses SVG
 - [x] Anthropic sketch provider plus the `ANTHROPIC_API_KEY` wiring, test-first with a mocked
       client
-- [ ] Inspector: Sketch in the model menu, no Print button on sketch takes
-- [ ] MCP `draw_panel_svg`
+- [x] Inspector: Sketch in the model menu, no Print button on sketch takes
+- [x] MCP `draw_panel_svg`
 - [ ] Live check, README and template, then deploy (with Yan's go-ahead and a key)
 
 ## UI mockups (ASCII)
@@ -139,7 +139,7 @@ button is simply absent for sketch takes.
   Unit, with a mocked create — `src/lib/server/generation/anthropic-sketch.test.ts`
 - [ ] A sketch-model generation stores `image/svg+xml` with the exact aspect; a print of an SVG
       is refused — integration — `generate.int.test.ts`
-- [ ] MCP `draw_panel_svg` sanitises (a script is gone), stores, places and logs; bad SVG is a
+- [x] MCP `draw_panel_svg` sanitises (a script is gone), stores, places and logs; bad SVG is a
       tool error — unit — `server.test.ts`
 - [ ] e2e: pick Sketch and generate (fake provider); the take shows, and Print is absent —
       `e2e/generation.e2e.ts`

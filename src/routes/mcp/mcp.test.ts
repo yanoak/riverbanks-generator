@@ -8,11 +8,13 @@ type Handler = (event: { request: Request; url: URL }) => Promise<Response> | Re
 let mcp: { POST: Handler; OPTIONS: Handler };
 let metadata: { GET: Handler };
 
+// Importing the route loads the whole server (MCP SDK, providers, Anthropic SDK): slow when the
+// suite runs in parallel.
 beforeAll(async () => {
 	mcp = (await import('./+server')) as unknown as typeof mcp;
 	metadata =
 		(await import('../.well-known/oauth-protected-resource/mcp/+server')) as unknown as typeof metadata;
-});
+}, 60_000);
 
 const event = (path: string, init?: RequestInit) => {
 	const url = new URL(`https://app.test${path}`);

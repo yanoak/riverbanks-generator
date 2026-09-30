@@ -17,7 +17,7 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import { nearestAspect } from '$lib/generation/aspect';
-	import { DEFAULT_MODEL, PRINT_MODEL } from '$lib/generation/models';
+	import { DEFAULT_MODEL, PRINT_MODEL, VECTOR_MODELS } from '$lib/generation/models';
 	import { pending } from '$lib/generation/pending.svelte';
 	import { panelBox } from '$lib/geometry/panel';
 	import type { Panel } from '$lib/model/types';
@@ -38,6 +38,7 @@
 		height: number;
 		prompt: string;
 		quality: 'draft' | 'print';
+		model: string;
 	}
 
 	// svelte-ignore state_referenced_locally
@@ -52,7 +53,11 @@
 	// svelte-ignore state_referenced_locally
 	let modelKey = $state((pick(style?.model) ?? pick(DEFAULT_MODEL) ?? gen.models[0])?.key ?? '');
 	const model = $derived(pick(modelKey));
-	const aspect = $derived(model ? nearestAspect(panelBox(editor.page, panel), model.aspects) : '');
+	const aspect = $derived.by(() => {
+		if (!model) return '';
+		const box = panelBox(editor.page, panel);
+		return model.anyAspect ? 'exact' : nearestAspect(box, model.aspects);
+	});
 	const job = $derived(pending.get(panel.id));
 	const busy = $derived(!!job && !job.error);
 
@@ -75,7 +80,7 @@
 	async function loadTakes(panelId: string) {
 		const { data } = await gen.supabase
 			.from('generations')
-			.select('id, asset_id, width, height, prompt, quality')
+			.select('id, asset_id, width, height, prompt, quality, model')
 			.eq('comic_id', gen.comicId)
 			.eq('panel_id', panelId)
 			.eq('status', 'done')
@@ -215,6 +220,8 @@
 
 	const current = $derived(takes.findIndex((t) => t.asset_id === panel.image?.assetId));
 	const isPrint = $derived(takes[current]?.quality === 'print');
+	/** SVG sketches are vector: nothing to make a print version of. */
+	const isVector = $derived(VECTOR_MODELS.has(takes[current]?.model ?? ''));
 	const canPrint = $derived(gen.models.some((m) => m.key === PRINT_MODEL));
 </script>
 
@@ -244,8 +251,11 @@
 			>
 				{#each gen.models as m (m.key)}<option value={m.key}>{m.label}</option>{/each}
 			</select>
-			<span class="text-xs text-stone-500 tabular-nums" title="Aspect ratio sent to the model"
-				>{aspect}</span
+			<span
+				class="text-xs text-stone-500 tabular-nums"
+				title={model?.anyAspect
+					? 'Drawn at the panel’s exact shape'
+					: 'Aspect ratio sent to the model'}>{aspect}</span
 			>
 		</div>
 		<button
@@ -280,7 +290,9 @@
 					aria-checked={i === current}
 					aria-label="Take {takes.length - i}{take.quality === 'print'
 						? ' (4K print)'
-						: ''}: {take.prompt}"
+						: VECTOR_MODELS.has(take.model)
+							? ' (SVG sketch)'
+							: ''}: {take.prompt}"
 					title={take.prompt}
 					tabindex={i === (current < 0 ? 0 : current) ? 0 : -1}
 					class="relative h-12 w-12 overflow-hidden rounded {i === current
@@ -292,10 +304,10 @@
 					{#if assetUrl(take.asset_id)}
 						<img src={assetUrl(take.asset_id)} alt="" class="h-full w-full object-cover" />
 					{/if}
-					{#if take.quality === 'print'}
+					{#if take.quality === 'print' || VECTOR_MODELS.has(take.model)}
 						<span
 							class="absolute right-0.5 bottom-0.5 rounded bg-stone-900/80 px-1 text-[9px] font-semibold text-white"
-							>4K</span
+							>{take.quality === 'print' ? '4K' : 'SVG'}</span
 						>
 					{/if}
 				</button>
@@ -303,7 +315,7 @@
 		</div>
 	{/if}
 
-	{#if panel.image && canPrint}
+	{#if panel.image && canPrint && !isVector}
 		<button
 			class="mt-3 w-full rounded border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-50 disabled:opacity-50"
 			disabled={busy || isPrint}

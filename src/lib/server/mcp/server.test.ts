@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { MemoryStore } from '$lib/ops/memory-store';
-import { loadComic } from '$lib/ops/ops';
+import { OpError, loadComic } from '$lib/ops/ops';
 import type { GenerateInput } from '$lib/server/generation/generate';
 import type { StyleProfile } from '$lib/styles/styles';
 import { createMcpServer } from './server';
@@ -26,6 +26,7 @@ async function connect() {
 	const store = new MemoryStore();
 	const imported: string[] = [];
 	const generated: GenerateInput[] = [];
+	const sketches: { svg: string; box: { w: number; h: number } }[] = [];
 	const server = createMcpServer({
 		store,
 		user: { id: 'user-1', email: 'yan@test.local' },
@@ -35,6 +36,20 @@ async function connect() {
 			return { assetId: 'asset-1', naturalWidth: 800, naturalHeight: 600 };
 		},
 		listStyles: async () => [INK],
+		saveSketch: async (input) => {
+			if (!input.svg.includes('<svg')) throw new OpError('invalid', 'No <svg> drawing found.');
+			sketches.push(input);
+			return {
+				generationId: 'sketch-1',
+				assetId: 'sketch-asset',
+				naturalWidth: 1000,
+				naturalHeight: 333,
+				aspect: '1000:333',
+				model: 'svg-agent',
+				dropped: 0,
+				quality: 'draft'
+			};
+		},
 		generate: async (input) => {
 			if (input.prompt === 'fail') throw new Error('Gemini: quota exceeded');
 			generated.push(input);
@@ -62,7 +77,7 @@ async function connect() {
 		};
 		return { text: res.content[0].text, isError: !!res.isError, structured: res.structuredContent };
 	};
-	return { client, call, store, imported, generated };
+	return { client, call, store, imported, generated, sketches };
 }
 
 describe('Riverbanks MCP server', () => {
@@ -90,6 +105,7 @@ describe('Riverbanks MCP server', () => {
 				'set_comic_style',
 				'generate_panel_image',
 				'make_print_version',
+				'draw_panel_svg',
 				'split_panel',
 				'search',
 				'fetch',
@@ -212,6 +228,30 @@ describe('Riverbanks MCP server', () => {
 			const after = (await loadComic(store, id)).comic.pages[0].panels[0].image!;
 			expect(after.offsetX).toBe(before.offsetX);
 			expect(after.scale * after.naturalWidth).toBeCloseTo(before.scale * before.naturalWidth);
+		});
+
+		it('draws a panel from the agent’s own SVG: stored, placed filling it, prompt kept', async () => {
+			const { call, store, sketches } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Sketch' })).text);
+			const panelId = (await loadComic(store, id)).comic.pages[0].panels[0].id;
+			const svg = '<svg viewBox="0 0 1000 333"><circle r="9"/></svg>';
+			const res = await call('draw_panel_svg', {
+				comicId: id,
+				page: 1,
+				panelId,
+				svg,
+				prompt: 'a heron at dawn'
+			});
+			expect(res.isError).toBe(false);
+			expect(res.text).toMatch(/Drew panel .* as an SVG sketch/);
+			expect(sketches[0].svg).toBe(svg);
+			expect(sketches[0].box.w).toBeGreaterThan(0);
+			const panel = (await loadComic(store, id)).comic.pages[0].panels[0];
+			expect(panel.image).toMatchObject({ assetId: 'sketch-asset', naturalWidth: 1000 });
+			expect(panel.prompt).toBe('a heron at dawn');
+
+			const bad = await call('draw_panel_svg', { comicId: id, page: 1, panelId, svg: 'nope' });
+			expect(bad).toMatchObject({ isError: true, text: expect.stringMatching(/No <svg>/) });
 		});
 
 		it('a failed generation is a readable tool error and changes nothing', async () => {

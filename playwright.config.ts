@@ -26,6 +26,8 @@ export default defineConfig({
 	webServer: {
 		command: 'npm run build && npm run preview -- --port 4318 --strictPort',
 		port: 4318,
+		// The server is built before each run; a busy machine can take most of a minute.
+		timeout: 180_000,
 		env: {
 			PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL,
 			PUBLIC_SUPABASE_PUBLISHABLE_KEY: env.PUBLIC_SUPABASE_PUBLISHABLE_KEY,

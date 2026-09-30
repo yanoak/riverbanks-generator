@@ -144,12 +144,20 @@ export const availableModels = (providers: Set<Provider>) =>
 	MODELS.filter((m) => providers.has(m.provider));
 
 /** What the browser needs to offer a model. */
-export type ModelOption = Pick<ModelInfo, 'key' | 'label' | 'note' | 'aspects' | 'maxRefs'>;
+export type ModelOption = Pick<
+	ModelInfo,
+	'key' | 'label' | 'note' | 'aspects' | 'maxRefs' | 'anyAspect' | 'vector'
+>;
 
-export const toOption = ({ key, label, note, aspects, maxRefs }: ModelInfo): ModelOption => ({
+export const toOption = ({
 	key,
 	label,
 	note,
 	aspects,
-	maxRefs
-});
+	maxRefs,
+	anyAspect,
+	vector
+}: ModelInfo): ModelOption => ({ key, label, note, aspects, maxRefs, anyAspect, vector });
+
+/** Keys of models that draw SVG: their takes have no print version. */
+export const VECTOR_MODELS = new Set(MODELS.filter((m) => m.vector).map((m) => m.key));

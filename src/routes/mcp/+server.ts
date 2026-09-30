@@ -7,7 +7,7 @@ import { supabaseEnv } from '$lib/server/supabase-env';
 import { bearerToken, CORS, unauthorized, verifyAccessToken } from '$lib/server/mcp/auth';
 import { importImage } from '$lib/server/mcp/images';
 import { createMcpServer } from '$lib/server/mcp/server';
-import { generatePanelImage } from '$lib/server/generation/generate';
+import { generatePanelImage, saveAgentSketch } from '$lib/server/generation/generate';
 import { providerFor } from '$lib/server/generation/providers';
 import { listProfiles } from '$lib/styles/styles';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
@@ -36,7 +36,8 @@ const handle: RequestHandler = async ({ request, url }) => {
 		appUrl: url.origin,
 		listStyles: () => listProfiles(supabase),
 		generate: (input) =>
-			generatePanelImage(supabase, input, { provider: providerFor, signal: request.signal })
+			generatePanelImage(supabase, input, { provider: providerFor, signal: request.signal }),
+		saveSketch: (input) => saveAgentSketch(supabase, input)
 	});
 	const transport = new WebStandardStreamableHTTPServerTransport({
 		sessionIdGenerator: undefined,

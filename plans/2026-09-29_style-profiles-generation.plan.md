@@ -434,7 +434,7 @@ Run on local first, with the real Gemini key (not the fake), then on production 
 - [ ] Does Yan's Higgsfield API account reach the models listed above, and what does each cost
       in credits? Use `/estimate` once the key is in.
 - [ ] Default Gemini size: 2K ($0.10) or 1K ($0.067)? The plan assumes 2K, since panels print
-      large.
+      large. Asked Yan on 2026-09-30.
 
 ## Progress notes
 
@@ -451,8 +451,12 @@ the real APIs**, because no keys are set.
 
 - **Describe** (`gemini-3.1-flash-lite`): 7.5 s. The palette matched the reference to within a
   few shades.
-- **Gemini images:** refused with "exceeded your current quota". The key's Google project needs
-  billing turned on; image models have no free tier.
+- **Gemini images:** at first refused with "exceeded your current quota": image models have no
+  free tier. After Yan prepaid on 2026-09-30, Nano Banana 2 made a 2752×1536 JPEG of 1.6 MB at
+  2K in 18 s, in the reference's style.
+- **Nano Banana through Higgsfield's API is not available.** `/nano-banana-pro` answers 503
+  `model_disabled`, and the other likely paths answer 404. So Google direct is the only route
+  from a server.
 - **Higgsfield Grok Image 2.0** (the app's own provider code):
   - `aspect_ratio`, `resolution: 2k` and `image_urls` all work.
   - A Supabase signed URL as the reference works, and the style was clearly followed.

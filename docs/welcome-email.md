@@ -115,7 +115,11 @@ Pick a style when you create a comic, or later in the right-hand panel. Then sel
 press G, describe what happens in it, and press Cmd+Enter: a quick draft comes back in the
 style, shaped to the panel. Every take is kept, so you can switch back. When you're happy with
 one, "Print version (4K)" redraws it at print resolution, unchanged.
+
+For quick roughs, choose "Sketch (SVG, Claude)" in the model menu: Claude draws the panel as a
+line-art sketch for a few cents, and sketches print at any size.
 ```
 
 And in the Claude section, replace "It can't draw or generate images itself yet." with:
-"It can also list styles, set a comic's style, and generate a panel's image in it."
+"It can also list styles, set a comic's style, generate a panel's image in it, and draw a panel
+itself as an SVG sketch, which costs nothing extra."

@@ -112,8 +112,9 @@ Make one under "Styles": upload references, mark characters and objects with a n
 "Mae"), and press "Describe from references" to have it draft the text for you.
 
 Pick a style when you create a comic, or later in the right-hand panel. Then select a panel,
-press G, describe what happens in it, and press Cmd+Enter: the image comes back in the style,
-shaped to the panel. Every take is kept, so you can switch back.
+press G, describe what happens in it, and press Cmd+Enter: a quick draft comes back in the
+style, shaped to the panel. Every take is kept, so you can switch back. When you're happy with
+one, "Print version (4K)" redraws it at print resolution, unchanged.
 ```
 
 And in the Claude section, replace "It can't draw or generate images itself yet." with:

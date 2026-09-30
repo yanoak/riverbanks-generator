@@ -37,8 +37,11 @@ Pick a style when you create a comic (**New comic**, or `N`), or later from the 
 nothing selected. The comic follows the style as it is edited: a change to a style applies to
 the next images generated in every comic using it.
 
-To generate, select a panel, press `G`, describe what happens in it, and press ⌘Enter. The
-image comes back at the supported shape nearest the panel's and fills it. The prompt stays on
+To generate, select a panel, press `G`, describe what happens in it, and press ⌘Enter. You get
+a cheap, low-resolution **draft** (Nano Banana 2 at 512, about $0.045), at the supported shape
+nearest the panel's, filling it. When a take is the one, **Print version (4K)** redraws that
+exact image at 5504 px (about $0.15, 25 s) for large prints such as A1, keeping your crop. The
+style's palette is named in that request, because redraws otherwise drift in colour. The prompt stays on
 the panel, and every take is kept under **Takes** to switch back to (←/→, or click). Undo works
 as for any edit.
 

@@ -445,10 +445,21 @@ the real APIs**, because no keys are set.
 
 - Gemini: the generateContent image request shape (`imageConfig`), the 2K output size, and the
   model id `gemini-3.1-flash-lite` for Describe.
-- Higgsfield:
-  - the field names `aspect_ratio`, `resolution` and `image_urls`;
-  - the aspect lists for Qwen and Soul;
-  - whether it accepts Supabase signed URLs.
+- Higgsfield: the aspect lists for Qwen and Soul.
+
+**Checked live on 2026-09-30:**
+
+- **Describe** (`gemini-3.1-flash-lite`): 7.5 s. The palette matched the reference to within a
+  few shades.
+- **Gemini images:** refused with "exceeded your current quota". The key's Google project needs
+  billing turned on; image models have no free tier.
+- **Higgsfield Grok Image 2.0** (the app's own provider code):
+  - `aspect_ratio`, `resolution: 2k` and `image_urls` all work.
+  - A Supabase signed URL as the reference works, and the style was clearly followed.
+  - 24 s for a 2816×1584 PNG of 1.7 MB.
+  - `/estimate` quotes $0.08 an image (Soul V2 is $0.006).
+  - Cloudflare answers Python's urllib with a 403 "error code: 1010", but Node's fetch, which
+    the app uses, gets through.
 
 **Left out of the stages above (follow-ups, not blockers):**
 

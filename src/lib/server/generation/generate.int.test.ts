@@ -157,21 +157,13 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 		).rejects.toThrow(/Generate or place an image first/);
 	});
 
-	it('a Claude sketch is stored as SVG at the panel’s exact shape', async () => {
-		const { calls, provider } = recording();
-		const out = await generatePanelImage(
-			member,
-			{
-				comicId,
-				panelId,
-				prompt: 'a heron',
-				profileId,
-				modelKey: 'sketch-claude',
-				box: { w: 900, h: 300 }
-			},
-			{ provider }
-		);
-		expect(calls[0].aspect).toBe('1000:333');
+	it('an agent’s sketch is stored as SVG at the panel’s exact shape', async () => {
+		const out = await saveAgentSketch(member, {
+			comicId,
+			panelId,
+			box: { w: 900, h: 300 },
+			svg: '<svg viewBox="0 0 1000 333"><path d="M0 0 L10 10"/></svg>'
+		});
 		expect(out).toMatchObject({ aspect: '1000:333', naturalWidth: 1000, naturalHeight: 333 });
 		const { data } = await member.storage.from('assets').download(`${comicId}/${out.assetId}`);
 		expect(data?.type).toBe('image/svg+xml');
@@ -179,12 +171,13 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 	});
 
 	it('a sketch has no print version: it is vector already', async () => {
-		const { provider } = recording();
-		const sketch = await generatePanelImage(
-			member,
-			{ comicId, panelId, prompt: 'a heron', modelKey: 'sketch-claude', box: { w: 1, h: 1 } },
-			{ provider }
-		);
+		const { calls, provider } = recording();
+		const sketch = await saveAgentSketch(member, {
+			comicId,
+			panelId,
+			box: { w: 1, h: 1 },
+			svg: '<svg viewBox="0 0 10 10"><circle r="4"/></svg>'
+		});
 		await expect(
 			generatePanelImage(
 				member,
@@ -199,6 +192,7 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 				{ provider }
 			)
 		).rejects.toThrow(/vector/);
+		expect(calls).toEqual([]);
 	});
 
 	it('an agent’s own SVG is sanitised, stored and logged as svg-agent', async () => {

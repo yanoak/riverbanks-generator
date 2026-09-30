@@ -45,11 +45,11 @@ style's palette is named in that request, because redraws otherwise drift in col
 the panel, and every take is kept under **Takes** to switch back to (←/→, or click). Undo works
 as for any edit.
 
-For roughing out panels cheaply, pick **Sketch (SVG, Claude)** in the model menu. Claude Sonnet 5
-draws the panel as vector line art in the style's palette, at the panel's exact shape, for about
-$0.05. A sketch prints at any size, so it has no print version. From Claude or ChatGPT,
-`draw_panel_svg` lets the agent draw the panel itself, at no cost beyond your own plan. Every
-SVG is sanitised before it's stored: scripts, links, embedded images and text are removed.
+To rough out panels for free, ask Claude or ChatGPT to draw them over MCP: `draw_panel_svg`
+has the agent draw the panel itself as vector line art, in the comic's style and at the panel's
+exact shape, on your own plan with no image credits. The sketch lands as a take marked SVG, and
+since it prints at any size it has no print version. Every SVG is sanitised before it's stored:
+scripts, links, embedded images and text are removed.
 
 Models: **Nano Banana 2** (the default) and **Nano Banana Pro** through the Gemini API, and
 **Grok Image 2.0**, **Marketing Studio Image**, **Qwen Image 3 (edit)** and **Soul V2** through
@@ -118,7 +118,6 @@ Image generation reads server-side keys, in `.env.development.local` locally and
 
 - `GEMINI_API_KEY`: Gemini (Nano Banana models, and Describe from references)
 - `HF_API_KEY` and `HF_API_SECRET` (or `HF_CREDENTIALS=id:secret`): Higgsfield
-- `ANTHROPIC_API_KEY`: Claude, for SVG sketches
 - `GENERATION_PROVIDER=fake`: every model returns a flat test image for free. The e2e tests
   set this. Create a local user
 with Supabase Studio (http://127.0.0.1:54323) or the admin API.

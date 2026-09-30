@@ -97,11 +97,13 @@ What this plan relies on:
 - [x] Migration: `image/svg+xml` in `assets`; `measureImage` gains an allowed-types option
 - [x] Registry: `sketch-claude` (anyAspect, maxRefs 4) and `svg-agent` (hidden); exact aspect
       in `generatePanelImage`; print refuses SVG
-- [x] Anthropic sketch provider plus the `ANTHROPIC_API_KEY` wiring, test-first with a mocked
-      client
-- [x] Inspector: Sketch in the model menu, no Print button on sketch takes
+- [x] ~~Anthropic sketch provider plus the `ANTHROPIC_API_KEY` wiring~~: built, then removed (see
+      Decision)
+- [x] Inspector: ~~Sketch in the model menu~~ (removed); SVG badge and no Print button on sketch
+      takes
 - [x] MCP `draw_panel_svg`
-- [ ] Live check, README and template, then deploy (with Yan's go-ahead and a key)
+- [ ] Live check over MCP from a Claude account, README and template, then deploy (with Yan's
+      go-ahead)
 
 ## UI mockups (ASCII)
 
@@ -165,7 +167,31 @@ button is simply absent for sketch takes.
 
 ## Open questions
 
-- [ ] Sonnet 5 at effort low: good enough sketches, or does it need `medium`? To check live.
+- [x] ~~Sonnet 5 at effort low: good enough?~~ Moot: the in-app sketcher was removed.
+
+## Decision: MCP only (2026-09-30)
+
+The in-app sketcher (Claude Sonnet 5 through the Anthropic API) was built and tested, then
+**removed before release**. Yan's view: "if it's 5 cents per sketch via API I don't think it's
+actually cost effective … I think it's a good use of the MCP via a claude account tho".
+
+At about $0.05 it costs as much as a Nano Banana 2 draft ($0.045), which is a real image. The
+MCP route costs nothing beyond the person's own Claude or ChatGPT plan.
+
+- **Removed:** the `sketch-claude` model, the provider and its tests, `@anthropic-ai/sdk`, and
+  `ANTHROPIC_API_KEY`.
+- **Kept:**
+  - `draw_panel_svg` and the sanitiser;
+  - SVG in the `assets` bucket;
+  - exact-shape aspect;
+  - `svg-agent` logging, the SVG badge on takes, and no print version for vector.
+- **Still covered by tests:** e2e coverage moved to `e2e/mcp.e2e.ts`, where the agent draws a
+  panel and the open editor shows it.
+
+A hand-drawn test of the MCP route is in the studio folder, because it is not committed:
+`riverbanks/tests/moving-house-style/f-claude-svg.svg`, example A's prompt as SVG.
+- **What it reads as:** a good storyboard rough, with the right composition, palette, props and
+  expression, but not finished ligne-claire.
 
 ## Outcome
 

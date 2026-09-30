@@ -79,16 +79,4 @@ test('prompt a panel in the comic’s style, keep takes, switch between them', a
 	await page.locator('main [data-panel-id]').first().click();
 	await expect(prompt).toHaveValue('Mae on the raft at dusk');
 	await expect(takes).toHaveCount(3);
-
-	// A Claude sketch: SVG at the panel's exact shape, marked SVG, and no print version.
-	await page
-		.getByRole('combobox', { name: 'Model' })
-		.selectOption({ label: 'Sketch (SVG, Claude)' });
-	await prompt.focus();
-	await page.keyboard.press('ControlOrMeta+Enter');
-	await expect(takes).toHaveCount(4);
-	await expect(takes.first()).toHaveAccessibleName(/SVG sketch/);
-	await expect(takes.first()).toHaveAttribute('aria-checked', 'true');
-	await expect(page.locator('main img[src]').first()).toBeVisible();
-	await expect(page.getByRole('button', { name: /Print version/ })).toHaveCount(0);
 });

@@ -82,6 +82,19 @@ test('an MCP agent edits a comic that is open in the editor, live', async ({ pag
 	expect(made).toMatch(/Generated a \d+:\d+ image/);
 	await expect(page.locator('main img').first()).toBeVisible();
 
+	// The agent draws another panel itself as SVG; a script in it never reaches the page.
+	const small = d.pages[0].panels.find((p: { cells?: number[] }) => p.cells?.length === 1);
+	const drawn = await call('draw_panel_svg', {
+		comicId: id,
+		page: 1,
+		panelId: small.id,
+		prompt: 'a mudskipper',
+		svg: '<svg viewBox="0 0 1000 1000"><script>alert(1)</script><circle cx="500" cy="500" r="300" fill="#8A6A48"/></svg>'
+	});
+	expect(drawn).toMatch(/as an SVG sketch/);
+	const sketch = page.locator('main img').nth(1); // the generated image, then the sketch
+	await expect(sketch).toBeVisible();
+
 	// A local edit and an agent edit at the same moment both survive: no conflict, no overwrite.
 	await panels.nth(3).click();
 	await page.keyboard.press('Shift+ArrowDown');

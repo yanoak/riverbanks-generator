@@ -4,7 +4,7 @@
 
 import type { RefLimits } from './refs';
 
-export type Provider = 'gemini' | 'higgsfield' | 'anthropic' | 'agent' | 'fake';
+export type Provider = 'gemini' | 'higgsfield' | 'agent' | 'fake';
 
 export interface ModelInfo extends RefLimits {
 	/** Stored on profiles and generations; stable even if the provider id changes. */
@@ -95,21 +95,8 @@ export const MODELS: ModelInfo[] = [
 		sizes: { draft: '720p', print: '1080p' },
 		note: 'Higgsfield · text only: ignores the style’s images'
 	},
-	// Claude writes the panel as SVG line art: a few cents, and vector.
-	{
-		key: 'sketch-claude',
-		provider: 'anthropic',
-		id: 'claude-sonnet-5',
-		label: 'Sketch (SVG, Claude)',
-		aspects: ['1:1'],
-		anyAspect: true,
-		vector: true,
-		maxRefs: 4,
-		roleCaps: { style: 3, character: 2, object: 2 },
-		sizes: { draft: 'svg', print: 'svg' },
-		note: 'Claude Sonnet 5 · vector sketch, about $0.05'
-	},
-	// SVG an agent wrote itself over MCP (draw_panel_svg). Logged like a model, never offered.
+	// SVG an agent drew itself over MCP (draw_panel_svg), on the person's own Claude or ChatGPT
+	// plan. Logged like a model, never offered in the picker.
 	{
 		key: 'svg-agent',
 		provider: 'agent',

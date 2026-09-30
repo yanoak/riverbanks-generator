@@ -42,6 +42,7 @@ MAKING A COMIC
 Click "+ New comic" (or press N). Everything saves automatically, and the toolbar shows "Saved".
 
 Panels. A page starts as a 3 × 4 grid.
+
 - Click a panel, then Shift-click (or Shift + arrow keys) to add neighbours, then press M to
   merge them. L and U shapes work.
 - Shift+M splits a merged panel back into cells.
@@ -50,15 +51,18 @@ Panels. A page starts as a 3 × 4 grid.
   break-outs like Scott McCloud's Understanding Comics.
 
 Images.
+
 - Drop an image onto a panel, paste one with Cmd+V, or use Upload in the right-hand panel.
 - Press Enter (or double-click) to crop: drag to pan, scroll to zoom, and Esc when done.
 
 Text. The toolbar buttons (or keys) add balloons inside the selected panel:
+
 - Speech (S), Thought (T), Whisper (W), Shout (K), Caption (C), SFX (X)
 - Start typing straight away. Cmd+B for bold, Cmd+I for italic, and Esc to finish.
 - Drag the orange dot to point the tail; double-click a balloon to edit it again.
 
 Also:
+
 - Cmd+Z undoes anything, including just your own changes when others are editing too.
 - The left sidebar adds, reorders and deletes pages.
 - "PNG" (Cmd+E) downloads the current page, and "PDF" prints the whole comic.
@@ -78,11 +82,11 @@ USING IT WITH CLAUDE (MCP)
 Riverbanks has an MCP server, so Claude can build and edit your comics with you.
 
 - Claude Code: run
-    claude mcp add --transport http riverbanks https://riverbanks-generator.vercel.app/mcp
+  claude mcp add --transport http riverbanks https://riverbanks-generator.vercel.app/mcp
   then type /mcp inside Claude Code. A browser opens: sign in with your Riverbanks account and
   click Allow.
 - claude.ai: Settings → Connectors → Add custom connector, and paste
-    https://riverbanks-generator.vercel.app/mcp
+  https://riverbanks-generator.vercel.app/mcp
 - ChatGPT also works, on a plan with Developer mode. Ask me for the steps.
 
 Then ask for things like: "Create a comic called Sediment. On page 1 merge the top row into one
@@ -116,8 +120,8 @@ press G, describe what happens in it, and press Cmd+Enter: a quick draft comes b
 style, shaped to the panel. Every take is kept, so you can switch back. When you're happy with
 one, "Print version (4K)" redraws it at print resolution, unchanged.
 
-For quick roughs, choose "Sketch (SVG, Claude)" in the model menu: Claude draws the panel as a
-line-art sketch for a few cents, and sketches print at any size.
+For free quick roughs, ask Claude (connected as below) to "sketch panel 2 as SVG": it draws the
+panel itself as line art in the comic's style, and it costs nothing beyond your Claude plan.
 ```
 
 And in the Claude section, replace "It can't draw or generate images itself yet." with:

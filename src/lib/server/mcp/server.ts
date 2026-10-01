@@ -884,7 +884,9 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	const balloonText = z
 		.string()
 		.max(2000)
-		.describe('Balloon text. New lines are separate lines; **bold** and *italic* are supported.');
+		.describe(
+			'Balloon text. New lines are separate lines; **bold**, *italic* and ~~strikethrough~~ are supported.'
+		);
 
 	server.registerTool(
 		'add_balloon',

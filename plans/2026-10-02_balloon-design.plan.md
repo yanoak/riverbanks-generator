@@ -138,7 +138,7 @@ Each step is usable on its own.
 ## Tasks
 
 - [ ] Plan, and the diary entry
-- [ ] Strikethrough: Inspector button, `~~` over MCP, and tests
+- [x] Strikethrough: Inspector button, `~~` over MCP, and tests
 - [ ] Shape geometry: rounded-rect outline, `outlinePoint` tails, inset by roundness, `points`
       and `depth`; tests
 - [ ] Shape controls: Inspector sliders, and the MCP `add_balloon`/`update_balloon` fields;
@@ -211,7 +211,7 @@ On the canvas, an anchored balloon and a necked pair:
 
 ## Test list (TDD)
 
-- [ ] `markdownToHtml('~~gone~~')` gives `<s>gone</s>`, and `htmlToPlain` gives it back.
+- [x] `markdownToHtml('~~gone~~')` gives `<s>gone</s>`, and `htmlToPlain` gives it back.
       Layer: unit, `src/lib/ops/text.test.ts`
 - [ ] Roundness outlines. Layer: unit, `src/lib/geometry/balloon.test.ts`
   - `roundedPath` with r = 1 traces the same ellipse as today (same points at 0/90/180/270°);

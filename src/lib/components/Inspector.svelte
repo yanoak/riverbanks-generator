@@ -5,6 +5,7 @@
 	import type { Editor as TipTap } from '@tiptap/core';
 	import Bold from '@lucide/svelte/icons/bold';
 	import Italic from '@lucide/svelte/icons/italic';
+	import Strikethrough from '@lucide/svelte/icons/strikethrough';
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import AlignCenter from '@lucide/svelte/icons/align-center';
 	import AlignRight from '@lucide/svelte/icons/align-right';
@@ -60,6 +61,13 @@
 			icon: Italic,
 			active: (tt: TipTap) => tt.isActive('italic'),
 			run: (tt: TipTap) => tt.chain().focus().toggleItalic().run()
+		},
+		{
+			label: 'strike',
+			title: 'Strikethrough (⌘⇧S)',
+			icon: Strikethrough,
+			active: (tt: TipTap) => tt.isActive('strike'),
+			run: (tt: TipTap) => tt.chain().focus().toggleStrike().run()
 		},
 		{ label: 'left', title: 'Align left', icon: AlignLeft, ...align('left') },
 		{ label: 'center', title: 'Align centre', icon: AlignCenter, ...align('center') },

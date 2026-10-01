@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import * as Y from 'yjs';
+import { fragmentToHtml, htmlToFragment } from '$lib/model/text';
 import { htmlToPlain, markdownToHtml } from './text';
 
 describe('markdownToHtml', () => {
@@ -28,5 +30,18 @@ describe('htmlToPlain', () => {
 		expect(htmlToPlain('<p>THE <strong>TRICK</strong></p><p>IS &amp; WAS</p>')).toBe(
 			'THE **TRICK**\nIS & WAS'
 		);
+	});
+});
+
+describe('strikethrough', () => {
+	it('turns ~~text~~ into <s> and back', () => {
+		expect(markdownToHtml('NOT ~~ALWAYS~~ NEVER')).toBe('<p>NOT <s>ALWAYS</s> NEVER</p>');
+		expect(htmlToPlain('<p>NOT <s>ALWAYS</s> NEVER</p>')).toBe('NOT ~~ALWAYS~~ NEVER');
+	});
+
+	it('survives the editor schema', () => {
+		const fragment = new Y.Doc().getXmlFragment('t');
+		htmlToFragment('<p><s>gone</s></p>', fragment);
+		expect(fragmentToHtml(fragment)).toContain('<s>gone</s>');
 	});
 });

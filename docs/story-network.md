@@ -11,6 +11,9 @@ Plans with the reasoning behind it:
   and the sync.
 - [`2026-10-01_network-portraits`](../plans/2026-10-01_network-portraits.plan.md): the portraits.
 
+For the stories themselves, the full canon snapshot with sources, precedence and open questions
+is [`content/canon/riverbanks-canon.md`](../content/canon/riverbanks-canon.md).
+
 ## The one rule: the Google Doc is canon
 
 The network is rebuilt from **RIVERBOOK**, never edited by hand on the page:

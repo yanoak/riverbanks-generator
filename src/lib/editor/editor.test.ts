@@ -360,3 +360,52 @@ describe('Editor.placePrintVersion', () => {
 		expect(editor.page.panels[0].image!.assetId).toBe('other');
 	});
 });
+
+describe('Editor header and footer bands', () => {
+	function boards() {
+		const editor = new Editor();
+		editor.load(createComic('Taming Currents', 'board'));
+		editor.addPage();
+		editor.goToPage(0);
+		return editor;
+	}
+
+	it('selects a band, and drops the selection on a page without one', () => {
+		const editor = boards();
+		editor.selectBand('header');
+		expect(editor.selection).toEqual({ kind: 'band', band: 'header' });
+		const old = new Editor();
+		old.load(createComic('Old'));
+		old.selectBand('footer');
+		expect(old.selection).toEqual({ kind: 'none' });
+	});
+
+	it('edits this page’s band text as one undo step', () => {
+		const editor = boards();
+		editor.setBandText('header', 'subtitle', 'The Invitation');
+		expect(editor.bands.header.subtitle).toBe('The Invitation');
+		expect(editor.comic.pages[1].bands).toBeUndefined();
+		editor.undo();
+		expect(editor.bands.header.subtitle).toBe('');
+	});
+
+	it('typing the default back drops the override', () => {
+		const editor = boards();
+		editor.setBandText('header', 'title', 'Mine');
+		editor.setBandText('header', 'title', '{comic}');
+		expect(editor.page.bands).toBeUndefined();
+	});
+
+	it('uses a page’s band on every page, and resets a page to the default', () => {
+		const editor = boards();
+		editor.setBandText('header', 'title', 'ACT TWO');
+		editor.useBandOnEveryPage('header');
+		expect(editor.comic.bands?.header.title).toBe('ACT TWO');
+		expect(editor.page.bands).toBeUndefined();
+		editor.goToPage(1);
+		expect(editor.bands.header.title).toBe('ACT TWO');
+		editor.setBandText('header', 'title', 'ELSEWHERE');
+		editor.resetBand('header');
+		expect(editor.bands.header.title).toBe('ACT TWO');
+	});
+});

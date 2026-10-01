@@ -17,28 +17,52 @@ export const BAND_TOKENS = ['{comic}', '{page}', '{pages}'];
 /** The comic's default bands, before tokens. */
 export const comicBands = (comic: Comic): Bands => comic.bands ?? HOUSE_BANDS;
 
-function fill(text: string, comic: Comic, index: number): string {
-	return text
-		.replaceAll('{comic}', comic.title)
-		.replaceAll('{pages}', String(comic.pages.length))
-		.replaceAll('{page}', String(index + 1));
+/** Whether the page has room for this band (its grid leaves a strip above or below). */
+export const hasBand = (page: Page, band: Band): boolean =>
+	((band === 'header' ? page.grid.top : page.grid.bottom) ?? 0) > 0;
+
+/** What resolving needs to know about the comic; the comics list has no more than this. */
+export interface BandContext {
+	title: string;
+	bands?: Bands;
+	pageCount: number;
+}
+
+/** A band's text on a page before tokens: the default, with the page's overrides on top. */
+export function bandSource<B extends Band>(
+	defaults: Bands | undefined,
+	page: Page | undefined,
+	band: B
+): Bands[B] {
+	return { ...(defaults ?? HOUSE_BANDS)[band], ...page?.bands?.[band] } as Bands[B];
 }
 
 /** The text page `index` (0-based) shows in its bands. */
 export function resolveBands(comic: Comic, index: number): Bands {
-	const base = comicBands(comic);
-	const own = comic.pages[index]?.bands;
-	const header = { ...base.header, ...own?.header };
-	const footer = { ...base.footer, ...own?.footer };
+	return bandsFor(
+		{ title: comic.title, bands: comic.bands, pageCount: comic.pages.length },
+		comic.pages[index],
+		index
+	);
+}
+
+export function bandsFor(ctx: BandContext, page: Page | undefined, index: number): Bands {
+	const fill = (text: string) =>
+		text
+			.replaceAll('{comic}', ctx.title)
+			.replaceAll('{pages}', String(ctx.pageCount))
+			.replaceAll('{page}', String(index + 1));
+	const header = bandSource(ctx.bands, page, 'header');
+	const footer = bandSource(ctx.bands, page, 'footer');
 	return {
 		header: {
-			title: fill(header.title, comic, index),
-			subtitle: fill(header.subtitle, comic, index)
+			title: fill(header.title),
+			subtitle: fill(header.subtitle)
 		},
 		footer: {
-			left: fill(footer.left, comic, index),
-			center: fill(footer.center, comic, index),
-			right: fill(footer.right, comic, index)
+			left: fill(footer.left),
+			center: fill(footer.center),
+			right: fill(footer.right)
 		}
 	};
 }
@@ -62,6 +86,16 @@ export function setPageBands(page: Page, patch: BandsPatch): void {
 		const slots = defined(patch[band]);
 		if (Object.keys(slots).length) next[band] = { ...next[band], ...slots } as never;
 	}
+	tidy(page, next);
+}
+
+/** Drop one slot's override, so the page shows the default there again. */
+export function clearPageBandSlot(page: Page, band: Band, slot: string): void {
+	const next: BandOverrides = { ...page.bands };
+	if (!next[band]) return;
+	const slots = { ...next[band] } as Record<string, string>;
+	delete slots[slot];
+	next[band] = slots as never;
 	tidy(page, next);
 }
 

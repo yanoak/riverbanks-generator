@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
-import type { Page } from '$lib/model/types';
+import type { Bands, Page } from '$lib/model/types';
 import { mutateComic } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		locals.supabase
 			.from('comics')
 			.select(
-				'id, title, owner_id, updated_at, styleProfileId:doc->>styleProfileId, pages:doc->pages, firstPage:doc->pages->0'
+				'id, title, owner_id, updated_at, styleProfileId:doc->>styleProfileId, bands:doc->bands, pages:doc->pages, firstPage:doc->pages->0'
 			)
 			.order('updated_at', { ascending: false }),
 		locals.supabase.rpc('shared_comic_owners'),
@@ -31,6 +31,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			updatedAt: r.updated_at as string,
 			pageCount: Array.isArray(r.pages) ? r.pages.length : 0,
 			firstPage: r.firstPage as Page | null,
+			bands: (r.bands as Bands | null) ?? undefined,
 			styleProfileId: (r.styleProfileId as string | null) ?? null,
 			/** Set for comics someone else owns and shared with me. */
 			sharedBy: r.owner_id === user?.id ? null : (ownerEmail.get(r.id as string) ?? 'someone')

@@ -8,6 +8,17 @@ import { ySyncPluginKey } from '@tiptap/y-tiptap';
 import type * as Y from 'yjs';
 import type { Peer, Presence } from '$lib/collab/presence.svelte';
 import { YHistory } from '$lib/history/yhistory.svelte';
+import {
+	bandSource,
+	clearPageBandSlot,
+	comicBands,
+	hasBand,
+	resetPageBands,
+	resolveBands,
+	setPageBands,
+	useOnEveryPage,
+	type Band
+} from '$lib/model/bands';
 import { createComic, createPage } from '$lib/model/factory';
 import { createBalloon } from '$lib/model/balloons';
 import { clone } from '$lib/model/clone';
@@ -21,6 +32,7 @@ import { addImage } from '$lib/persistence/assets.svelte';
 import type {
 	Balloon,
 	BalloonType,
+	Bands,
 	Comic,
 	FreePanel,
 	GridSpec,
@@ -30,7 +42,10 @@ import type {
 } from '$lib/model/types';
 
 export type Selection =
-	{ kind: 'none' } | { kind: 'panels'; ids: string[] } | { kind: 'balloon'; id: string };
+	| { kind: 'none' }
+	| { kind: 'panels'; ids: string[] }
+	| { kind: 'balloon'; id: string }
+	| { kind: 'band'; band: Band };
 
 export type Mode = 'select' | 'image' | 'text';
 
@@ -243,6 +258,8 @@ export class Editor {
 			const ids = sel.ids.filter((id) => page.panels.some((p) => p.id === id));
 			if (ids.length !== sel.ids.length)
 				this.selection = ids.length ? { kind: 'panels', ids } : { kind: 'none' };
+		} else if (sel.kind === 'band' && !hasBand(page, sel.band)) {
+			this.selection = { kind: 'none' };
 		} else if (sel.kind === 'balloon' && !page.balloons.some((b) => b.id === sel.id)) {
 			this.selection = { kind: 'none' };
 			if (this.editingBalloonId === sel.id) this.stopEditing();
@@ -250,6 +267,44 @@ export class Editor {
 		if (this.imagePanelId && !page.panels.some((p) => p.id === this.imagePanelId)) {
 			this.exitImageMode();
 		}
+	}
+
+	// --- header and footer bands -----------------------------------------------------------
+
+	/** The text the current page shows in its bands, tokens filled in. */
+	get bands(): Bands {
+		return resolveBands(this.comic, this.pageIndex);
+	}
+
+	/** The current page's band text before tokens, and which slots it overrides. */
+	bandSource<B extends Band>(band: B): { text: Bands[B]; overridden: string[] } {
+		return {
+			text: bandSource(this.comic.bands, this.page, band),
+			overridden: Object.keys(this.page.bands?.[band] ?? {})
+		};
+	}
+
+	selectBand(band: Band): void {
+		this.select(hasBand(this.page, band) ? { kind: 'band', band } : { kind: 'none' });
+	}
+
+	/** Set one slot on this page; typing the comic's default back drops the override. */
+	setBandText(band: Band, slot: string, value: string): void {
+		this.change(`Edit ${band}`, (d, page) => {
+			const fallback = (comicBands(d)[band] as unknown as Record<string, string>)[slot];
+			if (value === fallback) clearPageBandSlot(page, band, slot);
+			else setPageBands(page, { [band]: { [slot]: value } });
+		});
+	}
+
+	useBandOnEveryPage(band: Band): void {
+		this.change(`Use ${band} on every page`, (d) => useOnEveryPage(d, this.pageIndex, band));
+		this.say(`Every page now shows this ${band}, unless it has its own.`);
+	}
+
+	resetBand(band: Band): void {
+		this.change(`Reset ${band}`, (_d, page) => resetPageBands(page, band));
+		this.say(`This page’s ${band} is back to the default.`);
 	}
 
 	// --- panel operations -----------------------------------------------------------------

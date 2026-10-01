@@ -15,13 +15,30 @@
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
 	import { DEFAULT_TYPOGRAPHY, type Typography } from '$lib/typography/typography';
+	import type { Band } from '$lib/model/bands';
+	import type { Bands } from '$lib/model/types';
 
 	let {
 		page,
 		scale,
 		editor,
-		typography = DEFAULT_TYPOGRAPHY
-	}: { page: Page; scale: number; editor?: Editor; typography?: Typography } = $props();
+		typography = DEFAULT_TYPOGRAPHY,
+		bands
+	}: {
+		page: Page;
+		scale: number;
+		editor?: Editor;
+		typography?: Typography;
+		/** What the header and footer say, resolved (see model/bands.ts). */
+		bands?: Bands;
+	} = $props();
+
+	/** The bands' boxes: a strip above and below the grid, where the page has them. */
+	const top = $derived(page.grid.top ?? 0);
+	const bottom = $derived(page.grid.bottom ?? 0);
+	const bandBox = (band: Band) =>
+		band === 'header' ? { y: 0, h: top } : { y: page.height - bottom, h: bottom };
+	const selectedBand = $derived(editor?.selection.kind === 'band' ? editor.selection.band : null);
 
 	const shapes = $derived(
 		page.panels
@@ -150,6 +167,10 @@
 		style:transform="scale({scale})"
 		style:transform-origin="top left"
 	>
+		{#if top > 0}{@render header()}{/if}
+		{#if bottom > 0}{@render footer()}{/if}
+		{#if editor && top > 0}{@render bandHit('header')}{/if}
+
 		{#each shapes as { panel, bbox, clip } (panel.id)}
 			<div
 				class="absolute overflow-hidden"
@@ -309,6 +330,8 @@
 			{/if}
 		{/each}
 
+		{#if editor && bottom > 0}{@render bandHit('footer')}{/if}
+
 		{#if peersHere.length}
 			<svg
 				class="pointer-events-none absolute inset-0 overflow-visible"
@@ -363,6 +386,49 @@
 		{/if}
 	</div>
 </div>
+
+<!-- After Sam's slides: the title in Rubik Microbe capitals, the footer in small Rubik caps. -->
+{#snippet header()}
+	<div
+		class="band header absolute inset-x-0 top-0 flex flex-col items-center justify-center px-8 text-center"
+		style:height="{top}px"
+	>
+		{#if bands?.header.title}<div class="title">{bands.header.title}</div>{/if}
+		{#if bands?.header.subtitle}<div class="subtitle">{bands.header.subtitle}</div>{/if}
+	</div>
+{/snippet}
+
+{#snippet footer()}
+	<div
+		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-8"
+		style:height="{bottom}px"
+	>
+		<span class="text-left">{bands?.footer.left}</span>
+		<span class="text-center">{bands?.footer.center}</span>
+		<span class="text-right">{bands?.footer.right}</span>
+	</div>
+{/snippet}
+
+<!-- Beneath the balloons and free panels (z 1), so text that spills into a band stays on top. -->
+{#snippet bandHit(band: Band)}
+	{@const box = bandBox(band)}
+	<div
+		data-band={band}
+		class="band-hit absolute inset-x-0 cursor-pointer outline-none"
+		class:selected={selectedBand === band}
+		style:top="{box.y}px"
+		style:height="{box.h}px"
+		style:z-index="1"
+		style:--w="{2 / scale}px"
+		role="button"
+		tabindex="0"
+		aria-label={band === 'header' ? 'Header' : 'Footer'}
+		aria-pressed={selectedBand === band}
+		onpointerdown={() => editor?.selectBand(band)}
+		onfocus={() => selectedBand !== band && editor?.selectBand(band)}
+		onkeydown={(e) => e.key === 'Enter' && editor?.selectBand(band)}
+	></div>
+{/snippet}
 
 {#snippet freePanelBody(panel: FreePanel)}
 	<div
@@ -438,6 +504,40 @@
 		box-shadow: 0 0 0 1px var(--color-amber-700);
 		cursor: crosshair;
 		z-index: 20;
+	}
+	.band {
+		color: #1c1917;
+		pointer-events: none;
+	}
+	.header {
+		font-family: 'Rubik Microbe', 'Rubik', sans-serif;
+		text-transform: uppercase;
+		line-height: 1;
+	}
+	.header .title {
+		font-size: 72px;
+	}
+	.header .subtitle {
+		font-size: 40px;
+		margin-top: 12px;
+	}
+	.footer {
+		font-family: 'Rubik', sans-serif;
+		font-weight: 600;
+		font-size: 18px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+	.band-hit:hover {
+		background: color-mix(in oklab, var(--color-sky-500) 6%, transparent);
+	}
+	.band-hit.selected,
+	.band-hit:focus-visible {
+		outline: var(--w) dashed var(--color-sky-500);
+		outline-offset: calc(var(--w) * -2);
+	}
+	.band-hit.selected {
+		background: color-mix(in oklab, var(--color-sky-500) 10%, transparent);
 	}
 	.hit:focus-visible {
 		stroke: var(--color-sky-600);

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import PageView from './PageView.svelte';
+	import { resolveBands } from '$lib/model/bands';
 	import type { Typography } from '$lib/typography/typography';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
@@ -34,7 +35,12 @@
 				class:ring-2={i === editor.pageIndex}
 				class:ring-sky-500={i === editor.pageIndex}
 			>
-				<PageView {page} scale={THUMB_WIDTH / page.width} {typography} />
+				<PageView
+					{page}
+					scale={THUMB_WIDTH / page.width}
+					{typography}
+					bands={resolveBands(editor.comic, i)}
+				/>
 			</div>
 			<span class="flex items-center gap-1">
 				{i + 1}

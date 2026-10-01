@@ -6,6 +6,7 @@
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import StyleChoices from '$lib/components/StyleChoices.svelte';
 	import PageView from '$lib/components/PageView.svelte';
+	import { bandsFor } from '$lib/model/bands';
 	import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 	import type { Comic } from '$lib/model/types';
 	import { useAssetBackend } from '$lib/persistence/assets.svelte';
@@ -189,6 +190,7 @@
 						page={comic.firstPage}
 						scale={THUMB / comic.firstPage.width}
 						typography={lettering(comic.styleProfileId)}
+						bands={bandsFor(comic, comic.firstPage, 0)}
 					/>
 				{/if}
 			</div>

@@ -61,9 +61,9 @@
 		document.querySelector<HTMLElement>('[data-share]')?.focus();
 	}
 	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
+	import { resolveBands } from '$lib/model/bands';
+	import { formatOf } from '$lib/model/factory';
 
-	/** US trim width at 96 CSS px per inch, for the print stylesheet. */
-	const PRINT_SCALE = (6.625 * 96) / 1000;
 	let stage = $state<HTMLElement>();
 
 	async function exportPng() {
@@ -85,6 +85,21 @@
 	}
 
 	const editor = new Editor();
+
+	/** The printed sheet, from the first page's shape: A1 for boards, else US comic trim. */
+	const sheet = $derived(
+		editor.comic.pages[0] && formatOf(editor.comic.pages[0]) === 'board'
+			? { width: '594mm', height: '841mm', px: (594 / 25.4) * 96 }
+			: { width: '6.625in', height: '10.25in', px: 6.625 * 96 }
+	);
+
+	// @page can't take a CSS variable, so the print stylesheet's sheet size is written here.
+	$effect(() => {
+		const style = document.createElement('style');
+		style.textContent = `@page { size: ${sheet.width} ${sheet.height}; margin: 0; }`;
+		document.head.append(style);
+		return () => style.remove();
+	});
 	let saveStatus = $state<SaveStatus>('saved');
 	let loaded = $state(false);
 	/** Receiving live updates (cloud comics only); exposed as data-live for tests. */
@@ -225,14 +240,21 @@
 
 <!-- Offscreen static render of the current page at 1 unit = 1px, for PNG export. -->
 <div class="export-stage" bind:this={stage} aria-hidden="true">
-	{#if loaded}<PageView page={editor.page} scale={1} {typography} />{/if}
+	{#if loaded}<PageView page={editor.page} scale={1} {typography} bands={editor.bands} />{/if}
 </div>
 
 <!-- Every page, one per sheet; only visible when printing (Export → PDF). -->
 <div class="print-pages" aria-hidden="true">
 	{#if loaded}
-		{#each editor.comic.pages as page (page.id)}
-			<div class="print-page"><PageView {page} scale={PRINT_SCALE} {typography} /></div>
+		{#each editor.comic.pages as page, i (page.id)}
+			<div class="print-page" style:height={sheet.height}>
+				<PageView
+					{page}
+					scale={sheet.px / page.width}
+					{typography}
+					bands={resolveBands(editor.comic, i)}
+				/>
+			</div>
 		{/each}
 	{/if}
 </div>
@@ -274,7 +296,7 @@
 			>
 				<div class="shadow-[0_2px_24px_rgba(0,0,0,0.12)]">
 					{#if loaded}
-						<PageView page={editor.page} {scale} {editor} {typography} />
+						<PageView page={editor.page} {scale} {editor} {typography} bands={editor.bands} />
 					{/if}
 				</div>
 			</div>
@@ -305,10 +327,6 @@
 		display: none;
 	}
 	@media print {
-		@page {
-			size: 6.625in 10.25in;
-			margin: 0;
-		}
 		:global(body) {
 			margin: 0;
 		}
@@ -320,7 +338,6 @@
 			display: block;
 		}
 		.print-page {
-			height: 10.25in;
 			overflow: hidden;
 		}
 		.print-page:not(:last-child) {

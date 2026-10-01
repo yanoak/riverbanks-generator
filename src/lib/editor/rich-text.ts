@@ -43,7 +43,7 @@ function mount(editor: Editor, balloon: Balloon, selectAll: boolean, node: HTMLE
 		const available = node.parentElement?.clientHeight ?? 0;
 		const overflow = node.offsetHeight - available;
 		if (overflow <= 1) return;
-		const h = balloon.h + overflow / (1 - 2 * textInset(balloon.type));
+		const h = balloon.h + overflow / (1 - 2 * textInset(balloon.type, balloon.roundness));
 		editor.change(
 			'Edit text',
 			(_d, page) => {

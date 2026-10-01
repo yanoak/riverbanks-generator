@@ -95,6 +95,32 @@ const balloonType = z
 	.enum(['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'])
 	.describe('speech/thought/whisper/shout have tails; caption is a box; sfx is display lettering');
 const border = z.enum(['solid', 'none']);
+const shapeArgs = {
+	roundness: z
+		.number()
+		.min(0)
+		.max(1)
+		.nullable()
+		.optional()
+		.describe(
+			'speech, whisper, caption: 0 is a box, 1 an ellipse (the speech default; a caption’s is 0), 0.1–0.3 a softly rounded rectangle. null resets.'
+		),
+	points: z
+		.number()
+		.int()
+		.min(5)
+		.max(48)
+		.nullable()
+		.optional()
+		.describe('thought: number of cloud bumps; shout: number of spikes (default 18). null resets.'),
+	depth: z
+		.number()
+		.min(0)
+		.max(1)
+		.nullable()
+		.optional()
+		.describe('shout: how deep the spikes cut, 0 shallow to 1 deep (default 0.55). null resets.')
+};
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'a #rrggbb colour');
 
 /**
@@ -902,7 +928,8 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				text: balloonText,
 				panelId: z.string().optional(),
 				rect: rect.optional(),
-				tailTip: point.optional()
+				tailTip: point.optional(),
+				...shapeArgs
 			}
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.addBalloon(c, args).summary)
@@ -914,7 +941,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Update balloon',
 			description:
-				'Change a balloon’s text, type, rect, tail (null removes it), font size, font or fill. ' +
+				'Change a balloon’s text, type, rect, tail (null removes it), font size, font, fill, or shape (roundness, points, depth). ' +
 				'A balloon with no font follows its comic style’s lettering for its type; `font` gives it its own ' +
 				`(a CSS font-family; loaded fonts: ${FONTS.map((f) => f.family).join(', ')}) and "" hands it back to the style.`,
 			inputSchema: {
@@ -927,7 +954,8 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				tailTip: point.nullable().optional(),
 				fontSize: z.number().min(8).max(200).optional(),
 				font: z.string().max(200).optional(),
-				fill: color.optional()
+				fill: color.optional(),
+				...shapeArgs
 			}
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.updateBalloon(c, args))

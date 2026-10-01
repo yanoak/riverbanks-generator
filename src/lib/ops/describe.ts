@@ -4,7 +4,7 @@ import { gridArea } from '$lib/geometry/grid';
 import { panelBox } from '$lib/geometry/panel';
 import { resolveBands } from '$lib/model/bands';
 import { formatOf } from '$lib/model/factory';
-import type { Comic, Rect } from '$lib/model/types';
+import type { Balloon, Comic, Rect } from '$lib/model/types';
 import { htmlToPlain } from './text';
 
 const round = (r: Rect): Rect => ({
@@ -13,6 +13,16 @@ const round = (r: Rect): Rect => ({
 	w: Math.round(r.w),
 	h: Math.round(r.h)
 });
+
+/** The shape settings a balloon has of its own, if any. */
+function shapeOf(b: Balloon) {
+	const shape = Object.fromEntries(
+		(['roundness', 'points', 'depth'] as const).flatMap((k) =>
+			b[k] === undefined ? [] : [[k, b[k]]]
+		)
+	);
+	return Object.keys(shape).length ? { shape } : {};
+}
 
 export function describeComic(comic: Comic, meta: { id: string; rev: number; appUrl: string }) {
 	return {
@@ -53,6 +63,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 					type: b.type,
 					text: htmlToPlain(b.html),
 					rect: round(b),
+					...shapeOf(b),
 					...(b.tail
 						? { tailTip: { x: Math.round(b.x + b.tail.x), y: Math.round(b.y + b.tail.y) } }
 						: {})

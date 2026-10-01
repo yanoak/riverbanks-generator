@@ -8,8 +8,14 @@
 	let { balloon, typography, text }: { balloon: Balloon; typography: Typography; text?: Snippet } =
 		$props();
 
-	const shape = $derived(balloonShape(balloon.type, balloon.w, balloon.h, balloon.tail));
-	const inset = $derived(textInset(balloon.type));
+	const shape = $derived(
+		balloonShape(balloon.type, balloon.w, balloon.h, balloon.tail, {
+			roundness: balloon.roundness,
+			points: balloon.points,
+			depth: balloon.depth
+		})
+	);
+	const inset = $derived(textInset(balloon.type, balloon.roundness));
 	const lettering = $derived(letteringFor(balloon, typography));
 	const STROKE = 7;
 </script>

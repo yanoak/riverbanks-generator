@@ -139,9 +139,9 @@ Each step is usable on its own.
 
 - [ ] Plan, and the diary entry
 - [x] Strikethrough: Inspector button, `~~` over MCP, and tests
-- [ ] Shape geometry: rounded-rect outline, `outlinePoint` tails, inset by roundness, `points`
+- [x] Shape geometry: rounded-rect outline, `outlinePoint` tails, inset by roundness, `points`
       and `depth`; tests
-- [ ] Shape controls: Inspector sliders, and the MCP `add_balloon`/`update_balloon` fields;
+- [x] Shape controls: Inspector sliders, and the MCP `add_balloon`/`update_balloon` fields;
       `get_comic` reports them
 - [ ] Anchors: `anchorBalloon`, `repinAnchors` in the grid ops, the clip in the render, drag to
       detach, the Inspector menu and MCP; tests
@@ -201,9 +201,8 @@ On the canvas, an anchored balloon and a necked pair:
    `<input type="range">`, so the arrow keys step them (1 % for roundness and depth, 1 for
    points) and Home/End jump to the ends. Anchor and Connect to are `<select>`s. The connector
    style is a radio pair.
-2. **Undo:** each control commits on `change` as one undo step. A slider that the keyboard
-   steps several times groups into one step, the way a balloon's text does while it is being
-   typed.
+2. **Undo:** dragging a slider is one undo step, however far it moves, and so is each arrow-key
+   step. The Anchor, Connect to and Connector controls are one step per change.
 3. **Shortcuts:** ⌘⇧S toggles strike while editing text (TipTap's binding), like ⌘B and ⌘I.
    No new canvas keys.
 4. **Focus:** it stays on the control after a change. Anchoring or connecting moves things on
@@ -213,14 +212,14 @@ On the canvas, an anchored balloon and a necked pair:
 
 - [x] `markdownToHtml('~~gone~~')` gives `<s>gone</s>`, and `htmlToPlain` gives it back.
       Layer: unit, `src/lib/ops/text.test.ts`
-- [ ] Roundness outlines. Layer: unit, `src/lib/geometry/balloon.test.ts`
+- [x] Roundness outlines. Layer: unit, `src/lib/geometry/balloon.test.ts`
   - `roundedPath` with r = 1 traces the same ellipse as today (same points at 0/90/180/270°);
   - with r = 0 it is the bounding box.
-- [ ] `outlinePoint` lies on the outline. It meets a box's edge at the right place, and an
+- [x] `outlinePoint` lies on the outline. It meets a box's edge at the right place, and an
       ellipse's at the same place as `ellipsePoint`. Layer: unit, `balloon.test.ts`
-- [ ] `textInset` is 0.15 for an ellipse, 0.06 for a box, and monotonic in between. Layer: unit,
+- [x] `textInset` is 0.15 for an ellipse, 0.06 for a box, and monotonic in between. Layer: unit,
       `balloon.test.ts`
-- [ ] `points` sets the bump count (counting arcs) and the spike count (outer vertices), and
+- [x] `points` sets the bump count (counting arcs) and the spike count (outer vertices), and
       `depth` sets the inner radius. Absent values reproduce today's paths exactly. Layer: unit,
       `balloon.test.ts`
 - [ ] Anchors. Layer: unit, `src/lib/model/balloons.test.ts`

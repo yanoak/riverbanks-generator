@@ -577,6 +577,35 @@ describe('Riverbanks MCP server', () => {
 		expect(refused.isError).toBe(true);
 	});
 
+	it('shapes balloons: roundness, bumps and spikes, and resets them', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Shapes' })).text);
+		await call('add_balloon', {
+			comicId: id,
+			page: 1,
+			type: 'speech',
+			text: 'HI',
+			roundness: 0.2
+		});
+		await call('add_balloon', { comicId: id, page: 1, type: 'shout', text: 'NO!' });
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const [speech, shout] = d.pages[0].balloons;
+		expect(speech.shape).toEqual({ roundness: 0.2 });
+		expect(shout).not.toHaveProperty('shape');
+
+		await call('update_balloon', {
+			comicId: id,
+			page: 1,
+			balloonId: shout.id,
+			points: 9,
+			depth: 0.9
+		});
+		await call('update_balloon', { comicId: id, page: 1, balloonId: speech.id, roundness: null });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[1].shape).toEqual({ points: 9, depth: 0.9 });
+		expect(d.pages[0].balloons[0]).not.toHaveProperty('shape');
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

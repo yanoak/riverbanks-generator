@@ -134,9 +134,17 @@ export class Editor {
 		return result;
 	}
 
-	/** Set fields on a panel or balloon of the current page. Undefined deletes the field. */
-	patch(description: string, id: string, fields: Partial<Balloon> | Partial<Panel>): void {
-		this.change(description, (_d, page) => Object.assign(find(page, id), fields));
+	/**
+	 * Set fields on a panel or balloon of the current page. Undefined deletes the field. With
+	 * `group`, the change joins the step in progress (a slider being dragged).
+	 */
+	patch(
+		description: string,
+		id: string,
+		fields: Partial<Balloon> | Partial<Panel>,
+		opts: { group?: boolean } = {}
+	): void {
+		this.change(description, (_d, page) => Object.assign(find(page, id), fields), opts);
 	}
 
 	/**

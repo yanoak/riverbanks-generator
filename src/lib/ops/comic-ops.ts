@@ -206,6 +206,21 @@ export function removePanelImage(comic: Comic, args: { page: number; panelId: st
 
 // --- balloons ------------------------------------------------------------------------------
 
+/** A balloon's shape settings; null hands one back to the default for its type. */
+export interface ShapeArgs {
+	roundness?: number | null;
+	points?: number | null;
+	depth?: number | null;
+}
+
+function applyShape(b: Balloon, args: ShapeArgs) {
+	for (const key of ['roundness', 'points', 'depth'] as const) {
+		const v = args[key];
+		if (v === null) delete b[key];
+		else if (v !== undefined) b[key] = v;
+	}
+}
+
 export function addBalloon(
 	comic: Comic,
 	args: {
@@ -215,13 +230,14 @@ export function addBalloon(
 		panelId?: string;
 		rect?: Rect;
 		tailTip?: Point;
-	}
+	} & ShapeArgs
 ): { id: string; summary: string } {
 	const page = pageAt(comic, args.page);
 	const box = args.panelId ? panelBox(page, panelIn(page, args.panelId)) : undefined;
 	const balloon = createBalloon(page, args.type, box);
 	if (args.rect) Object.assign(balloon, args.rect);
 	balloon.html = markdownToHtml(args.text);
+	applyShape(balloon, args);
 	if (args.tailTip && TAILED.includes(args.type)) {
 		balloon.tail = { x: args.tailTip.x - balloon.x, y: args.tailTip.y - balloon.y };
 	}
@@ -241,7 +257,7 @@ export function updateBalloon(
 		fontSize?: number;
 		font?: string;
 		fill?: string;
-	}
+	} & ShapeArgs
 ): string {
 	const b = balloonIn(pageAt(comic, args.page), args.balloonId);
 	if (args.text !== undefined) b.html = markdownToHtml(args.text);
@@ -251,6 +267,7 @@ export function updateBalloon(
 	if (args.font) b.font = args.font;
 	else if (args.font === '') delete b.font;
 	if (args.fill) b.fill = args.fill;
+	applyShape(b, args);
 	if (args.tailTip === null || !TAILED.includes(b.type)) delete b.tail;
 	else if (args.tailTip) b.tail = { x: args.tailTip.x - b.x, y: args.tailTip.y - b.y };
 	return `Updated balloon ${b.id}.`;

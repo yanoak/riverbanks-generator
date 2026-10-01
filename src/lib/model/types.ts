@@ -91,7 +91,27 @@ export interface Balloon extends Rect {
 	fontSize: number;
 	fill: string;
 	stroke: string;
+	/** Unused; see anchor. */
 	clipTo?: Id;
+	/** 0 (box) to 1 (ellipse) for speech, whisper and caption; absent is 1, or 0 for a caption. */
+	roundness?: number;
+	/** Bumps on a thought balloon, spikes on a shout; absent is the size-based / 18 default. */
+	points?: number;
+	/** How deep a shout's spikes cut, 0 to 1; absent is 0.55. */
+	depth?: number;
+	/** Sits in this panel corner, cut off flush by the panel's border (see model/balloons.ts). */
+	anchor?: BalloonAnchor;
+	/** The balloon this one connects to: the next line in the same exchange. */
+	next?: Id;
+	/** How the connection to `next` is drawn; absent is a neck. */
+	connector?: 'neck' | 'line';
+}
+
+export type Corner = 'tl' | 'tr' | 'bl' | 'br';
+
+export interface BalloonAnchor {
+	panelId: Id;
+	corner: Corner;
 }
 
 /** The header band's text: a large title line over a smaller subtitle. */

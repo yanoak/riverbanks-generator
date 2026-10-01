@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
-	import type { BalloonType, Page, Panel } from '$lib/model/types';
+	import type { Balloon, BalloonType, Page, Panel } from '$lib/model/types';
 
 	import type { Editor as TipTap } from '@tiptap/core';
 	import Bold from '@lucide/svelte/icons/bold';
@@ -21,10 +21,21 @@
 	import StyleDialog from './StyleDialog.svelte';
 	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
 	import { tick } from 'svelte';
+	import { pointsOf, POINTS_RANGE, roundnessOf } from '$lib/geometry/balloon';
 	import type { Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
+	const ROUNDED: string[] = ['speech', 'whisper', 'caption'];
+
+	/** A slider's moves while one drag (or key press) lasts are one undo step. */
+	let sliding = $state<string | null>(null);
+	function slide(id: string, description: string, fields: Partial<Balloon>) {
+		const key = `${id}:${description}`;
+		editor.patch(description, id, fields, { group: sliding === key });
+		sliding = key;
+	}
+	const endSlide = () => (sliding = null);
 
 	const formatLabel = (page: Page) => {
 		const format = formatOf(page);
@@ -192,6 +203,64 @@
 					})}
 			/>
 		</label>
+		{#if ROUNDED.includes(b.type) || b.type === 'thought' || b.type === 'shout'}
+			<h3 class="sub">Shape</h3>
+		{/if}
+		{#if ROUNDED.includes(b.type)}
+			{@const r = roundnessOf(b.type, b.roundness)}
+			<label class="row gap-2">
+				<span>Roundness</span>
+				<span class="flex items-center gap-1 text-[10px] text-stone-400">
+					box
+					<input
+						class="w-24"
+						type="range"
+						min="0"
+						max="100"
+						value={Math.round(r * 100)}
+						data-shape="roundness"
+						aria-valuetext={r >= 1 ? 'ellipse' : r <= 0 ? 'box' : `${Math.round(r * 100)}%`}
+						oninput={(e) => slide(b.id, 'Roundness', { roundness: +e.currentTarget.value / 100 })}
+						onchange={endSlide}
+					/>
+					oval
+				</span>
+			</label>
+		{/if}
+		{#if b.type === 'thought' || b.type === 'shout'}
+			{@const count = pointsOf(b.type, b.w, b.h, b.points)}
+			<label class="row gap-2">
+				<span>{b.type === 'shout' ? 'Spikes' : 'Bumps'}</span>
+				<span class="flex items-center gap-2">
+					<input
+						class="w-20"
+						type="range"
+						min={POINTS_RANGE[0]}
+						max={POINTS_RANGE[1]}
+						value={count}
+						data-shape="points"
+						oninput={(e) => slide(b.id, 'Points', { points: +e.currentTarget.value })}
+						onchange={endSlide}
+					/>
+					<span class="w-5 text-right tabular-nums">{count}</span>
+				</span>
+			</label>
+		{/if}
+		{#if b.type === 'shout'}
+			<label class="row gap-2">
+				<span>Depth</span>
+				<input
+					class="w-24"
+					type="range"
+					min="0"
+					max="100"
+					value={Math.round((b.depth ?? 0.55) * 100)}
+					data-shape="depth"
+					oninput={(e) => slide(b.id, 'Spike depth', { depth: +e.currentTarget.value / 100 })}
+					onchange={endSlide}
+				/>
+			</label>
+		{/if}
 		<div class="mt-3 grid grid-cols-2 gap-2">
 			<button class="btn" onclick={() => editor.reorder('front')} title="]">To front</button>
 			<button class="btn" onclick={() => editor.reorder('back')} title="[">To back</button>
@@ -381,6 +450,9 @@
 	}
 	.row {
 		@apply flex items-center justify-between py-1.5;
+	}
+	.sub {
+		@apply mt-3 mb-1 border-t border-stone-100 pt-3 text-[11px] font-semibold tracking-wide text-stone-400 uppercase;
 	}
 	.btn {
 		@apply w-full rounded border border-stone-300 px-3 py-1.5 hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-transparent;

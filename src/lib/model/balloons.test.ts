@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { createPage } from './factory';
+import { createComic, createPage } from './factory';
 import { createBalloon } from './balloons';
 
 describe('createBalloon', () => {
+	it('places a balloon with no box inside the grid, clear of the header and footer', () => {
+		const board = createComic('t', 'board').pages[0];
+		for (const type of ['caption', 'speech'] as const) {
+			const b = createBalloon(board, type);
+			expect(b.y).toBeGreaterThanOrEqual(208);
+			expect(b.y + b.h).toBeLessThanOrEqual(1416 - 208);
+		}
+	});
+
 	it('centres the balloon in the given box', () => {
 		const page = createPage();
 		const b = createBalloon(page, 'speech', { x: 100, y: 100, w: 400, h: 400 });

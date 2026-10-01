@@ -15,6 +15,12 @@ function cellSize(grid: GridSpec, size: Size) {
 	};
 }
 
+/** The part of the page the grid lays out in: all of it, less the header and footer bands. */
+export function gridArea(grid: GridSpec, size: Size): Rect {
+	const top = grid.top ?? 0;
+	return { x: 0, y: top, w: size.width, h: size.height - top - (grid.bottom ?? 0) };
+}
+
 export function cellRect(grid: GridSpec, size: Size, cell: number): Rect {
 	const { w, h } = cellSize(grid, size);
 	const row = Math.floor(cell / grid.cols);

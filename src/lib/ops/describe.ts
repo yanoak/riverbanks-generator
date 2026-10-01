@@ -1,5 +1,6 @@
 // A compact, agent-readable view of a comic: what get_comic returns.
 
+import { gridArea } from '$lib/geometry/grid';
 import { panelBox } from '$lib/geometry/panel';
 import { resolveBands } from '$lib/model/bands';
 import { formatOf } from '$lib/model/factory';
@@ -26,12 +27,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 			url: `${meta.appUrl}/comics/${meta.id}?page=${i + 1}`,
 			format: formatOf(page) ?? 'custom',
 			size: { width: page.width, height: page.height },
-			gridArea: {
-				x: 0,
-				y: page.grid.top ?? 0,
-				w: page.width,
-				h: page.height - (page.grid.top ?? 0) - (page.grid.bottom ?? 0)
-			},
+			gridArea: gridArea(page.grid, page),
 			grid: { rows: page.grid.rows, cols: page.grid.cols },
 			...(page.grid.top || page.grid.bottom
 				? { bands: { ...resolveBands(comic, i), overrides: page.bands ?? {} } }

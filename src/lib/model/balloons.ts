@@ -1,3 +1,4 @@
+import { gridArea } from '$lib/geometry/grid';
 import { newId } from './factory';
 import type { Balloon, BalloonType, Page, Rect } from './types';
 
@@ -17,9 +18,9 @@ const DEFAULTS: Record<BalloonType, { w: number; h: number; html: string; fontSi
 
 const HAS_TAIL: BalloonType[] = ['speech', 'whisper', 'thought', 'shout'];
 
-/** A new balloon of the given type, centred horizontally in `box` (default: the page). */
+/** A new balloon of the given type, centred horizontally in `box` (default: the grid's area). */
 export function createBalloon(page: Page, type: BalloonType, box?: Rect): Balloon {
-	const area = box ?? { x: 0, y: 0, w: page.width, h: page.height };
+	const area = box ?? gridArea(page.grid, page);
 	const d = DEFAULTS[type];
 	const w = Math.min(d.w, area.w * 0.9);
 	const h = Math.min(d.h, area.h * 0.9);

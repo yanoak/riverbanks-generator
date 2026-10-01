@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import canonJson from './fixture.json';
 import riverbook from '../../../content/network/riverbook.json';
-import { ageIn, aliveIn, filterNetwork, parseNetwork, type Network } from './canon';
+import { ageIn, aliveIn, filterNetwork, parseNetwork, portraitFor, type Network } from './canon';
 
 const canon = (): Network => parseNetwork(structuredClone(canonJson));
 
@@ -65,5 +65,39 @@ describe('filterNetwork', () => {
 		const view = filterNetwork(canon(), { stories: null, institutions: false });
 		expect(view.people.some((p) => p.kind === 'institution')).toBe(false);
 		expect(view.links.some((l) => l.target === 'guild')).toBe(false);
+	});
+});
+
+describe('portraits', () => {
+	const mae = {
+		portraits: [
+			{ cast: 'Mae at 12', from: null },
+			{ cast: 'Mae at 52', from: 2060 },
+			{ cast: 'Mae at 30', from: 2040 }
+		]
+	};
+
+	it('picks the look for the year: the latest that has started', () => {
+		expect(portraitFor(mae, 2045)?.cast).toBe('Mae at 30');
+		expect(portraitFor(mae, 2070)?.cast).toBe('Mae at 52');
+	});
+
+	it('uses the first listed for all years, and before any look starts', () => {
+		expect(portraitFor(mae, null)?.cast).toBe('Mae at 12');
+		expect(portraitFor(mae, 2030)?.cast).toBe('Mae at 12');
+		expect(portraitFor({ portraits: [{ cast: 'Old', from: 2050 }] }, 2000)?.cast).toBe('Old');
+	});
+
+	it('is null with no portraits', () => {
+		expect(portraitFor({ portraits: [] }, 2040)).toBeNull();
+	});
+
+	it('the schema takes portraits and a style; a portrait needs a cast name', () => {
+		const n = structuredClone(canonJson) as Record<string, unknown> & typeof canonJson;
+		(n.meta as Record<string, unknown>).styleProfileId = '11111111-1111-4111-8111-111111111111';
+		(n.people[0] as Record<string, unknown>).portraits = [{ cast: 'Mae at 12', from: null }];
+		expect(parseNetwork(n).people[0].portraits[0]).toMatchObject({ cast: 'Mae at 12', from: null });
+		(n.people[0] as Record<string, unknown>).portraits = [{ from: 2040 }];
+		expect(() => parseNetwork(n)).toThrow();
 	});
 });

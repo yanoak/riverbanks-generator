@@ -16,6 +16,25 @@ const story = z.object({
 	order: z.number().int().default(0)
 });
 
+const portrait = z.object({
+	/** A cast member's name in the network's style (meta.styleProfileId). */
+	cast: z.string().min(1).max(120),
+	/** The year this look starts; null for the default look. */
+	from: year.default(null),
+	/** Where the face is on the sheet (0–1) and how far to zoom; defaults suit a three-view sheet. */
+	focus: z
+		.object({
+			x: z.number().min(0).max(1),
+			y: z.number().min(0).max(1),
+			zoom: z.number().min(1).max(20)
+		})
+		.optional(),
+	/** Filled in on save: the public copy of the portrait and its size in pixels. */
+	url: z.string().url().optional(),
+	width: z.number().int().positive().optional(),
+	height: z.number().int().positive().optional()
+});
+
 const person = z.object({
 	id: z.string().min(1).max(60),
 	name: z.string().min(1).max(120),
@@ -25,7 +44,8 @@ const person = z.object({
 	died: year.default(null),
 	home: z.string().max(200).default(''),
 	stories: z.array(z.string()).default([]),
-	summary: z.string().max(4000).default('')
+	summary: z.string().max(4000).default(''),
+	portraits: z.array(portrait).max(12).default([])
 });
 
 const link = z.object({
@@ -41,6 +61,8 @@ const link = z.object({
 
 const meta = z.object({
 	syncedAt: z.string().max(40),
+	/** The style whose cast the portraits come from. */
+	styleProfileId: z.string().uuid().optional(),
 	sources: z.array(z.object({ name: z.string().max(200), url: z.string().url() })).default([]),
 	notes: z.array(z.string().max(1000)).default([])
 });
@@ -56,6 +78,24 @@ export type Network = z.infer<typeof schema>;
 export type Person = Network['people'][number];
 export type Link = Network['links'][number];
 export type Story = Network['stories'][number];
+export type Portrait = Person['portraits'][number];
+
+/** The default face crop: the front figure's head on a three-view character sheet. */
+export const DEFAULT_FOCUS = { x: 0.17, y: 0.13, zoom: 4.5 };
+
+/** The look for a year: the latest that has started; for all years (null) or before any look
+ * starts, the first one listed. */
+export function portraitFor<P extends Pick<Portrait, 'from'>>(
+	person: { portraits: P[] },
+	y: number | null
+): P | null {
+	const all = person.portraits;
+	if (!all.length) return null;
+	if (y === null) return all[0];
+	const started = all.filter((p) => p.from === null || p.from <= y);
+	const dated = started.filter((p) => p.from !== null).sort((a, b) => b.from! - a.from!);
+	return dated[0] ?? started[0] ?? all[0];
+}
 
 /** Parse and cross-check: ids unique, every link and story reference resolves. Throws with the reason. */
 export function parseNetwork(input: unknown): Network {

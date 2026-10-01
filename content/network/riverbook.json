@@ -13,14 +13,36 @@
 		],
 		"notes": [
 			"The timeline sheet is canon for years and family; the Edited Drafts tab is canon for the stories.",
-			"Ages of the Sultan and the princes come from the character designs, not from canon."
-		]
+			"Ages of the Sultan and the princes come from the character designs, not from canon.",
+			"Portraits are the starred cast sheets of the \"Riverbanks house style\", copied in on each sync."
+		],
+		"styleProfileId": "b5f76d95-af53-4a85-b365-b85bfc781eae"
 	},
 	"stories": [
-		{ "id": "delegate", "title": "The Youngest Delegate", "years": "2027–2030", "order": 1 },
-		{ "id": "snow", "title": "The Year It Snowed", "years": "2040 · 2052", "order": 2 },
-		{ "id": "hilsa", "title": "Visa for a Hilsa", "years": "2065", "order": 3 },
-		{ "id": "timeline", "title": "Timeline only", "years": "", "order": 4 }
+		{
+			"id": "delegate",
+			"title": "The Youngest Delegate",
+			"years": "2027–2030",
+			"order": 1
+		},
+		{
+			"id": "snow",
+			"title": "The Year It Snowed",
+			"years": "2040 · 2052",
+			"order": 2
+		},
+		{
+			"id": "hilsa",
+			"title": "Visa for a Hilsa",
+			"years": "2065",
+			"order": 3
+		},
+		{
+			"id": "timeline",
+			"title": "Timeline only",
+			"years": "",
+			"order": 4
+		}
 	],
 	"people": [
 		{
@@ -32,7 +54,21 @@
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate", "snow"],
-			"summary": "Youngest child of Sultan Ibrahim of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja."
+			"summary": "Youngest child of Sultan Ibrahim of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja.",
+			"portraits": [
+				{
+					"cast": "Ismahan at 18",
+					"from": 2010
+				},
+				{
+					"cast": "Ismahan at 20",
+					"from": 2030
+				},
+				{
+					"cast": "Ismahan at 42",
+					"from": 2040
+				}
+			]
 		},
 		{
 			"id": "sultan-ibrahim",
@@ -43,7 +79,13 @@
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate"],
-			"summary": "Ageing Sultan of Mua (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord."
+			"summary": "Ageing Sultan of Mua (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord.",
+			"portraits": [
+				{
+					"cast": "Sultan Ibrahim",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "the-general",
@@ -54,7 +96,13 @@
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate"],
-			"summary": "Elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled."
+			"summary": "Elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled.",
+			"portraits": [
+				{
+					"cast": "the General",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "the-financier",
@@ -65,7 +113,13 @@
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate"],
-			"summary": "Second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled."
+			"summary": "Second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled.",
+			"portraits": [
+				{
+					"cast": "the Financier",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "soraya",
@@ -98,7 +152,13 @@
 			"died": 2041,
 			"home": "Chiang Mai, on the Ping",
 			"stories": ["delegate", "snow"],
-			"summary": "Runs the family's Chinese restaurant on stilts on the Ping; her cooking lived by the Gross Delish Index before it had a name. At the 2028 Sunda Summit with the Ping river valley delegation she shares a meal with young Ismahan. Teaches eight-year-old Ya to cook through the year it snowed (2040) and dies the next year; her shrine sits under the restaurant, reachable when the water drops."
+			"summary": "Runs the family's Chinese restaurant on stilts on the Ping; her cooking lived by the Gross Delish Index before it had a name. At the 2028 Sunda Summit with the Ping river valley delegation she shares a meal with young Ismahan. Teaches eight-year-old Ya to cook through the year it snowed (2040) and dies the next year; her shrine sits under the restaurant, reachable when the water drops.",
+			"portraits": [
+				{
+					"cast": "Dew",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "ya",
@@ -109,7 +169,21 @@
 			"died": null,
 			"home": "Chiang Mai",
 			"stories": ["snow", "hilsa"],
-			"summary": "Dew's granddaughter, from a Chinese immigrant family long settled on the Ping, with a fluid sense of home. Learns to cook from Dew in 2040; on her 2052 sailabout teaches Ismahan to cook. Inspired by that trip into research; by 2065 she studies food ecosystems with the Bengal Passage Cooperative and recruits Jalal."
+			"summary": "Dew's granddaughter, from a Chinese immigrant family long settled on the Ping, with a fluid sense of home. Learns to cook from Dew in 2040; on her 2052 sailabout teaches Ismahan to cook. Inspired by that trip into research; by 2065 she studies food ecosystems with the Bengal Passage Cooperative and recruits Jalal.",
+			"portraits": [
+				{
+					"cast": "Ya at 20",
+					"from": 2045
+				},
+				{
+					"cast": "Ya at 8",
+					"from": 2032
+				},
+				{
+					"cast": "Ya at 33",
+					"from": 2060
+				}
+			]
 		},
 		{
 			"id": "taro",
@@ -120,7 +194,17 @@
 			"died": null,
 			"home": "",
 			"stories": ["snow", "hilsa"],
-			"summary": "Ya's grey tabby: a tiny kitten on the 2052 sailabout, a teenage cat (cats live longer now) at her side in 2065."
+			"summary": "Ya's grey tabby: a tiny kitten on the 2052 sailabout, a teenage cat (cats live longer now) at her side in 2065.",
+			"portraits": [
+				{
+					"cast": "Taro the kitten",
+					"from": 2052
+				},
+				{
+					"cast": "Taro the cat",
+					"from": 2060
+				}
+			]
 		},
 		{
 			"id": "jalal",
@@ -131,7 +215,13 @@
 			"died": null,
 			"home": "A village on the Meghna",
 			"stories": ["hilsa"],
-			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa."
+			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa.",
+			"portraits": [
+				{
+					"cast": "Jalal",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "shapla",
@@ -142,7 +232,13 @@
 			"died": null,
 			"home": "A village on the Meghna",
 			"stories": ["hilsa"],
-			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, then the drowned delta. She cooks the tagged hilsa into the feast."
+			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, then the drowned delta. She cooks the tagged hilsa into the feast.",
+			"portraits": [
+				{
+					"cast": "Shapla",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "drone",
@@ -153,7 +249,13 @@
 			"died": null,
 			"home": "",
 			"stories": ["hilsa"],
-			"summary": "A chatty second-hand fishing drone Jalal bought at a night market. Formerly KAN's, so KAN researchers can still patch in through it."
+			"summary": "A chatty second-hand fishing drone Jalal bought at a night market. Formerly KAN's, so KAN researchers can still patch in through it.",
+			"portraits": [
+				{
+					"cast": "the drone",
+					"from": null
+				}
+			]
 		},
 		{
 			"id": "kan",

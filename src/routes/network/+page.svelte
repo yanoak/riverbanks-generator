@@ -6,7 +6,7 @@
 	import { tick } from 'svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import NetworkGraph, { STORY_COLOURS } from '$lib/components/NetworkGraph.svelte';
-	import { ageIn, filterNetwork, type Link } from '$lib/network/canon';
+	import { ageIn, filterNetwork, portraitFor, type Link } from '$lib/network/canon';
 
 	let { data } = $props();
 	const network = $derived(data.stored?.network ?? null);
@@ -202,6 +202,26 @@
 							>
 						{/each}
 					</div>
+					{@const look = portraitFor(chosen, year)}
+					{#if look?.url}
+						<img
+							src={look.url}
+							alt="{look.cast}, character sheet"
+							class="mb-2 w-full rounded border border-stone-200 bg-stone-50"
+						/>
+						{#if chosen.portraits.length > 1}
+							<p class="mb-3 flex flex-wrap gap-1 text-[11px] text-stone-500">
+								Looks:
+								{#each chosen.portraits as pt (pt.cast)}
+									<span
+										class="rounded-full border px-1.5 {pt === look
+											? 'border-stone-500 text-stone-800'
+											: 'border-stone-200'}">{pt.cast}{pt.from ? ` · ${pt.from}` : ''}</span
+									>
+								{/each}
+							</p>
+						{/if}
+					{/if}
 					<p class="mb-4 text-sm leading-relaxed text-stone-700">{chosen.summary}</p>
 					<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">Ties</h3>
 					<ul class="space-y-1">

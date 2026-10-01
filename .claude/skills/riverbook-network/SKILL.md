@@ -65,7 +65,8 @@ you have to choose, follow the order above.
   "meta": {
     "syncedAt": "YYYY-MM-DD",
     "sources": [{ "name": "…", "url": "https://…" }],
-    "notes": ["Caveats the team should see, e.g. where an age comes from the art, not canon."]
+    "notes": ["Caveats the team should see, e.g. where an age comes from the art, not canon."],
+    "styleProfileId": "b5f76d95-…"   // the style whose cast the portraits come from
   },
   "stories": [{ "id": "hilsa", "title": "Visa for a Hilsa", "years": "2065", "order": 3 }],
   "people": [{
@@ -76,7 +77,11 @@ you have to choose, follow the order above.
     "born": 2032, "died": null,       // years from the timeline sheet; null when not canon
     "home": "Chiang Mai",
     "stories": ["snow", "hilsa"],     // story ids they appear in; "timeline" for sheet-only people
-    "summary": "Two or three sentences: who they are and what they do in the stories."
+    "summary": "Two or three sentences: who they are and what they do in the stories.",
+    "portraits": [                    // optional: cast cards in meta.styleProfileId's style
+      { "cast": "Ya at 20", "from": 2045 },   // first listed = the look for "All years"
+      { "cast": "Ya at 8", "from": 2032 }     // the year scrubber shows the latest look started
+    ]
   }],
   "links": [{
     "id": "dew-ya",                   // "<source>-<target>", stable
@@ -102,3 +107,7 @@ you have to choose, follow the order above.
   - Don't add a grandparent tie that is already implied by two parent ties, unless the sources make
     a point of it (e.g. a scene of Teja with Grandma Ismahan).
 - **Summaries:** written from the canon text, in plain sentences, without speculation.
+- **Portraits:** keep each person's existing `portraits`. For a new character, check the style's
+  cast (`list_style_profiles`). If they have a card, add it; if not, say so and offer to add one
+  (`set_cast_member` + `generate_cast_portrait`). Saving copies each starred portrait to a public
+  bucket, so re-sync after re-starring a portrait in the style.

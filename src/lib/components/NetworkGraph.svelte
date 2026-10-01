@@ -21,7 +21,15 @@
 	import { drag } from 'd3-drag';
 	import { select } from 'd3-selection';
 	import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from 'd3-zoom';
-	import { ageIn, aliveIn, type Link, type Person, type Story } from '$lib/network/canon';
+	import {
+		DEFAULT_FOCUS,
+		ageIn,
+		aliveIn,
+		portraitFor,
+		type Link,
+		type Person,
+		type Story
+	} from '$lib/network/canon';
 
 	let {
 		people,
@@ -96,7 +104,7 @@
 			)
 			.force('charge', forceManyBody().strength(-520))
 			.force('center', forceCenter(0, 0))
-			.force('collide', forceCollide(42))
+			.force('collide', forceCollide(48))
 			.on('tick', () => {
 				frame++;
 				// Fit once per layout, as soon as it has mostly settled; after that the view is the user's.
@@ -277,7 +285,8 @@
 				{@const p = v.person}
 				{@const lit = !near || near.has(p.id)}
 				{@const live = year === null || aliveIn(p, year)}
-				{@const r = p.kind === 'person' ? 13 : p.kind === 'institution' ? 15 : 9}
+				{@const face = portraitFor(p, year)}
+				{@const r = face?.url ? 22 : p.kind === 'person' ? 13 : p.kind === 'institution' ? 15 : 9}
 				<g
 					use:draggable={v.n}
 					transform="translate({v.x},{v.y})"
@@ -308,6 +317,22 @@
 							stroke={colourOf(p)}
 							stroke-width="2.5"
 						/>
+					{:else if face?.url}
+						{@const f = face.focus ?? DEFAULT_FOCUS}
+						{@const w = 2 * r * f.zoom}
+						{@const h = (w * (face.height ?? 2)) / (face.width ?? 3)}
+						<clipPath id="face-{p.id}"><circle {r} /></clipPath>
+						<circle {r} fill={colourOf(p)} />
+						<image
+							href={face.url}
+							x={-f.x * w}
+							y={-f.y * h}
+							width={w}
+							height={h}
+							clip-path="url(#face-{p.id})"
+							preserveAspectRatio="none"
+						/>
+						<circle {r} fill="none" stroke={colourOf(p)} stroke-width="3" />
 					{:else}
 						<circle
 							{r}

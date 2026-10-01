@@ -3,7 +3,7 @@
 
 import { fitImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
-import { createBalloon } from '$lib/model/balloons';
+import { anchorBalloon, createBalloon, repinAnchors } from '$lib/model/balloons';
 import {
 	createFreePanel,
 	mergePanels as merge,
@@ -22,6 +22,7 @@ import { gridPanels } from '$lib/model/invariants';
 import { REASONS } from '$lib/model/reasons';
 import type {
 	Balloon,
+	BalloonAnchor,
 	BalloonType,
 	Comic,
 	GridSpec,
@@ -211,14 +212,21 @@ export interface ShapeArgs {
 	roundness?: number | null;
 	points?: number | null;
 	depth?: number | null;
+	/** Anchor to a panel corner (cut off flush by its border); null lets go. */
+	anchor?: BalloonAnchor | null;
 }
 
-function applyShape(b: Balloon, args: ShapeArgs) {
+function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
 	for (const key of ['roundness', 'points', 'depth'] as const) {
 		const v = args[key];
 		if (v === null) delete b[key];
 		else if (v !== undefined) b[key] = v;
 	}
+	if (args.anchor === null) delete b.anchor;
+	else if (args.anchor) {
+		panelIn(page, args.anchor.panelId);
+		anchorBalloon(page, b.id, args.anchor);
+	} else if (b.anchor) repinAnchors(page); // a new size or roundness changes the overhang
 }
 
 export function addBalloon(
@@ -237,11 +245,11 @@ export function addBalloon(
 	const balloon = createBalloon(page, args.type, box);
 	if (args.rect) Object.assign(balloon, args.rect);
 	balloon.html = markdownToHtml(args.text);
-	applyShape(balloon, args);
+	page.balloons.push(balloon);
+	applyShape(page, balloon, args);
 	if (args.tailTip && TAILED.includes(args.type)) {
 		balloon.tail = { x: args.tailTip.x - balloon.x, y: args.tailTip.y - balloon.y };
 	}
-	page.balloons.push(balloon);
 	return { id: balloon.id, summary: `Added ${args.type} ${balloon.id} on page ${args.page}.` };
 }
 
@@ -259,7 +267,8 @@ export function updateBalloon(
 		fill?: string;
 	} & ShapeArgs
 ): string {
-	const b = balloonIn(pageAt(comic, args.page), args.balloonId);
+	const page = pageAt(comic, args.page);
+	const b = balloonIn(page, args.balloonId);
 	if (args.text !== undefined) b.html = markdownToHtml(args.text);
 	if (args.type) b.type = args.type;
 	if (args.rect) Object.assign(b, args.rect);
@@ -267,9 +276,9 @@ export function updateBalloon(
 	if (args.font) b.font = args.font;
 	else if (args.font === '') delete b.font;
 	if (args.fill) b.fill = args.fill;
-	applyShape(b, args);
 	if (args.tailTip === null || !TAILED.includes(b.type)) delete b.tail;
 	else if (args.tailTip) b.tail = { x: args.tailTip.x - b.x, y: args.tailTip.y - b.y };
+	applyShape(page, b, args);
 	return `Updated balloon ${b.id}.`;
 }
 

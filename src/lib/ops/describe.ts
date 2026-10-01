@@ -64,6 +64,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 					text: htmlToPlain(b.html),
 					rect: round(b),
 					...shapeOf(b),
+					...(b.anchor ? { anchor: b.anchor } : {}),
 					...(b.tail
 						? { tailTip: { x: Math.round(b.x + b.tail.x), y: Math.round(b.y + b.tail.y) } }
 						: {})

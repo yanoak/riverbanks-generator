@@ -409,3 +409,55 @@ describe('Editor header and footer bands', () => {
 		expect(editor.bands.header.title).toBe('ACT TWO');
 	});
 });
+
+describe('Editor anchored balloons', () => {
+	function setup() {
+		const editor = new Editor();
+		editor.load(createComic('Anchors', 'board'));
+		editor.addBalloon('speech');
+		editor.stopEditing();
+		const id = editor.page.balloons[0].id;
+		editor.select({ kind: 'balloon', id });
+		return { editor, id, balloon: () => editor.page.balloons[0] };
+	}
+
+	it('anchors to a corner of the panel under the balloon, and lets go', () => {
+		const { editor, balloon } = setup();
+		const under = editor.anchorPanel()!;
+		editor.setAnchor('tl');
+		expect(balloon().anchor).toEqual({ panelId: under.id, corner: 'tl' });
+		editor.setAnchor(null);
+		expect(balloon().anchor).toBeUndefined();
+		editor.undo();
+		expect(balloon().anchor?.corner).toBe('tl');
+	});
+
+	it('a drag lets go of the corner in the same undo step; a resize keeps it', () => {
+		const { editor, balloon } = setup();
+		editor.setAnchor('br');
+		const pinned = { ...balloon() };
+		const b = balloon();
+		const before = { x: b.x, y: b.y, w: b.w, h: b.h };
+		b.w += 40; // resize from the right
+		editor.commitGeometry(b, before, 'Resize balloon');
+		expect(balloon().anchor?.corner).toBe('br');
+		// Still in its corner: a wider balloon overhangs a little more (0.293 of the extra half-width).
+		expect(balloon().x + balloon().w).toBeCloseTo(pinned.x + pinned.w + 0.293 * 20, 6);
+
+		const moved = balloon();
+		const at = { x: moved.x, y: moved.y, w: moved.w, h: moved.h };
+		moved.x -= 100;
+		editor.commitGeometry(moved, at, 'Move balloon');
+		expect(balloon().anchor).toBeUndefined();
+		editor.undo();
+		expect(balloon().anchor?.corner).toBe('br');
+		expect(balloon().x).toBeCloseTo(at.x, 6);
+	});
+
+	it('a nudge lets go too', () => {
+		const { editor, balloon } = setup();
+		editor.setAnchor('tl');
+		editor.nudge(1, 0);
+		expect(balloon().anchor).toBeUndefined();
+	});
+});

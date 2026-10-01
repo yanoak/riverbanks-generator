@@ -119,7 +119,14 @@ const shapeArgs = {
 		.max(1)
 		.nullable()
 		.optional()
-		.describe('shout: how deep the spikes cut, 0 shallow to 1 deep (default 0.55). null resets.')
+		.describe('shout: how deep the spikes cut, 0 shallow to 1 deep (default 0.55). null resets.'),
+	anchor: z
+		.object({ panelId: z.string(), corner: z.enum(['tl', 'tr', 'bl', 'br']) })
+		.nullable()
+		.optional()
+		.describe(
+			'Tuck the balloon into this corner of a panel (tl, tr, bl, br): it overhangs the corner and the panel border cuts it off flush, and it follows the corner when the grid changes. Keeps its size and its tail tip. null lets go.'
+		)
 };
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'a #rrggbb colour');
 

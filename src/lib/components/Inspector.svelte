@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
-	import type { Balloon, BalloonType, Page, Panel } from '$lib/model/types';
+	import type { Balloon, BalloonType, Corner, GridPanel, Page, Panel } from '$lib/model/types';
 
 	import type { Editor as TipTap } from '@tiptap/core';
 	import Bold from '@lucide/svelte/icons/bold';
@@ -27,6 +27,22 @@
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
 	const ROUNDED: string[] = ['speech', 'whisper', 'caption'];
+	const CORNERS: [Corner, string][] = [
+		['tl', 'Top-left'],
+		['tr', 'Top-right'],
+		['bl', 'Bottom-left'],
+		['br', 'Bottom-right']
+	];
+
+	/** "3", or "a free panel": how the Inspector names a panel. */
+	function panelNumber(panel: Panel | undefined): string {
+		if (!panel) return '';
+		if (panel.kind === 'free') return '(free)';
+		const grid = editor.page.panels
+			.filter((p) => p.kind === 'grid')
+			.sort((a, b) => Math.min(...(a as GridPanel).cells) - Math.min(...(b as GridPanel).cells));
+		return String(grid.indexOf(panel) + 1);
+	}
 
 	/** A slider's moves while one drag (or key press) lasts are one undo step. */
 	let sliding = $state<string | null>(null);
@@ -260,6 +276,32 @@
 					onchange={endSlide}
 				/>
 			</label>
+		{/if}
+		{#if b.type !== 'sfx'}
+			{@const host = editor.anchorPanel()}
+			<h3 class="sub">Placement</h3>
+			<label class="row gap-2">
+				<span>Anchor</span>
+				<select
+					class="w-36 rounded border border-stone-300 px-1 py-0.5"
+					data-anchor
+					disabled={!host}
+					value={b.anchor?.corner ?? ''}
+					onchange={(e) => editor.setAnchor((e.currentTarget.value || null) as Corner | null)}
+				>
+					<option value="">None</option>
+					{#each CORNERS as [corner, label] (corner)}
+						<option value={corner}>{label}</option>
+					{/each}
+				</select>
+			</label>
+			<p class="text-xs leading-relaxed text-stone-500">
+				{#if b.anchor}
+					Cut off by panel {panelNumber(host)}’s border. Drag it to let go.
+				{:else if host}
+					A corner of panel {panelNumber(host)}, the one under the balloon.
+				{/if}
+			</p>
 		{/if}
 		<div class="mt-3 grid grid-cols-2 gap-2">
 			<button class="btn" onclick={() => editor.reorder('front')} title="]">To front</button>

@@ -1,6 +1,8 @@
+import { BALLOON_STROKE, roundnessOf } from '$lib/geometry/balloon';
 import { gridArea } from '$lib/geometry/grid';
+import { panelBox } from '$lib/geometry/panel';
 import { newId } from './factory';
-import type { Balloon, BalloonType, Page, Rect } from './types';
+import type { Balloon, BalloonAnchor, BalloonType, Page, Rect } from './types';
 
 // What createBalloon stamped on every balloon before lettering came from the style
 // (typography/typography.ts treats these as unset).
@@ -41,4 +43,50 @@ export function createBalloon(page: Page, type: BalloonType, box?: Rect): Balloo
 		fill: type === 'caption' ? '#fff4c2' : type === 'sfx' ? '#ffd23f' : '#ffffff',
 		stroke: '#000000'
 	};
+}
+
+// --- anchoring to a panel corner -------------------------------------------------------------
+
+/** Shapes without a roundness (clouds, spikes) overhang like an ellipse. */
+const cornerRoundness = (b: Balloon) =>
+	b.type === 'speech' || b.type === 'whisper' || b.type === 'caption'
+		? roundnessOf(b.type, b.roundness)
+		: 1;
+
+/**
+ * Put the balloon in its anchor's corner, overhanging the panel by the stroke plus the depth of
+ * the corner arc at 45°, so the panel border (which clips it, see PageView) cuts through the
+ * rounded corner the way a hand-lettered balloon tucked into a corner looks. A box loses just
+ * its own border on those two sides and sits flush.
+ */
+function pin(page: Page, b: Balloon, anchor: BalloonAnchor, keepTailTip: boolean): boolean {
+	const panel = page.panels.find((p) => p.id === anchor.panelId);
+	if (!panel) return false;
+	const box = panelBox(page, panel);
+	const r = cornerRoundness(b);
+	const ox = BALLOON_STROKE / 2 + 0.293 * ((r * b.w) / 2);
+	const oy = BALLOON_STROKE / 2 + 0.293 * ((r * b.h) / 2);
+	const left = anchor.corner[1] === 'l';
+	const top = anchor.corner[0] === 't';
+	const x = left ? box.x - ox : box.x + box.w - b.w + ox;
+	const y = top ? box.y - oy : box.y + box.h - b.h + oy;
+	// Anchoring keeps the tail on its speaker; re-pinning moves it with the panel.
+	if (b.tail && keepTailTip) b.tail = { x: b.tail.x + b.x - x, y: b.tail.y + b.y - y };
+	b.x = x;
+	b.y = y;
+	return true;
+}
+
+export function anchorBalloon(page: Page, balloonId: string, anchor: BalloonAnchor): void {
+	const b = page.balloons.find((x) => x.id === balloonId);
+	if (!b) throw new Error(`No balloon ${balloonId} on this page.`);
+	if (!pin(page, b, anchor, true)) throw new Error(`No panel ${anchor.panelId} on this page.`);
+	b.anchor = { ...anchor };
+}
+
+/** Re-seat anchored balloons after the panels moved; one whose panel is gone lets go. */
+export function repinAnchors(page: Page): void {
+	for (const b of page.balloons) {
+		if (b.anchor && !pin(page, b, b.anchor, false)) delete b.anchor;
+	}
 }

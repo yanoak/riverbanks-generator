@@ -19,7 +19,9 @@ import {
 	useOnEveryPage,
 	type Band
 } from '$lib/model/bands';
+import { anchorBalloon, repinAnchors } from '$lib/model/balloons';
 import { createComic, createPage } from '$lib/model/factory';
+import { panelNear } from '$lib/geometry/panel';
 import { createBalloon } from '$lib/model/balloons';
 import { clone } from '$lib/model/clone';
 import { createFreePanel, mergePanels, setGrid, splash, splitPanel } from '$lib/model/panels';
@@ -32,8 +34,10 @@ import { addImage } from '$lib/persistence/assets.svelte';
 import type {
 	Balloon,
 	BalloonType,
+	BalloonAnchor,
 	Bands,
 	Comic,
+	Corner,
 	FreePanel,
 	GridSpec,
 	Page,
@@ -350,8 +354,40 @@ export class Editor {
 	}
 
 	/** Record a completed drag or resize of a free panel or balloon. */
+	/**
+	 * After a drag or resize. An anchored balloon that was dragged lets go of its corner (in the
+	 * same undo step); one that was resized stays anchored and re-seats in its corner.
+	 */
 	commitGeometry(target: Rect & { id: string }, before: Rect, description: string): void {
-		this.commit(description, target, before);
+		const now = { x: target.x, y: target.y, w: target.w, h: target.h };
+		const moved = now.w === before.w && now.h === before.h;
+		this.change(description, (_d, page) => {
+			const t = find(page, target.id) as Rect & { anchor?: BalloonAnchor };
+			Object.assign(t, now);
+			if (!t.anchor || !page.balloons.some((b) => b.id === target.id)) return;
+			if (moved) delete t.anchor;
+			else repinAnchors(page);
+		});
+	}
+
+	// --- anchoring a balloon to a panel corner ----------------------------------------------
+
+	/** The panel the selected balloon is (or would be) anchored to: its own, else the one under it. */
+	anchorPanel(): Panel | undefined {
+		const b = this.selectedBalloon;
+		if (!b) return undefined;
+		const own = b.anchor && this.page.panels.find((p) => p.id === b.anchor!.panelId);
+		return own || panelNear(this.page, { x: b.x + b.w / 2, y: b.y + b.h / 2 });
+	}
+
+	setAnchor(corner: Corner | null): void {
+		const b = this.selectedBalloon;
+		const panel = this.anchorPanel();
+		if (!b || (corner && !panel)) return;
+		this.change(corner ? 'Anchor balloon' : 'Release balloon', (_d, page) => {
+			if (corner) anchorBalloon(page, b.id, { panelId: panel!.id, corner });
+			else delete page.balloons.find((x) => x.id === b.id)!.anchor;
+		});
 	}
 
 	get selectedBalloon(): Balloon | undefined {
@@ -396,9 +432,10 @@ export class Editor {
 		if (!target) return false;
 		if (this.refuseHeld(target.id)) return true;
 		this.change('Nudge', (_d, page) => {
-			const t = find(page, target.id) as Rect;
+			const t = find(page, target.id) as Rect & { anchor?: BalloonAnchor };
 			t.x += dx;
 			t.y += dy;
+			delete t.anchor;
 		});
 		return true;
 	}

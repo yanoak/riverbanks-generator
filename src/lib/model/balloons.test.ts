@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createComic, createPage } from './factory';
-import { createBalloon } from './balloons';
+import { anchorBalloon, createBalloon, repinAnchors } from './balloons';
+import { panelBox } from '$lib/geometry/panel';
+import { BALLOON_STROKE } from '$lib/geometry/balloon';
 
 describe('createBalloon', () => {
 	it('places a balloon with no box inside the grid, clear of the header and footer', () => {
@@ -37,5 +39,64 @@ describe('createBalloon', () => {
 	it('leaves the font to the style', () => {
 		const page = createPage();
 		expect(createBalloon(page, 'sfx').font).toBeUndefined();
+	});
+});
+
+describe('anchoring to a panel corner', () => {
+	function board() {
+		const page = createComic('t', 'board').pages[0];
+		const panel = page.panels[0]; // top-left cell
+		const box = panelBox(page, panel);
+		const b = createBalloon(page, 'speech');
+		page.balloons.push(b);
+		return { page, panel, box, b };
+	}
+
+	it('overhangs the chosen corner so the border cuts through the rounded corner', () => {
+		const { page, panel, box, b } = board();
+		const over = (r: number, size: number) => BALLOON_STROKE / 2 + 0.293 * ((r * size) / 2);
+		for (const corner of ['tl', 'tr', 'bl', 'br'] as const) {
+			anchorBalloon(page, b.id, { panelId: panel.id, corner });
+			expect(b.anchor).toEqual({ panelId: panel.id, corner });
+			const left = corner[1] === 'l';
+			const top = corner[0] === 't';
+			const x = left ? box.x - over(1, b.w) : box.x + box.w - b.w + over(1, b.w);
+			const y = top ? box.y - over(1, b.h) : box.y + box.h - b.h + over(1, b.h);
+			expect(b.x).toBeCloseTo(x, 6);
+			expect(b.y).toBeCloseTo(y, 6);
+		}
+	});
+
+	it('loses only its own border on a box', () => {
+		const { page, panel, box, b } = board();
+		b.roundness = 0;
+		anchorBalloon(page, b.id, { panelId: panel.id, corner: 'tl' });
+		expect(b.x).toBeCloseTo(box.x - BALLOON_STROKE / 2, 6);
+	});
+
+	it('follows its corner when the grid changes', () => {
+		const { page, panel, b } = board();
+		anchorBalloon(page, b.id, { panelId: panel.id, corner: 'br' });
+		const before = { x: b.x, y: b.y };
+		page.grid.margin += 30;
+		repinAnchors(page);
+		const box = panelBox(page, page.panels[0]);
+		expect(b.x).not.toBe(before.x);
+		expect(b.x + b.w).toBeCloseTo(box.x + box.w + BALLOON_STROKE / 2 + 0.293 * (b.w / 2), 6);
+	});
+
+	it('lets go of a panel that is gone, and stays where it was', () => {
+		const { page, panel, b } = board();
+		anchorBalloon(page, b.id, { panelId: panel.id, corner: 'tl' });
+		const at = { x: b.x, y: b.y };
+		page.panels = page.panels.filter((p) => p.id !== panel.id);
+		repinAnchors(page);
+		expect(b.anchor).toBeUndefined();
+		expect({ x: b.x, y: b.y }).toEqual(at);
+	});
+
+	it('refuses an unknown panel', () => {
+		const { page, b } = board();
+		expect(() => anchorBalloon(page, b.id, { panelId: 'nope', corner: 'tl' })).toThrow(/panel/);
 	});
 });

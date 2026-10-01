@@ -158,6 +158,42 @@ describe('balloon fonts', () => {
 	});
 });
 
+describe('balloon design fields', () => {
+	it('round-trips shape, anchor and connection, and clears them', () => {
+		const comic = createComic('Design', 'board');
+		const page = comic.pages[0];
+		const a = createBalloon(page, 'speech');
+		const b = createBalloon(page, 'shout');
+		page.balloons.push(a, b);
+		Object.assign(a, {
+			roundness: 0.2,
+			anchor: { panelId: page.panels[0].id, corner: 'tl' },
+			next: b.id,
+			connector: 'line'
+		});
+		Object.assign(b, { points: 9, depth: 0.8 });
+		const doc = comicToYDoc(comic);
+		const fields = ['roundness', 'points', 'depth', 'anchor', 'next', 'connector'] as const;
+		const pick = (x: object) =>
+			Object.fromEntries(fields.map((k) => [k, (x as Record<string, unknown>)[k]]));
+		const projected = projectComic(doc).pages[0].balloons;
+		for (const original of [a, b]) {
+			expect(pick(projected.find((q) => q.id === original.id)!)).toEqual(pick(original));
+		}
+		edit(doc, (d) => {
+			const x = d.pages[0].balloons.find((q) => q.id === a.id)!;
+			delete x.anchor;
+			delete x.next;
+			delete x.connector;
+			x.roundness = 0.5;
+		});
+		const back = projectComic(doc).pages[0].balloons.find((q) => q.id === a.id)!;
+		expect(back).not.toHaveProperty('anchor');
+		expect(back).not.toHaveProperty('next');
+		expect(back.roundness).toBe(0.5);
+	});
+});
+
 describe('board format and bands', () => {
 	it('round-trips grid bands, comic defaults and page overrides', () => {
 		const comic = createComic('Taming Currents', 'board');

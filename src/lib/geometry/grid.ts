@@ -246,6 +246,26 @@ export function panelOutline(cells: number[], grid: GridSpec, size: Size): Point
 	return points;
 }
 
+/**
+ * A clockwise outline of horizontal and vertical edges (any panel), moved `d` inwards on every
+ * edge: each vertex steps along the inward normals of its two edges.
+ */
+export function insetOrthogonal(points: Point[], d: number): Point[] {
+	const n = points.length;
+	const inward = (a: Point, b: Point) => {
+		const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+		// Clockwise on screen (y down), the inside is to the right of travel.
+		return { x: -(b.y - a.y) / len, y: (b.x - a.x) / len };
+	};
+	return points.map((p, i) => {
+		const prev = points[(i - 1 + n) % n];
+		const next = points[(i + 1) % n];
+		const n1 = inward(prev, p);
+		const n2 = inward(p, next);
+		return { x: p.x + d * (n1.x + n2.x), y: p.y + d * (n1.y + n2.y) };
+	});
+}
+
 export function polygonBBox(points: Point[]): Rect {
 	const xs = points.map((p) => p.x);
 	const ys = points.map((p) => p.y);

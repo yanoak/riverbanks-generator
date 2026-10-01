@@ -18,6 +18,9 @@ export interface ShapeOptions {
 	depth?: number;
 }
 
+/** The outline's stroke width, in page units. */
+export const BALLOON_STROKE = 7;
+
 const f = (n: number) => Math.round(n * 100) / 100;
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 

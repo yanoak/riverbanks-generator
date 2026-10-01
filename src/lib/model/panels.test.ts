@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createPage } from './factory';
-import { checkPage } from './invariants';
+import { createComic, createPage } from './factory';
+import { checkPage, gridPanels } from './invariants';
+import { anchorBalloon, createBalloon } from './balloons';
 import { createFreePanel, mergePanels, setGrid, splash, splitPanel } from './panels';
 import type { GridPanel, Page } from './types';
 
@@ -132,5 +133,23 @@ describe('createFreePanel', () => {
 		const b = createFreePanel(page);
 		expect(a.x + a.w / 2).toBeCloseTo(page.width / 2);
 		expect(b.z).toBeGreaterThan(a.z);
+	});
+});
+
+describe('anchored balloons follow the grid', () => {
+	it('re-pins on setGrid, merge and split', () => {
+		const page = createComic('t', 'board').pages[0];
+		const [p0, p1] = gridPanels(page);
+		const b = createBalloon(page, 'caption');
+		page.balloons.push(b);
+		anchorBalloon(page, b.id, { panelId: p0.id, corner: 'tr' });
+		const right = () => b.x + b.w;
+		const before = right();
+		expect(mergePanels(page, [p0.id, p1.id]).ok).toBe(true);
+		expect(right()).toBeGreaterThan(before + 100); // the merged panel's corner is further right
+		splitPanel(page, p0.id);
+		expect(right()).toBeCloseTo(before, 6);
+		setGrid(page, { gutter: 40 });
+		expect(right()).not.toBeCloseTo(before, 6);
 	});
 });

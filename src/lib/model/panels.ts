@@ -3,6 +3,7 @@
 // returns a refusal reason instead of throwing so the UI can explain it.
 
 import { canMerge } from '$lib/geometry/grid';
+import { repinAnchors } from './balloons';
 import { clone } from './clone';
 import { newId, singleCellPanels } from './factory';
 import { gridPanels } from './invariants';
@@ -38,6 +39,7 @@ export function mergePanels(
 	page.panels = page.panels.flatMap((p) =>
 		p.id === first.id ? [merged] : drop.has(p.id) ? [] : [p]
 	);
+	repinAnchors(page);
 	return { ok: true, mergedId: first.id };
 }
 
@@ -59,6 +61,7 @@ export function splitPanel(page: Page, panelId: string): void {
 			...rest.map((cell) => ({ ...style, id: newId(), cells: [cell] }))
 		];
 	});
+	repinAnchors(page);
 }
 
 /** Rows/cols can only change while every grid panel is a single cell. */
@@ -84,7 +87,7 @@ export function setGrid(
 		return { ok: false, reason: 'has-merges' };
 	}
 	page.grid = next;
-	if (!reshaped) return { ok: true };
+	if (!reshaped) return (repinAnchors(page), { ok: true });
 	// Keep the panel (and its image) wherever the same row/col still exists.
 	const old = new Map(
 		gridPanels({ ...page, grid: before }).map((p) => {
@@ -98,6 +101,7 @@ export function setGrid(
 		return kept ? { ...kept, cells: [c] } : p;
 	});
 	page.panels = [...fresh, ...page.panels.filter((p) => p.kind === 'free')];
+	repinAnchors(page);
 	return { ok: true };
 }
 

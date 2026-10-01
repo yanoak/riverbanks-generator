@@ -606,6 +606,36 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].balloons[0]).not.toHaveProperty('shape');
 	});
 
+	it('anchors a balloon into a panel corner, and lets go', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Anchors' })).text);
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const panel = d.pages[0].panels[0];
+		await call('add_balloon', {
+			comicId: id,
+			page: 1,
+			type: 'speech',
+			text: 'HUMAN BEINGS MUST WORK',
+			anchor: { panelId: panel.id, corner: 'tl' }
+		});
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const b = d.pages[0].balloons[0];
+		expect(b.anchor).toEqual({ panelId: panel.id, corner: 'tl' });
+		expect(b.rect.x).toBeLessThan(panel.bbox.x);
+		expect(b.rect.y).toBeLessThan(panel.bbox.y);
+
+		const bad = await call('update_balloon', {
+			comicId: id,
+			page: 1,
+			balloonId: b.id,
+			anchor: { panelId: 'nope', corner: 'tl' }
+		});
+		expect(bad.isError).toBe(true);
+		await call('update_balloon', { comicId: id, page: 1, balloonId: b.id, anchor: null });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[0]).not.toHaveProperty('anchor');
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

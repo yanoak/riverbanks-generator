@@ -4,7 +4,8 @@
   export).
 -->
 <script lang="ts">
-	import { clipPathFor, panelOutline, polygonBBox } from '$lib/geometry/grid';
+	import { clipPathFor, insetOrthogonal, panelOutline, polygonBBox } from '$lib/geometry/grid';
+	import { panelPolygon } from '$lib/geometry/panel';
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import type { FreePanel, GridPanel, Page } from '$lib/model/types';
 	import Transformer from './Transformer.svelte';
@@ -62,6 +63,20 @@
 	);
 
 	const balloons = $derived([...page.balloons].sort((a, b) => a.z - b.z));
+
+	/**
+	 * An anchored balloon is cut off at the inside of its panel's border (in the balloon's own
+	 * units), so the border stays whole over it: a grid panel's 4-unit stroke is centred on its
+	 * outline, a free panel's lies inside its box.
+	 */
+	function clipFor(b: Balloon): string | undefined {
+		const panel = b.anchor && page.panels.find((p) => p.id === b.anchor!.panelId);
+		if (!panel) return undefined;
+		const border = panel.border === 'none' ? 0 : panel.kind === 'grid' ? 2 : 4;
+		const outline = insetOrthogonal(panelPolygon(page, panel), border);
+		const pts = outline.map((p) => `${p.x - b.x}px ${p.y - b.y}px`);
+		return `polygon(${pts.join(', ')})`;
+	}
 	const selectedBalloonId = $derived(
 		editor?.selection.kind === 'balloon' ? editor.selection.id : null
 	);
@@ -289,7 +304,7 @@
 				>
 					<div class="contents" role="presentation">
 						{#if editor.editingBalloonId === balloon.id}
-							<BalloonView {balloon} {typography}>
+							<BalloonView {balloon} {typography} clip={clipFor(balloon)}>
 								{#snippet text()}
 									<div
 										class="rich-text cursor-text"
@@ -298,7 +313,7 @@
 								{/snippet}
 							</BalloonView>
 						{:else}
-							<BalloonView {balloon} {typography} />
+							<BalloonView {balloon} {typography} clip={clipFor(balloon)} />
 						{/if}
 					</div>
 					{#snippet extra()}
@@ -325,7 +340,7 @@
 					style:width="{balloon.w}px"
 					style:height="{balloon.h}px"
 				>
-					<BalloonView {balloon} {typography} />
+					<BalloonView {balloon} {typography} clip={clipFor(balloon)} />
 				</div>
 			{/if}
 		{/each}

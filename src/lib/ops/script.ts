@@ -3,7 +3,8 @@
 // centre (free panels first, since they sit on top).
 
 import { panelOutline } from '$lib/geometry/grid';
-import type { Balloon, Comic, Page, Panel, Point } from '$lib/model/types';
+import { insidePolygon as inside } from '$lib/geometry/panel';
+import type { Balloon, Comic, Page, Panel } from '$lib/model/types';
 import { htmlToPlain } from './text';
 
 const plain = (b: Balloon) => htmlToPlain(b.html).replace(/\*+/g, '').replace(/\n+/g, ' / ');
@@ -25,16 +26,6 @@ function orderedPanels(page: Page): Panel[] {
 }
 
 /** Even-odd ray casting; outlines are simple polygons (canMerge rules out holes). */
-function inside(p: Point, poly: Point[]): boolean {
-	let hit = false;
-	for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-		const a = poly[i];
-		const b = poly[j];
-		if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x)
-			hit = !hit;
-	}
-	return hit;
-}
 
 function panelFor(page: Page, b: Balloon): Panel | null {
 	const c = { x: b.x + b.w / 2, y: b.y + b.h / 2 };

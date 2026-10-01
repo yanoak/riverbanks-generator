@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	canMerge,
+	insetOrthogonal,
 	cellAt,
 	cellRect,
 	derivePanels,
@@ -227,5 +228,29 @@ describe('header and footer bands (grid top/bottom)', () => {
 	it('treats missing bands as zero', () => {
 		const plain: GridSpec = { rows: 4, cols: 4, gutter: 10, margin: 20 };
 		expect(cellRect(plain, page, 0).y).toBe(20);
+	});
+});
+
+describe('insetOrthogonal', () => {
+	it('moves every edge of a clockwise outline inwards', () => {
+		const square = [
+			{ x: 0, y: 0 },
+			{ x: 10, y: 0 },
+			{ x: 10, y: 10 },
+			{ x: 0, y: 10 }
+		];
+		expect(insetOrthogonal(square, 2)).toEqual([
+			{ x: 2, y: 2 },
+			{ x: 8, y: 2 },
+			{ x: 8, y: 8 },
+			{ x: 2, y: 8 }
+		]);
+	});
+
+	it('handles an L-shaped panel’s inner corner', () => {
+		const l = panelOutline([0, 1, 5], grid, size);
+		const inset = insetOrthogonal(l, 2);
+		const box = polygonBBox(l);
+		expect(polygonBBox(inset)).toEqual({ x: box.x + 2, y: box.y + 2, w: box.w - 4, h: box.h - 4 });
 	});
 });

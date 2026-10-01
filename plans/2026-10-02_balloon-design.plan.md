@@ -93,7 +93,10 @@ today's 0.86.
   is the stroke, plus 0.293 × the corner radius (the 45° point of the corner arc). So the border
   cuts through the rounded corner the way it does in 5278, and a box (r = 0) loses its own
   border on those two sides, like 5279's top box.
-- **Clipping:** the balloon is clipped to the panel's outline polygon, tail included. The clip
+- **Clipping:** the balloon is clipped to the inside edge of the panel's border, tail
+  included, so the border stays whole over it. A grid panel's 4-unit stroke is centred on its
+  outline, so the clip is the outline moved 2 inwards (`insetOrthogonal`). A free panel's
+  border lies inside its box, so its clip is moved 4 inwards. The clip
   goes on the balloon's drawing, not on its Transformer, so the selection handles stay visible.
 - **Following the panel:** `repinAnchors(page)` re-snaps anchored balloons, keeping their size,
   and is called by `setGrid`, `mergePanels` and `splitPanel` in `model/panels.ts`. Those cover
@@ -143,7 +146,7 @@ Each step is usable on its own.
       and `depth`; tests
 - [x] Shape controls: Inspector sliders, and the MCP `add_balloon`/`update_balloon` fields;
       `get_comic` reports them
-- [ ] Anchors: `anchorBalloon`, `repinAnchors` in the grid ops, the clip in the render, drag to
+- [x] Anchors: `anchorBalloon`, `repinAnchors` in the grid ops, the clip in the render, drag to
       detach, the Inspector menu and MCP; tests
 - [ ] Connections: `next`/`connector`, cycle and delete rules, neck and line rendering, the
       Inspector menu and MCP; tests
@@ -222,12 +225,12 @@ On the canvas, an anchored balloon and a necked pair:
 - [x] `points` sets the bump count (counting arcs) and the spike count (outer vertices), and
       `depth` sets the inner radius. Absent values reproduce today's paths exactly. Layer: unit,
       `balloon.test.ts`
-- [ ] Anchors. Layer: unit, `src/lib/model/balloons.test.ts`
+- [x] Anchors. Layer: unit, `src/lib/model/balloons.test.ts`
   - `anchorBalloon` places the balloon overhanging the chosen corner by the formula, for each
     of the four corners;
   - `repinAnchors` keeps the anchor through a grid margin change;
   - it drops the anchor of a balloon whose panel was merged away.
-- [ ] `setGrid`, `mergePanels` and `splitPanel` re-pin anchored balloons. Layer: unit,
+- [x] `setGrid`, `mergePanels` and `splitPanel` re-pin anchored balloons. Layer: unit,
       `src/lib/model/panels.test.ts`
 - [ ] Connections. Layer: unit, `balloons.test.ts`
   - `connectBalloons` refuses a cycle and a balloon pointing at itself;
@@ -238,7 +241,7 @@ On the canvas, an anchored balloon and a necked pair:
 - [ ] MCP covers it all: `update_balloon` sets and clears the new fields, refuses a cycle and an
       unknown panel or balloon, and `get_comic` reports them. Layer: unit,
       `src/lib/server/mcp/server.test.ts`
-- [ ] The editor detaches an anchored balloon when it is dragged, as one undo step, and keeps the
+- [x] The editor detaches an anchored balloon when it is dragged, as one undo step, and keeps the
       anchor through a resize. Layer: unit, `src/lib/editor/editor.test.ts`
 
 ## Verification

@@ -190,6 +190,7 @@ describe('Riverbanks MCP server', () => {
 				'remove_panel_image',
 				'rename_comic',
 				'set_grid',
+				'set_header_footer',
 				'set_panel_image',
 				'list_style_profiles',
 				'create_style_profile',
@@ -545,6 +546,37 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].url).toBe(`https://app.test/comics/${id}?page=1`);
 	});
 
+	it('makes A1 boards by default, and sets their headers and footers', async () => {
+		const { call } = await connect();
+		const board = JSON.parse((await call('create_comic', { title: 'Taming Currents' })).text);
+		const old = JSON.parse((await call('create_comic', { title: 'Old', format: 'comic' })).text);
+
+		let d = JSON.parse((await call('get_comic', { comicId: board.id })).text);
+		expect(d.pages[0]).toMatchObject({ format: 'board', size: { width: 1000, height: 1416 } });
+		expect(d.pages[0].bands.header.title).toBe('Taming Currents');
+		const o = JSON.parse((await call('get_comic', { comicId: old.id })).text);
+		expect(o.pages[0]).toMatchObject({ format: 'comic', size: { width: 1000, height: 1545 } });
+
+		await call('set_header_footer', { comicId: board.id, header: { title: 'ACT TWO' } });
+		await call('add_page', { comicId: board.id });
+		const res = await call('set_header_footer', {
+			comicId: board.id,
+			page: 2,
+			header: { subtitle: 'The Invitation' }
+		});
+		expect(res.isError).toBe(false);
+		d = JSON.parse((await call('get_comic', { comicId: board.id })).text);
+		expect(d.pages[1].bands.header).toEqual({ title: 'ACT TWO', subtitle: 'The Invitation' });
+		expect(d.pages[0].bands.header).toEqual({ title: 'ACT TWO', subtitle: '' });
+
+		const refused = await call('set_header_footer', {
+			comicId: old.id,
+			page: 1,
+			header: { title: 'x' }
+		});
+		expect(refused.isError).toBe(true);
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);
@@ -573,7 +605,7 @@ describe('Riverbanks MCP server', () => {
 		const res = await client.readResource({ uri: `comic://${id}/page/1` });
 		const page = JSON.parse((res.contents[0] as { text: string }).text);
 		expect(page.number).toBe(1);
-		expect(page.panels).toHaveLength(12);
+		expect(page.panels).toHaveLength(16);
 	});
 
 	describe('deep research tools (OpenAI search/fetch schemas)', () => {

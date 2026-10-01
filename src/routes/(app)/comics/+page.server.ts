@@ -1,5 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { createComic } from '$lib/model/factory';
+import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
 import type { Page } from '$lib/model/types';
 import { mutateComic } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
@@ -43,7 +43,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const title = String(form.get('title') ?? '').trim() || 'Untitled comic';
 		const style = String(form.get('style') ?? '');
-		const comic = createComic(title.slice(0, 200));
+		const comic = createComic(title.slice(0, 200), DEFAULT_FORMAT);
 		if (/^[0-9a-f-]{36}$/i.test(style)) comic.styleProfileId = style;
 		const record = await new SupabaseComicStore(locals.supabase).create(
 			comic.title,

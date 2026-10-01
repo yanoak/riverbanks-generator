@@ -10,6 +10,7 @@ import {
 	mergePanels,
 	movePage,
 	removePanelImage,
+	setBands,
 	setGrid,
 	setPanelImage,
 	splitPanel,
@@ -126,5 +127,36 @@ describe('balloon ops', () => {
 		const { id } = addBalloon(comic, { page: 1, type: 'speech', text: 'x' });
 		updateBalloon(comic, { page: 1, balloonId: id, type: 'caption' });
 		expect(comic.pages[0].balloons[0].tail).toBeUndefined();
+	});
+});
+
+describe('board pages and bands', () => {
+	it('adds a page shaped like the one it follows', () => {
+		const comic = createComic('Boards', 'board');
+		addPage(comic, {});
+		expect(comic.pages[1]).toMatchObject({ width: 1000, height: 1416 });
+		expect(comic.pages[1].grid).toEqual(comic.pages[0].grid);
+		const old = createComic('Old');
+		addPage(old, {});
+		expect(old.pages[1]).toMatchObject({ width: 1000, height: 1545 });
+		expect(old.pages[1].grid.top).toBeUndefined();
+	});
+
+	it('sets the comic’s default bands, a page’s overrides, and resets them', () => {
+		const comic = createComic('Taming Currents', 'board');
+		addPage(comic, {});
+		expect(setBands(comic, { header: { title: 'ACT TWO' } })).toMatch(/every page/i);
+		expect(comic.bands?.header.title).toBe('ACT TWO');
+		expect(setBands(comic, { page: 2, header: { subtitle: 'The Invitation' } })).toMatch(
+			/ACT TWO \/ The Invitation/
+		);
+		expect(comic.pages[1].bands).toEqual({ header: { subtitle: 'The Invitation' } });
+		setBands(comic, { page: 2, reset: true });
+		expect(comic.pages[1]).not.toHaveProperty('bands');
+	});
+
+	it('refuses bands on a page without them', () => {
+		const comic = createComic('Old');
+		expect(() => setBands(comic, { page: 1, header: { title: 'x' } })).toThrow(/no header/);
 	});
 });

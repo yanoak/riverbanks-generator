@@ -33,4 +33,25 @@ describe('describeComic', () => {
 		expect(cells).toEqual([...Array(12).keys()]);
 		expect(Number.isInteger(d.pages[0].panels[5].bbox.x)).toBe(true);
 	});
+
+	it('reports each page’s size, grid area and band text', () => {
+		const comic = createComic('Taming Currents', 'board');
+		comic.pages[0].bands = { header: { subtitle: 'The Invitation' } };
+		const p = describeComic(comic, { id: 'c', rev: 1, appUrl: '' }).pages[0];
+		expect(p.size).toEqual({ width: 1000, height: 1416 });
+		expect(p.format).toBe('board');
+		expect(p.gridArea).toEqual({ x: 0, y: 208, w: 1000, h: 1000 });
+		expect(p.grid).toEqual({ rows: 4, cols: 4 });
+		expect(p.bands).toEqual({
+			header: { title: 'Taming Currents', subtitle: 'The Invitation' },
+			footer: { left: 'RIVERBANKS', center: '1', right: 'SEAPUNK STUDIOS' },
+			overrides: { header: { subtitle: 'The Invitation' } }
+		});
+	});
+
+	it('leaves bands out of a page without them', () => {
+		const p = describeComic(createComic(), { id: 'c', rev: 1, appUrl: '' }).pages[0];
+		expect(p.size).toEqual({ width: 1000, height: 1545 });
+		expect(p).not.toHaveProperty('bands');
+	});
 });

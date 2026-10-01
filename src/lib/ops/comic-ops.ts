@@ -10,6 +10,13 @@ import {
 	setGrid as reshape,
 	splitPanel as split
 } from '$lib/model/panels';
+import {
+	resetPageBands,
+	resolveBands,
+	setDefaultBands,
+	setPageBands,
+	type BandsPatch
+} from '$lib/model/bands';
 import { createPage } from '$lib/model/factory';
 import { gridPanels } from '$lib/model/invariants';
 import { REASONS } from '$lib/model/reasons';
@@ -87,6 +94,31 @@ export function movePage(comic: Comic, args: { page: number; to: number }): stri
 	comic.pages.splice(args.page - 1, 1);
 	comic.pages.splice(args.to - 1, 0, page);
 	return `Moved page ${args.page} to position ${args.to}.`;
+}
+
+/**
+ * Header and footer text: the comic's defaults when `page` is omitted, else that page's
+ * overrides. `reset` first returns the page to the defaults.
+ */
+export function setBands(
+	comic: Comic,
+	args: BandsPatch & { page?: number; reset?: boolean }
+): string {
+	const { page: n, reset, ...patch } = args;
+	if (n === undefined) {
+		setDefaultBands(comic, patch);
+		const b = comic.bands!;
+		return `Every page's header is now “${b.header.title} / ${b.header.subtitle}” and footer “${b.footer.left} · ${b.footer.center} · ${b.footer.right}”, unless a page overrides it.`;
+	}
+	const page = pageAt(comic, n);
+	for (const band of ['header', 'footer'] as const) {
+		const has = band === 'header' ? page.grid.top : page.grid.bottom;
+		if (patch[band] && !has) throw invalid(`Page ${n} has no ${band} band.`);
+	}
+	if (reset) resetPageBands(page);
+	setPageBands(page, patch);
+	const { header, footer } = resolveBands(comic, n - 1);
+	return `Page ${n} header: “${header.title} / ${header.subtitle}”; footer: “${footer.left} · ${footer.center} · ${footer.right}”.`;
 }
 
 export function setGrid(comic: Comic, args: { page: number } & Partial<GridSpec>): string {

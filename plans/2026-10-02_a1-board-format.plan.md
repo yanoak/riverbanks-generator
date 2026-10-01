@@ -120,7 +120,7 @@ print at 594 × 841 mm.
 - [x] Factory: `PAGE_FORMATS`, a board default for new comics, and pages that copy their
       neighbour's size; tests
 - [x] Model: `Comic.bands`, `Page.bands`, `resolveBands`, and Y.Doc round-trip and diff; tests
-- [ ] Ops and MCP: `set_header_footer`, a `format` argument on `create_comic`, and a size-aware
+- [x] Ops and MCP: `set_header_footer`, a `format` argument on `create_comic`, and a size-aware
       `get_comic` and schema text; tests
 - [ ] Render: header and footer bands in `PageView`, wired to every caller, and the PDF `@page`
       from the page size
@@ -190,13 +190,13 @@ fields: `Format  A1 board (594 × 841 mm)` or `Comic page`.
     `projectComic`;
   - `applyComic` writes only the band keys that changed;
   - a comic without them projects unchanged.
-- [ ] `addPage` after a board page makes a board page, and after a portrait page makes a
+- [x] `addPage` after a board page makes a board page, and after a portrait page makes a
       portrait page. Layer: unit, `src/lib/ops/comic-ops.test.ts`
-- [ ] The `setBands` op covers three cases: a page override, the comic default with `page`
+- [x] The `setBands` op covers three cases: a page override, the comic default with `page`
       omitted, and `reset` clearing a page's override. Layer: unit, `comic-ops.test.ts`
-- [ ] `describeComic` reports each page's size, its grid area, and the resolved band text.
+- [x] `describeComic` reports each page's size, its grid area, and the resolved band text.
       Layer: unit, `src/lib/ops/describe.test.ts`
-- [ ] MCP: `create_comic` with `format`, and `set_header_footer`, both work end to end. Layer:
+- [x] MCP: `create_comic` with `format`, and `set_header_footer`, both work end to end. Layer:
       unit, `src/lib/server/mcp/server.test.ts`
 - [ ] The editor can select a band, "Use on every page" sets the default and clears this page's
       override, and "Reset to default" clears it. Layer: unit, `src/lib/editor/editor.test.ts`

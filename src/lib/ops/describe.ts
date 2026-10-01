@@ -1,6 +1,8 @@
 // A compact, agent-readable view of a comic: what get_comic returns.
 
 import { panelBox } from '$lib/geometry/panel';
+import { resolveBands } from '$lib/model/bands';
+import { formatOf } from '$lib/model/factory';
 import type { Comic, Rect } from '$lib/model/types';
 import { htmlToPlain } from './text';
 
@@ -16,12 +18,24 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 		id: meta.id,
 		title: comic.title,
 		rev: meta.rev,
-		units: 'Page units: each page is 1000 wide × 1545 tall; x/y from the top-left.',
+		units:
+			'Page units, x/y from the top-left. Each page gives its size: an A1 board is 1000 × 1416, with the grid in the 1000 × 1000 square (gridArea) between a header and a footer band; a comic page is 1000 × 1545. Balloons and free panels may sit anywhere on the page, across panel borders and into the bands.',
 		pages: comic.pages.map((page, i) => ({
 			number: i + 1,
 			id: page.id,
 			url: `${meta.appUrl}/comics/${meta.id}?page=${i + 1}`,
+			format: formatOf(page) ?? 'custom',
+			size: { width: page.width, height: page.height },
+			gridArea: {
+				x: 0,
+				y: page.grid.top ?? 0,
+				w: page.width,
+				h: page.height - (page.grid.top ?? 0) - (page.grid.bottom ?? 0)
+			},
 			grid: { rows: page.grid.rows, cols: page.grid.cols },
+			...(page.grid.top || page.grid.bottom
+				? { bands: { ...resolveBands(comic, i), overrides: page.bands ?? {} } }
+				: {}),
 			panels: page.panels
 				.map((p) => ({
 					id: p.id,

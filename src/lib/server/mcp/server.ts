@@ -3,7 +3,7 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createComic } from '$lib/model/factory';
+import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
 import type { Comic } from '$lib/model/types';
 import * as ops from '$lib/ops/comic-ops';
 import { describeComic } from '$lib/ops/describe';
@@ -87,7 +87,9 @@ export interface StyleTools {
 const page = z.number().int().min(1).describe('1-based page number');
 const rect = z
 	.object({ x: z.number(), y: z.number(), w: z.number().positive(), h: z.number().positive() })
-	.describe('Rectangle in page units (page is 1000 wide × 1545 tall, origin top-left)');
+	.describe(
+		'Rectangle in page units, origin top-left (an A1 board is 1000 × 1416, a comic page 1000 × 1545; get_comic gives each page’s size)'
+	);
 const point = z.object({ x: z.number(), y: z.number() }).describe('Point in page units');
 const balloonType = z
 	.enum(['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'])
@@ -138,9 +140,11 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		{ name: 'riverbanks', version: '1.0.0' },
 		{
 			instructions:
-				'Riverbanks makes comic pages. A page is a grid (default 3 rows × 4 cols, cells numbered ' +
-				'0.. row-major) whose cells merge into panels; free panels float above; balloons ' +
-				'(speech, thought, whisper, shout, caption, sfx) sit on the page. Call get_comic first ' +
+				'Riverbanks makes comic pages, by default A1 exhibition boards: a header band, a square ' +
+				'grid (4 rows × 4 cols, cells numbered 0.. row-major) and a footer band. Grid cells ' +
+				'merge into panels; free panels float above; balloons (speech, thought, whisper, shout, ' +
+				'caption, sfx) sit on the page and may cross panel borders and the bands, as in a comic. ' +
+				'Set band text with set_header_footer. Call get_comic first ' +
 				'and after edits to see ids and geometry. Every edit is saved immediately and shows up ' +
 				'live in the user’s open editor. A comic’s style may have a cast (list_style_profiles): ' +
 				'name a member in a panel prompt, by name or alias, and their portrait and description ' +
@@ -173,11 +177,15 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		{
 			annotations: WRITE,
 			title: 'Create comic',
-			description: 'Create a comic with one page (3×4 grid). Returns its id.',
-			inputSchema: { title: z.string().min(1).max(200) }
+			description:
+				'Create a comic with one page. Returns its id. The default format, board, is an A1 exhibition board: a 4×4 grid in a 1000 × 1000 square between a header band (title, subtitle) and a footer band (left, center, right); set their text with set_header_footer. "comic" is a portrait comic page with a 3×4 grid and no bands. Later pages copy the page they follow.',
+			inputSchema: {
+				title: z.string().min(1).max(200),
+				format: z.enum(['board', 'comic']).optional().describe('Default: board')
+			}
 		},
-		async ({ title }) => {
-			const comic = createComic(title);
+		async ({ title, format }) => {
+			const comic = createComic(title, format ?? DEFAULT_FORMAT);
 			const record = await store.create(title, comic, initialState(comic));
 			return json({ id: record.id, url: `${ctx.appUrl}/comics/${record.id}` });
 		}
@@ -283,17 +291,40 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Set grid',
 			description:
-				'Change a page’s grid. Rows/cols can only change while no panels are merged (split first); gutter and margin can always change.',
+				'Change a page’s grid. Rows/cols can only change while no panels are merged (split first); gutter, margin and the header (top) and footer (bottom) band heights can always change. 0 removes a band.',
 			inputSchema: {
 				comicId: z.string(),
 				page,
 				rows: z.number().int().min(1).max(12).optional(),
 				cols: z.number().int().min(1).max(12).optional(),
 				gutter: z.number().min(0).max(80).optional(),
-				margin: z.number().min(0).max(200).optional()
+				margin: z.number().min(0).max(200).optional(),
+				top: z.number().min(0).max(600).optional(),
+				bottom: z.number().min(0).max(600).optional()
 			}
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.setGrid(c, args))
+	);
+
+	const slot = z.string().max(200);
+	server.registerTool(
+		'set_header_footer',
+		{
+			annotations: UPDATE,
+			title: 'Set header and footer',
+			description:
+				'Set the text in an A1 board’s header (a large title over a smaller subtitle) and footer (left, center, right). Without a page, it sets the comic’s defaults, which every page shows; with a page, it overrides slots on that page only. Give only the slots to change; "" blanks a slot. {comic}, {page} and {pages} are replaced by the title, the page number and the page count. reset: true first returns the page to the defaults.',
+			inputSchema: {
+				comicId: z.string(),
+				page: page.optional(),
+				header: z.object({ title: slot.optional(), subtitle: slot.optional() }).optional(),
+				footer: z
+					.object({ left: slot.optional(), center: slot.optional(), right: slot.optional() })
+					.optional(),
+				reset: z.boolean().optional()
+			}
+		},
+		async ({ comicId, ...args }) => edit(comicId, (c) => ops.setBands(c, args))
 	);
 
 	// --- panels ------------------------------------------------------------------------------
@@ -304,7 +335,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: WRITE,
 			title: 'Merge panels',
 			description:
-				'Merge grid panels into one. Give cell numbers (0-based, row-major; on a 3×4 grid the top row is 0–3) or panel ids. The union must be edge-connected with no enclosed gaps; L and U shapes are fine.',
+				'Merge grid panels into one. Give cell numbers (0-based, row-major; on a 4×4 grid the top row is 0–3) or panel ids. The union must be edge-connected with no enclosed gaps; L and U shapes are fine.',
 			inputSchema: {
 				comicId: z.string(),
 				page,

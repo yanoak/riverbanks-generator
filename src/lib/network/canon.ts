@@ -81,7 +81,7 @@ export type Story = Network['stories'][number];
 export type Portrait = Person['portraits'][number];
 
 /** The default face crop: the front figure's head on a three-view character sheet. */
-export const DEFAULT_FOCUS = { x: 0.17, y: 0.13, zoom: 4.5 };
+export const DEFAULT_FOCUS = { x: 0.2, y: 0.16, zoom: 7 };
 
 /** The look for a year: the latest that has started; for all years (null) or before any look
  * starts, the first one listed. */

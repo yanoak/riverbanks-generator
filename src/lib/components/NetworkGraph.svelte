@@ -321,17 +321,28 @@
 						{@const f = face.focus ?? DEFAULT_FOCUS}
 						{@const w = 2 * r * f.zoom}
 						{@const h = (w * (face.height ?? 2)) / (face.width ?? 3)}
-						<clipPath id="face-{p.id}"><circle {r} /></clipPath>
-						<circle {r} fill={colourOf(p)} />
-						<image
-							href={face.url}
-							x={-f.x * w}
-							y={-f.y * h}
-							width={w}
-							height={h}
-							clip-path="url(#face-{p.id})"
-							preserveAspectRatio="none"
-						/>
+						<!-- The face fills the circle as a pattern, so the node's box (focus ring, hit area) is the circle. -->
+						<defs>
+							<pattern
+								id="face-{p.id}"
+								patternUnits="userSpaceOnUse"
+								x={-r}
+								y={-r}
+								width={2 * r}
+								height={2 * r}
+							>
+								<rect width={2 * r} height={2 * r} fill={colourOf(p)} />
+								<image
+									href={face.url}
+									x={r - f.x * w}
+									y={r - f.y * h}
+									width={w}
+									height={h}
+									preserveAspectRatio="none"
+								/>
+							</pattern>
+						</defs>
+						<circle {r} fill="url(#face-{p.id})" />
 						<circle {r} fill="none" stroke={colourOf(p)} stroke-width="3" />
 					{:else}
 						<circle

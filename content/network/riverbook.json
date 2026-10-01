@@ -198,11 +198,21 @@
 			"portraits": [
 				{
 					"cast": "Taro the kitten",
-					"from": 2052
+					"from": 2052,
+					"focus": {
+						"x": 0.17,
+						"y": 0.35,
+						"zoom": 4
+					}
 				},
 				{
 					"cast": "Taro the cat",
-					"from": 2060
+					"from": 2060,
+					"focus": {
+						"x": 0.17,
+						"y": 0.35,
+						"zoom": 4
+					}
 				}
 			]
 		},
@@ -253,7 +263,12 @@
 			"portraits": [
 				{
 					"cast": "the drone",
-					"from": null
+					"from": null,
+					"focus": {
+						"x": 0.2,
+						"y": 0.45,
+						"zoom": 2.8
+					}
 				}
 			]
 		},

@@ -5,6 +5,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { z } from 'zod';
 import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
 import { letteringRoom } from '$lib/generation/room';
+import { GENERATED_OVERSCAN } from '$lib/geometry/image';
 import type { Comic } from '$lib/model/types';
 import * as ops from '$lib/ops/comic-ops';
 import { describeComic } from '$lib/ops/describe';
@@ -814,7 +815,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 					naturalHeight: made.naturalHeight
 				};
 				const { rev } = await mutateComic(store, comicId, (c) => {
-					ops.setPanelImage(c, { page: n, panelId, image });
+					ops.setPanelImage(c, { page: n, panelId, image, overscan: GENERATED_OVERSCAN });
 					const placed = ops.pageAt(c, n).panels.find((p) => p.id === panelId)!;
 					placed.prompt = prompt.trim();
 					if (cast) placed.cast = castIds;

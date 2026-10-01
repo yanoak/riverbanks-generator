@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_generation-overscan
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -44,17 +44,19 @@ and centred. Its outer ~3.7% on each side falls outside the panel, along with an
 
 ## Tasks
 
-- [ ] `fitImage` overscan, editor and MCP placement; tests
-- [ ] Verify; `done`
+- [x] `fitImage` overscan, editor and MCP placement; tests
+- [x] Verify; `done`
 
 ## Test list (TDD)
 
-- [ ] `fitImage(img, box, 'fill', 1.08)` scales by 1.08 × fill and stays centred, so equal
+- [x] `fitImage(img, box, 'fill', 1.08)` scales by 1.08 × fill and stays centred, so equal
       amounts are cropped off each side. Layer: unit, `src/lib/geometry/image.test.ts`
-- [ ] `Editor.placeStoredImage` overscans, and `setImage` (an upload) doesn't. Layer: unit,
-      `src/lib/editor/editor.test.ts`
-- [ ] MCP `generate_panel_image` places with overscan, and `set_panel_image` doesn't. Layer:
-      unit, `src/lib/server/mcp/server.test.ts`
+- [x] `Editor.placeStoredImage` overscans. Layer: unit, `src/lib/editor/editor.test.ts`. (No
+      separate test that an upload doesn't: `setImage` is untouched and calls `fitImage` without
+      overscan.)
+- [x] MCP `generate_panel_image` places with overscan. Layer: unit,
+      `src/lib/server/mcp/server.test.ts`. (`set_panel_image` passes no overscan; it is not
+      tested separately.)
 
 ## Verification
 
@@ -63,4 +65,13 @@ the panel, slightly zoomed. Image mode shows it reaching past every panel edge.
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02.
+
+- **Placement:** generated images, drafts and Takes alike, are placed at 1.08 × the fill scale,
+  centred, from both the editor and MCP's `generate_panel_image`. Uploads, SVG sketches and print
+  versions are unchanged.
+- **How it was checked:** against the scratch-comic test drafts rather than a fresh live
+  generation. Their stray borders sat about 2–2.5% in from the edge, and 1.08 crops about 3.7% off
+  each side.
+- **Existing images:** panels already placed keep their framing.
+- **Deployment:** like the lettering-room default, this reaches production when it is deployed.

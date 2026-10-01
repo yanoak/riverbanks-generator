@@ -8,6 +8,8 @@ import type { CastMember, StyleProfile, StyleRef } from '$lib/styles/styles';
 import canonJson from '$lib/network/fixture.json';
 import { parseNetwork, type Network } from '$lib/network/canon';
 import { createMcpServer } from './server';
+import { fitImage, GENERATED_OVERSCAN } from '$lib/geometry/image';
+import { panelBox } from '$lib/geometry/panel';
 
 const INK: StyleProfile = {
 	id: '11111111-1111-4111-8111-111111111111',
@@ -454,6 +456,10 @@ describe('Riverbanks MCP server', () => {
 			)!;
 			expect(panel.image).toMatchObject({ assetId: 'generated-1', naturalWidth: 1600 });
 			expect(panel.prompt).toBe('Mae on the raft at dawn');
+			// Zoomed past the fill, so a border the model drew near the edge is cropped off.
+			const page = (await loadComic(store, id)).comic.pages[0];
+			const fill = fitImage(panel.image!, panelBox(page, panel), 'fill');
+			expect(panel.image!.scale).toBeCloseTo(fill.scale * GENERATED_OVERSCAN, 9);
 		});
 
 		it('makes a print version of the panel’s image, keeping its framing', async () => {

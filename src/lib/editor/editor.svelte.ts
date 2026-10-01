@@ -28,7 +28,7 @@ import { createFreePanel, mergePanels, setGrid, splash, splitPanel } from '$lib/
 import { REASONS } from '$lib/model/reasons';
 import { reconcile } from '$lib/model/reconcile';
 import { applyComic, comicToYDoc, LOCAL, projectComic } from '$lib/model/ydoc';
-import { fitImage, panImage, zoomImage } from '$lib/geometry/image';
+import { fitImage, GENERATED_OVERSCAN, panImage, zoomImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { addImage } from '$lib/persistence/assets.svelte';
 import type {
@@ -514,7 +514,8 @@ export class Editor {
 
 	/**
 	 * Place an image that is already stored (a generated one) in a panel on any page, filling
-	 * it, with `extra` fields (its prompt) in the same undo step. False if the panel has gone.
+	 * it with a little overscan (GENERATED_OVERSCAN, to crop any border the model drew), with
+	 * `extra` fields (its prompt) in the same undo step. False if the panel has gone.
 	 */
 	placeStoredImage(
 		panelId: string,
@@ -527,7 +528,7 @@ export class Editor {
 		this.change(description, (d) => {
 			const page = d.pages.find((p) => p.id === at.id)!;
 			const panel = page.panels.find((p) => p.id === panelId)!;
-			const placement = fitImage(stored, panelBox(page, panel), 'fill');
+			const placement = fitImage(stored, panelBox(page, panel), 'fill', GENERATED_OVERSCAN);
 			Object.assign(panel, extra, { image: { ...stored, ...placement } });
 		});
 		return true;

@@ -6,6 +6,8 @@ import type { Comic, FreePanel } from '$lib/model/types';
 import { Presence } from '$lib/collab/presence.svelte';
 import { applyComic, projectComic } from '$lib/model/ydoc';
 import { Editor } from './editor.svelte';
+import { fitImage, GENERATED_OVERSCAN } from '$lib/geometry/image';
+import { panelBox } from '$lib/geometry/panel';
 
 describe('Editor pages', () => {
 	it('adds a page after the current one and shows it', () => {
@@ -314,6 +316,14 @@ describe('Editor.placeStoredImage', () => {
 	it('a panel that has gone is reported, not an error', () => {
 		const editor = new Editor();
 		expect(editor.placeStoredImage('gone', stored)).toBe(false);
+	});
+
+	it('overscans a generated image so a border drawn near its edge is cropped', () => {
+		const editor = new Editor();
+		const panel = editor.page.panels[0];
+		editor.placeStoredImage(panel.id, stored);
+		const fill = fitImage(stored, panelBox(editor.page, panel), 'fill');
+		expect(editor.page.panels[0].image!.scale).toBeCloseTo(fill.scale * GENERATED_OVERSCAN, 9);
 	});
 });
 

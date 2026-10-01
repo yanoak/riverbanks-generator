@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fitImage, panImage, zoomImage } from './image';
+import { fitImage, GENERATED_OVERSCAN, panImage, zoomImage } from './image';
 
 const box = { w: 400, h: 200 };
 const natural = { naturalWidth: 1000, naturalHeight: 1000 };
@@ -46,5 +46,24 @@ describe('panImage', () => {
 	it('moves the offsets', () => {
 		const start = { ...natural, scale: 1, offsetX: 5, offsetY: 5 };
 		expect(panImage(start, { dx: 10, dy: -5 })).toMatchObject({ offsetX: 15, offsetY: 0 });
+	});
+});
+
+describe('overscan', () => {
+	it('zooms past the fill by the factor, cropping equal amounts off each side', () => {
+		const img = { naturalWidth: 1000, naturalHeight: 1000 };
+		const box = { w: 400, h: 300 };
+		const fill = fitImage(img, box, 'fill');
+		const over = fitImage(img, box, 'fill', 1.08);
+		expect(over.scale).toBeCloseTo(fill.scale * 1.08, 9);
+		const shown = { w: img.naturalWidth * over.scale, h: img.naturalHeight * over.scale };
+		expect(-over.offsetX).toBeCloseTo((shown.w - box.w) / 2, 9);
+		expect(-over.offsetY).toBeCloseTo((shown.h - box.h) / 2, 9);
+		// Every edge loses at least ~3.7% of the image: past a stray border 2–3% in.
+		expect(-over.offsetX / shown.w).toBeGreaterThan(0.035);
+	});
+
+	it('is 1.08 for generated images', () => {
+		expect(GENERATED_OVERSCAN).toBe(1.08);
 	});
 });

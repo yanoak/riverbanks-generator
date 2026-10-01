@@ -18,14 +18,22 @@ const MIN_SCALE = 0.01;
 const MAX_SCALE = 20;
 
 /** Centre the image in the box, covering it ('fill') or contained in it ('fit'). */
+/**
+ * How far past filling its panel a generated image is zoomed. Image models sometimes draw their
+ * own thin border 2–3% in from the edge; at 1.08 every edge loses ~3.7%, which takes it off.
+ */
+export const GENERATED_OVERSCAN = 1.08;
+
+/** Fill or fit the box, centred; `overscan` zooms further in (generated images). */
 export function fitImage(
 	img: Natural,
 	box: { w: number; h: number },
-	mode: 'fill' | 'fit'
+	mode: 'fill' | 'fit',
+	overscan = 1
 ): Placement {
 	const sx = box.w / img.naturalWidth;
 	const sy = box.h / img.naturalHeight;
-	const scale = mode === 'fill' ? Math.max(sx, sy) : Math.min(sx, sy);
+	const scale = (mode === 'fill' ? Math.max(sx, sy) : Math.min(sx, sy)) * overscan;
 	return {
 		scale,
 		offsetX: (box.w - img.naturalWidth * scale) / 2,

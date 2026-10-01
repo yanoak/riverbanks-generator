@@ -194,13 +194,15 @@ export function setPanelImage(
 		panelId: string;
 		image: { assetId: string; naturalWidth: number; naturalHeight: number };
 		fit?: 'fill' | 'fit';
+		/** Zoom past the fit (GENERATED_OVERSCAN for generated images). */
+		overscan?: number;
 	}
 ): string {
 	const page = pageAt(comic, args.page);
 	const panel = panelIn(page, args.panelId);
 	panel.image = {
 		...args.image,
-		...fitImage(args.image, panelBox(page, panel), args.fit ?? 'fill')
+		...fitImage(args.image, panelBox(page, panel), args.fit ?? 'fill', args.overscan)
 	};
 	return `Placed image in panel ${panel.id} (${args.fit ?? 'fill'}).`;
 }

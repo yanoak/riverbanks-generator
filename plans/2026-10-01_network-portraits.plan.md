@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-01_network-portraits
-status: active
+status: done
 started: 2026-10-01
-finished:
+finished: 2026-10-01
 issue:
 ---
 
@@ -71,7 +71,7 @@ style, not just these portraits.
 - [x] Migration: the `network-portraits` bucket and its policies
 - [x] `saveNetwork` publishes portraits; integration test
 - [x] Graph nodes and detail panel show portraits; e2e still green
-- [ ] Canon maps people to the house-style cast; skill doc; re-sync production
+- [x] Canon maps people to the house-style cast; skill doc; re-sync production
 
 ## UI mockups (ASCII)
 
@@ -108,3 +108,22 @@ Unchanged: nodes stay focusable buttons. The "Looks" chips are informational, no
   - Ismahan, Ya, Dew, Jalal, Shapla, Taro, the drone, the Sultan and the princes show faces;
   - moving the year from 2028 to 2052 changes Ismahan and Ya to their older looks;
   - the page works signed out.
+
+## Outcome
+
+Live on 2026-10-01: 11 people show their house-style sheet. Verified on production with a
+signed-out headless browser:
+
+- **Faces:** they fill their circles, including Taro (a kitten face) and the drone (its camera
+  eye).
+- **Clicking:** a click on a face selects the person; the detail panel shows the sheet and the
+  person's looks.
+- **The year scrubber:** at 2052 it shows Ismahan at 42 and Ya at 20.
+
+Changes made while building it:
+
+- **Faces are SVG patterns, not clipped images.** The clipped version gave each node a
+  sheet-sized box, so clicks beside a face missed.
+- **Crops:** the default crop is tighter, `{0.2, 0.16, 7}`, and Taro and the drone have their own
+  focus.
+- **Documentation:** `docs/story-network.md`, for whoever updates the network next.

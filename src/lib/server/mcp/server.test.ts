@@ -5,6 +5,8 @@ import { MemoryStore } from '$lib/ops/memory-store';
 import { OpError, loadComic } from '$lib/ops/ops';
 import type { GenerateInput } from '$lib/server/generation/generate';
 import type { CastMember, StyleProfile, StyleRef } from '$lib/styles/styles';
+import canonJson from '$lib/network/fixture.json';
+import { parseNetwork, type Network } from '$lib/network/canon';
 import { createMcpServer } from './server';
 
 const INK: StyleProfile = {
@@ -69,6 +71,7 @@ async function connect() {
 	const generated: GenerateInput[] = [];
 	const sketches: { svg: string; box: { w: number; h: number } }[] = [];
 	const styleCalls: unknown[][] = [];
+	let storedNetwork: Network | null = null;
 	const ref = (id: string, castId: string | null = null): StyleRef => ({
 		id,
 		profileId: INK.id,
@@ -102,6 +105,11 @@ async function connect() {
 				quality: 'draft',
 				cast: []
 			};
+		},
+		network: {
+			get: async () =>
+				storedNetwork ? { network: storedNetwork, syncedAt: '2026-10-01T00:00:00Z' } : null,
+			save: async (input) => (storedNetwork = parseNetwork(input))
 		},
 		styles: {
 			create: async (name) => (styleCalls.push(['create', name]), 'new-style'),
@@ -187,6 +195,8 @@ describe('Riverbanks MCP server', () => {
 				'add_style_reference',
 				'set_cast_member',
 				'generate_cast_portrait',
+				'get_story_network',
+				'set_story_network',
 				'set_comic_style',
 				'generate_panel_image',
 				'make_print_version',
@@ -230,6 +240,25 @@ describe('Riverbanks MCP server', () => {
 		expect(by.list_comics.openWorldHint).toBe(false);
 		expect(by.rename_comic.idempotentHint).toBe(true);
 		expect(by.add_balloon.idempotentHint).toBe(false);
+	});
+
+	describe('story network', () => {
+		it('saves a valid network, reads it back, and refuses a broken one', async () => {
+			const { call } = await connect();
+			expect((await call('get_story_network')).text).toMatch(/No story network/);
+			const saved = await call('set_story_network', { network: canonJson });
+			expect(saved.text).toMatch(
+				/Saved the story network: \d+ people and \d+ ties across 2 stories\./
+			);
+			const got = JSON.parse((await call('get_story_network')).text);
+			expect(got.syncedAt).toBe('2026-10-01T00:00:00Z');
+			expect(got.people.find((p: { id: string }) => p.id === 'nana-oi').died).toBe(2035);
+
+			const bad = structuredClone(canonJson);
+			bad.links[0].source = 'nobody';
+			const refused = await call('set_story_network', { network: bad });
+			expect(refused).toMatchObject({ isError: true, text: expect.stringMatching(/nobody/) });
+		});
 	});
 
 	describe('styles and generation', () => {

@@ -1,0 +1,120 @@
+{
+	"meta": {
+		"syncedAt": "2026-10-01",
+		"sources": [{ "name": "Test fixture", "url": "https://example.com/canon" }],
+		"notes": ["A made-up network for tests, independent of the real canon."]
+	},
+	"stories": [
+		{ "id": "raft", "title": "The Raft", "years": "2030", "order": 1 },
+		{ "id": "harbour", "title": "The Harbour", "years": "2060", "order": 2 }
+	],
+	"people": [
+		{
+			"id": "mae",
+			"name": "Mae",
+			"kind": "person",
+			"aliases": [],
+			"born": 2018,
+			"died": null,
+			"home": "",
+			"stories": ["raft", "harbour"],
+			"summary": "Poles the raft at twelve; runs the harbour at fifty-two."
+		},
+		{
+			"id": "nana-oi",
+			"name": "Nana Oi",
+			"kind": "person",
+			"aliases": [],
+			"born": 1950,
+			"died": 2035,
+			"home": "",
+			"stories": ["raft"],
+			"summary": "Mae's grandmother, who built the raft."
+		},
+		{
+			"id": "kit",
+			"name": "Kit",
+			"kind": "person",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": ["harbour"],
+			"summary": "A ferry pilot Mae hires."
+		},
+		{
+			"id": "heron",
+			"name": "The heron",
+			"kind": "animal",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": ["raft"],
+			"summary": "Follows the raft."
+		},
+		{
+			"id": "guild",
+			"name": "Harbour Guild",
+			"kind": "institution",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": ["harbour"],
+			"summary": "Runs the harbour."
+		}
+	],
+	"links": [
+		{
+			"id": "nana-oi-mae",
+			"source": "nana-oi",
+			"target": "mae",
+			"type": "family",
+			"label": "grandmother",
+			"story": "raft",
+			"year": 2030,
+			"note": ""
+		},
+		{
+			"id": "mae-heron",
+			"source": "mae",
+			"target": "heron",
+			"type": "companion",
+			"label": "follows her",
+			"story": "raft",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "mae-kit",
+			"source": "mae",
+			"target": "kit",
+			"type": "work",
+			"label": "hires",
+			"story": "harbour",
+			"year": 2060,
+			"note": ""
+		},
+		{
+			"id": "mae-guild",
+			"source": "mae",
+			"target": "guild",
+			"type": "member",
+			"label": "runs it",
+			"story": "harbour",
+			"year": 2060,
+			"note": ""
+		},
+		{
+			"id": "kit-guild",
+			"source": "kit",
+			"target": "guild",
+			"type": "member",
+			"label": "pilot",
+			"story": "harbour",
+			"year": null,
+			"note": ""
+		}
+	]
+}

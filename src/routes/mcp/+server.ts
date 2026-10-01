@@ -19,6 +19,7 @@ import {
 } from '$lib/styles/styles';
 import { generatePortrait } from '$lib/server/generation/portrait';
 import { readImage } from '$lib/server/mcp/images';
+import { getNetwork, saveNetwork } from '$lib/network/store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import type { RequestHandler } from './$types';
 
@@ -47,6 +48,10 @@ const handle: RequestHandler = async ({ request, url }) => {
 		generate: (input) =>
 			generatePanelImage(supabase, input, { provider: providerFor, signal: request.signal }),
 		saveSketch: (input) => saveAgentSketch(supabase, input),
+		network: {
+			get: () => getNetwork(supabase),
+			save: (input) => saveNetwork(supabase, input)
+		},
 		styles: {
 			create: (name) => createProfile(supabase, name),
 			save: (id, patch) => saveProfile(supabase, id, patch),

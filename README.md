@@ -23,6 +23,23 @@ in the Supabase dashboard: **Authentication → Users → Add user → Create ne
 `/local` works without an account and saves in that browser only. After signing in, the comics
 page offers to import that local comic.
 
+## Story network
+
+**Network** (`/network`) maps every character in the canonised stories and how they are tied:
+family, inspiration, friendship, work, membership and companions. It has filters by story, a year
+scrubber that shows who is alive and how old, and a detail panel per person. Anyone can open it
+without signing in. It is a working reference, not exhibition material.
+
+The RIVERBOOK Google Doc is canon. The `riverbook-network` Claude Code skill
+(`.claude/skills/riverbook-network`):
+
+1. reads the Edited Drafts tab, its script tabs and the character timeline sheet;
+2. rebuilds `content/network/riverbook.json`;
+3. shows the diff (`./scripts/network-diff.py`);
+4. saves it with the MCP tool `set_story_network`.
+
+Run it after the doc changes. The page updates without a deploy.
+
 ## Styles and generating images
 
 A **style** (the **Styles** tab) is up to 14 style reference images plus a written description,
@@ -107,6 +124,7 @@ The tools are:
   (with an optional `cast`), `make_print_version`, `draw_panel_svg`
 - **Building styles:** `create_style_profile`, `add_style_reference`, `set_cast_member`,
   `generate_cast_portrait`
+- **Story network:** `get_story_network`, `set_story_network`
 - **Search and account:** `search`, `fetch` (the comic as a script, for deep research), `whoami`
 
 Each page is also available as the resource `comic://{id}/page/{n}`. Agents get the same

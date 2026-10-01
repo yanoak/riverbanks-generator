@@ -1,0 +1,393 @@
+{
+	"meta": {
+		"syncedAt": "2026-10-01",
+		"sources": [
+			{
+				"name": "RIVERBOOK › Edited Drafts (and its Script tabs)",
+				"url": "https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.igit5bn60vtm"
+			},
+			{
+				"name": "Character timeline (sheet)",
+				"url": "https://docs.google.com/spreadsheets/d/1tSifqkz57Ociu9xq-dRsMxBDvGYcprkoxBNd77GNY_A/edit?gid=0#gid=0"
+			}
+		],
+		"notes": [
+			"The timeline sheet is canon for years and family; the Edited Drafts tab is canon for the stories.",
+			"Ages of the Sultan and the princes come from the character designs, not from canon."
+		]
+	},
+	"stories": [
+		{ "id": "delegate", "title": "The Youngest Delegate", "years": "2027–2030", "order": 1 },
+		{ "id": "snow", "title": "The Year It Snowed", "years": "2040 · 2052", "order": 2 },
+		{ "id": "hilsa", "title": "Visa for a Hilsa", "years": "2065", "order": 3 },
+		{ "id": "timeline", "title": "Timeline only", "years": "", "order": 4 }
+	],
+	"people": [
+		{
+			"id": "ismahan",
+			"name": "Ismahan",
+			"kind": "person",
+			"aliases": ["Princess Ismahan", "the princess"],
+			"born": 2010,
+			"died": null,
+			"home": "Mua",
+			"stories": ["delegate", "snow"],
+			"summary": "Youngest child of Sultan Ibrahim of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja."
+		},
+		{
+			"id": "sultan-ibrahim",
+			"name": "Sultan Ibrahim",
+			"kind": "person",
+			"aliases": ["the Sultan"],
+			"born": null,
+			"died": null,
+			"home": "Mua",
+			"stories": ["delegate"],
+			"summary": "Ageing Sultan of Mua (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord."
+		},
+		{
+			"id": "the-general",
+			"name": "The General",
+			"kind": "person",
+			"aliases": ["the elder prince"],
+			"born": null,
+			"died": null,
+			"home": "Mua",
+			"stories": ["delegate"],
+			"summary": "Elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled."
+		},
+		{
+			"id": "the-financier",
+			"name": "The Financier",
+			"kind": "person",
+			"aliases": ["the second prince"],
+			"born": null,
+			"died": null,
+			"home": "Mua",
+			"stories": ["delegate"],
+			"summary": "Second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled."
+		},
+		{
+			"id": "soraya",
+			"name": "Soraya",
+			"kind": "person",
+			"aliases": ["Teja's mother"],
+			"born": 2039,
+			"died": null,
+			"home": "Mua",
+			"stories": ["timeline"],
+			"summary": "Ismahan's daughter, the middle generation, and Teja's mother."
+		},
+		{
+			"id": "teja",
+			"name": "Teja",
+			"kind": "person",
+			"aliases": [],
+			"born": 2064,
+			"died": null,
+			"home": "Mua",
+			"stories": ["timeline"],
+			"summary": "Soraya's daughter and Ismahan's granddaughter. Appears at 11 in a scene with Grandma Ismahan (2075)."
+		},
+		{
+			"id": "dew",
+			"name": "Dew",
+			"kind": "person",
+			"aliases": ["Grandma Dew"],
+			"born": 1965,
+			"died": 2041,
+			"home": "Chiang Mai, on the Ping",
+			"stories": ["delegate", "snow"],
+			"summary": "Runs the family's Chinese restaurant on stilts on the Ping; her cooking lived by the Gross Delish Index before it had a name. At the 2028 Sunda Summit with the Ping river valley delegation she shares a meal with young Ismahan. Teaches eight-year-old Ya to cook through the year it snowed (2040) and dies the next year; her shrine sits under the restaurant, reachable when the water drops."
+		},
+		{
+			"id": "ya",
+			"name": "Ya",
+			"kind": "person",
+			"aliases": [],
+			"born": 2032,
+			"died": null,
+			"home": "Chiang Mai",
+			"stories": ["snow", "hilsa"],
+			"summary": "Dew's granddaughter, from a Chinese immigrant family long settled on the Ping, with a fluid sense of home. Learns to cook from Dew in 2040; on her 2052 sailabout teaches Ismahan to cook. Inspired by that trip into research; by 2065 she studies food ecosystems with the Bengal Passage Cooperative and recruits Jalal."
+		},
+		{
+			"id": "taro",
+			"name": "Taro",
+			"kind": "animal",
+			"aliases": [],
+			"born": 2052,
+			"died": null,
+			"home": "",
+			"stories": ["snow", "hilsa"],
+			"summary": "Ya's grey tabby: a tiny kitten on the 2052 sailabout, a teenage cat (cats live longer now) at her side in 2065."
+		},
+		{
+			"id": "jalal",
+			"name": "Jalal",
+			"kind": "person",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "A village on the Meghna",
+			"stories": ["hilsa"],
+			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa."
+		},
+		{
+			"id": "shapla",
+			"name": "Shapla",
+			"kind": "person",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "A village on the Meghna",
+			"stories": ["hilsa"],
+			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, then the drowned delta. She cooks the tagged hilsa into the feast."
+		},
+		{
+			"id": "drone",
+			"name": "The drone",
+			"kind": "companion",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": ["hilsa"],
+			"summary": "A chatty second-hand fishing drone Jalal bought at a night market. Formerly KAN's, so KAN researchers can still patch in through it."
+		},
+		{
+			"id": "kan",
+			"name": "KAN",
+			"kind": "institution",
+			"aliases": ["Kinetic Adaptation Network"],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": ["snow", "hilsa"],
+			"summary": "The adaptation network. Runs sailabouts (Young Leaders, Executive MBA) and the research network the Bengal Passage Cooperative belongs to."
+		},
+		{
+			"id": "cooperative",
+			"name": "Bengal Passage Cooperative",
+			"kind": "institution",
+			"aliases": ["the Cooperative"],
+			"born": null,
+			"died": null,
+			"home": "Bengal",
+			"stories": ["hilsa"],
+			"summary": "Research organisation in the KAN network helping the fishers and farmers of the river system; tracks tagged hilsa."
+		}
+	],
+	"links": [
+		{
+			"id": "sultan-ismahan",
+			"source": "sultan-ibrahim",
+			"target": "ismahan",
+			"type": "family",
+			"label": "father",
+			"story": "delegate",
+			"year": null,
+			"note": "Sends her to the Sunda Summit as Mua's youngest delegate (2027)."
+		},
+		{
+			"id": "sultan-general",
+			"source": "sultan-ibrahim",
+			"target": "the-general",
+			"type": "family",
+			"label": "father",
+			"story": "delegate",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "sultan-financier",
+			"source": "sultan-ibrahim",
+			"target": "the-financier",
+			"type": "family",
+			"label": "father",
+			"story": "delegate",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "general-ismahan",
+			"source": "the-general",
+			"target": "ismahan",
+			"type": "family",
+			"label": "elder brother",
+			"story": "delegate",
+			"year": null,
+			"note": "His confidence comes back to bite him."
+		},
+		{
+			"id": "financier-ismahan",
+			"source": "the-financier",
+			"target": "ismahan",
+			"type": "family",
+			"label": "elder brother",
+			"story": "delegate",
+			"year": null,
+			"note": "His confidence comes back to bite him."
+		},
+		{
+			"id": "general-financier",
+			"source": "the-general",
+			"target": "the-financier",
+			"type": "family",
+			"label": "brothers",
+			"story": "delegate",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "ismahan-soraya",
+			"source": "ismahan",
+			"target": "soraya",
+			"type": "family",
+			"label": "mother",
+			"story": "timeline",
+			"year": 2039,
+			"note": ""
+		},
+		{
+			"id": "soraya-teja",
+			"source": "soraya",
+			"target": "teja",
+			"type": "family",
+			"label": "mother",
+			"story": "timeline",
+			"year": 2064,
+			"note": ""
+		},
+		{
+			"id": "ismahan-teja",
+			"source": "ismahan",
+			"target": "teja",
+			"type": "family",
+			"label": "grandmother",
+			"story": "timeline",
+			"year": 2075,
+			"note": "A scene of Teja at 11 with Grandma Ismahan."
+		},
+		{
+			"id": "dew-ya",
+			"source": "dew",
+			"target": "ya",
+			"type": "family",
+			"label": "grandmother, teacher",
+			"story": "snow",
+			"year": 2040,
+			"note": "Teaches her to cook through the year it snowed."
+		},
+		{
+			"id": "dew-ismahan",
+			"source": "dew",
+			"target": "ismahan",
+			"type": "inspired",
+			"label": "inspired at the Sunda Summit",
+			"story": "delegate",
+			"year": 2028,
+			"note": "\"Sit. Eat. The whole river is in this bowl.\" Food ties everything together, a lesson Ismahan carries home to Mua."
+		},
+		{
+			"id": "ismahan-ya",
+			"source": "ismahan",
+			"target": "ya",
+			"type": "friends",
+			"label": "boatmates",
+			"story": "snow",
+			"year": 2052,
+			"note": "Ya teaches cooking, Ismahan explains the GDI; they discover Dew inspired them both."
+		},
+		{
+			"id": "ya-taro",
+			"source": "ya",
+			"target": "taro",
+			"type": "companion",
+			"label": "her cat",
+			"story": "snow",
+			"year": 2052,
+			"note": ""
+		},
+		{
+			"id": "ya-jalal",
+			"source": "ya",
+			"target": "jalal",
+			"type": "work",
+			"label": "recruits him",
+			"story": "hilsa",
+			"year": 2065,
+			"note": "Offers him a place in the research network as a rivers and fisheries researcher."
+		},
+		{
+			"id": "jalal-shapla",
+			"source": "jalal",
+			"target": "shapla",
+			"type": "family",
+			"label": "married",
+			"story": "hilsa",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "jalal-drone",
+			"source": "jalal",
+			"target": "drone",
+			"type": "companion",
+			"label": "his drone",
+			"story": "hilsa",
+			"year": 2065,
+			"note": "Bought second-hand at a night market."
+		},
+		{
+			"id": "ya-cooperative",
+			"source": "ya",
+			"target": "cooperative",
+			"type": "member",
+			"label": "researcher",
+			"story": "hilsa",
+			"year": 2065,
+			"note": ""
+		},
+		{
+			"id": "cooperative-kan",
+			"source": "cooperative",
+			"target": "kan",
+			"type": "member",
+			"label": "part of",
+			"story": "hilsa",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "drone-kan",
+			"source": "drone",
+			"target": "kan",
+			"type": "member",
+			"label": "formerly KAN's",
+			"story": "hilsa",
+			"year": null,
+			"note": ""
+		},
+		{
+			"id": "ya-kan",
+			"source": "ya",
+			"target": "kan",
+			"type": "member",
+			"label": "Young Leaders sailabout",
+			"story": "snow",
+			"year": 2052,
+			"note": ""
+		},
+		{
+			"id": "ismahan-kan",
+			"source": "ismahan",
+			"target": "kan",
+			"type": "member",
+			"label": "Executive MBA sailabout",
+			"story": "snow",
+			"year": 2052,
+			"note": ""
+		}
+	]
+}

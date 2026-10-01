@@ -6,7 +6,8 @@
 
 	const LINKS = [
 		['/comics', 'Comics'],
-		['/styles', 'Styles']
+		['/styles', 'Styles'],
+		['/network', 'Network']
 	] as const;
 </script>
 

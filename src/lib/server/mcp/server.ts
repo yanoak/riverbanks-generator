@@ -13,6 +13,7 @@ import { loadComic, mutateComic, OpError } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
 import type { ComicStore } from '$lib/ops/store';
 import { panelBox } from '$lib/geometry/panel';
+import type { Network } from '$lib/network/canon';
 import type { GenerateInput, GenerateResult } from '$lib/server/generation/generate';
 import {
 	CAST_KINDS,
@@ -51,6 +52,11 @@ export interface McpContext {
 	generate: (input: GenerateInput) => Promise<GenerateResult>;
 	/** Building styles and their casts, as the user (RLS: only a style's creator can change it). */
 	styles?: StyleTools;
+	/** The story network shown at /network (internal): read and replace it. */
+	network?: {
+		get: () => Promise<{ network: Network; syncedAt: string } | null>;
+		save: (input: unknown) => Promise<Network>;
+	};
 	/** Sanitise and store SVG the agent drew itself (not yet placed). */
 	saveSketch: (input: {
 		comicId: string;
@@ -570,6 +576,51 @@ export function createMcpServer(ctx: McpContext): McpServer {
 					`Drew a ${ref.width}×${ref.height} sheet of ${member.name}: portrait ${ref.id}.${
 						first ? ' As its only portrait, it is the one sent with panels.' : ''
 					}`
+				);
+			})
+	);
+
+	const network = () => {
+		if (!ctx.network) throw new OpError('invalid', 'The story network is not available here.');
+		return ctx.network;
+	};
+
+	server.registerTool(
+		'get_story_network',
+		{
+			annotations: READ,
+			title: 'Get story network',
+			description:
+				'The internal map of the Riverbanks story characters and their ties (shown at /network): stories, people (kind, born, died, stories, summary) and typed links, as JSON, with when it was last synced from the RIVERBOOK doc.'
+		},
+		async () =>
+			guard(async () => {
+				const got = await network().get();
+				return got
+					? json({ syncedAt: got.syncedAt, ...got.network })
+					: text('No story network has been synced yet.');
+			})
+	);
+
+	server.registerTool(
+		'set_story_network',
+		{
+			annotations: { ...UPDATE, idempotentHint: true },
+			title: 'Set story network',
+			description:
+				'Replace the whole story network with a new version, rebuilt from the RIVERBOOK doc (the canon). Give the full document: {meta: {syncedAt, sources, notes}, stories: [{id, title, years, order}], people: [{id, name, kind: person|animal|companion|institution, aliases, born, died, home, stories, summary}], links: [{id, source, target, type: family|inspired|friends|work|member|companion, label, story, year, note}]}. Every link must point at people in it.',
+			inputSchema: { network: z.record(z.string(), z.unknown()) }
+		},
+		async ({ network: input }) =>
+			guard(async () => {
+				let saved: Network;
+				try {
+					saved = await network().save(input);
+				} catch (e) {
+					throw new OpError('invalid', (e as Error).message);
+				}
+				return text(
+					`Saved the story network: ${saved.people.length} people and ${saved.links.length} ties across ${saved.stories.length} stories.`
 				);
 			})
 	);

@@ -11,18 +11,17 @@ export const NO_LETTERING =
 	'Leave out any lettering, captions, speech balloons and sound effects: they are added later.';
 
 /**
- * Room for the lettering that will be laid over the picture. It says what fills that part, not
- * that it is empty: asked for "empty space", image models paint a blank band (2026-10-02, the
- * Hilsa drone panels), and a style whose palette names a paper colour leaves it as bare paper.
+ * Room for the lettering that will be laid over the picture, asked for by naming the quiet
+ * scenery that goes there. Tested on 2026-10-02 (plans/2026-10-02_lettering-room.plan.md):
+ * "leave empty space" got blank cream bands, and any talk of edges, frames, borders or bare
+ * paper (even "no frame") got the model drawing its own inner border. Concrete scenery did best.
  */
 export function roomSentence(room: Room): string {
 	const where = room.replace('-', ' ');
 	return (
-		`Lettering will sit over the ${where} of the frame, so keep that part quiet and low in ` +
-		'detail: the scene’s own sky, water, wall or ground, continuing right to the edges, with ' +
-		'no faces or key action there. Never leave a blank or empty area, a plain band, a box or a ' +
-		'frame for it: the picture fills the whole panel, and backgrounds are part of the scene, ' +
-		'never bare paper.'
+		`Speech balloons will be added over the ${where} part of the picture later, so keep it ` +
+		'simple there: open sky with a few soft clouds, calm water, or a plain wall, and no faces ' +
+		'or key action in that part.'
 	);
 }
 

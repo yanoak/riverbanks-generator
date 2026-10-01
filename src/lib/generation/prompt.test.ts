@@ -107,8 +107,9 @@ describe('room for lettering', () => {
 		expect(after.trimStart().startsWith(roomSentence('upper-left'))).toBe(true);
 		expect(roomSentence('upper-left')).toContain('upper left');
 		for (const key of ROOM_KEYS) {
-			expect(roomSentence(key)).not.toMatch(/empty space|leave (calm )?space/i);
-			expect(roomSentence(key)).toMatch(/never bare paper/);
+			// Each of these words made the model draw a blank band or its own border (2026-10-02).
+			expect(roomSentence(key)).not.toMatch(/empty|blank|frame|border|edge|paper|band/i);
+			expect(roomSentence(key)).toMatch(/sky|water|wall/);
 		}
 	});
 

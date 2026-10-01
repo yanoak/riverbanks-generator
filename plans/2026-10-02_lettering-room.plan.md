@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_lettering-room
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -48,12 +48,9 @@ The cause is in the prompts:
 - The result is a fixed key, not free text, so the API route can validate it.
 
 **What the prompt says.** `composePrompt` takes an optional `room`. When it is given, the
-prompt adds this right after `NO_LETTERING`:
-
-> Lettering will sit over the {where} of the frame, so keep that part quiet and low in detail:
-> the scene's own sky, water, wall or ground, continuing right to the edges, with no faces or
-> key action there. Never leave a blank or empty area, a plain band, a box or a frame for it:
-> the picture fills the whole panel, and backgrounds are part of the scene, never bare paper.
+prompt adds a sentence right after `NO_LETTERING`. The first draft (v1, below) asked for "no
+blank area, band, box or frame" and was replaced after testing. See the Outcome for v3, the
+wording that shipped.
 
 - **Panel drafts** always pass `room`.
 - **Print versions** don't: they redraw an image that is already right.
@@ -78,9 +75,9 @@ the scene, never bare paper"* to its Avoid field on its style page.
 
 - [x] Plan
 - [x] `letteringRoom`, the `room` prompt sentence, and the callers (UI, API, MCP); tests
-- [ ] Test generation: redraw panels 2.3 and 2.5 into a **scratch** comic (not the real one)
+- [x] Test generation: redraw panels 2.3 and 2.5 into a **scratch** comic (not the real one)
       and compare the results
-- [ ] Memory and diary; then `done`
+- [x] Memory and diary; then `done`
 
 ## Test list (TDD)
 
@@ -117,4 +114,33 @@ the scene, never bare paper"* to its Avoid field on its style page.
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02.
+
+**The test** was 8 Gemini Pro drafts in a scratch comic, *SCRATCH: lettering-room prompt test
+(delete me)* (`de4bde8e-07b3-4cee-bfcc-df21dce24c95`) on production. Panels 2.3 (the drone over
+the river) and 2.5 (the drone projecting Ya) were each generated with one wording per run. They
+went through the production prompt, with the wording under test in the panel text.
+
+| Wording | Blank band | Own inner border | Notes |
+|---|---|---|---|
+| Old: "Leave calm, empty space at the top…" | none this time | none | Cream sky with faint clouds |
+| v1: "…never leave a blank or empty area, a plain band, a box or a frame…" | none | **both** | Naming frames primed one |
+| v2: "Full-bleed artwork… out to all four edges…" | none | **both** | 2.5's river turned beige |
+| **v3:** "Speech balloons will be added over the top part later, so keep it simple there: open sky with a few soft clouds…" | none | one of two | 2.5 was exactly right: a teal sky with clouds, full scene |
+
+**What it showed:**
+
+- **The blank band is intermittent.** The old wording didn't reproduce it, so one test can't
+  prove a cure.
+- **Wording that negates frames, borders, edges or paper makes things worse:** it got the model
+  drawing its own inner border.
+- **Concrete scenery words did best.** `roomSentence` now uses the v3 wording, and the test bars
+  the trigger words.
+
+**Still open:**
+
+- **The inner border** (a separate, older problem; see the memory notes) still shows up in some
+  drafts. The next step, if it keeps coming, is to detect a drawn border and crop it
+  automatically after generation.
+- **No real panel was regenerated,** as Yan asked.
+- **The new default reaches the production app and MCP only once it is deployed.**

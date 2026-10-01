@@ -71,7 +71,9 @@ Absent means 0, so every stored comic reads unchanged. The cell layout (`cellSiz
 - **Rejected: a page-level `format` field.** It would duplicate width, height and grid, and drift
   from them.
 
-The format is a factory preset instead. `PAGE_FORMATS.board` and `PAGE_FORMATS.comic` each carry
+The format is a factory preset instead. `createComic`'s own default stays `'comic'`, so the
+many test fixtures built on a 3 × 4 portrait page keep working. The product default is
+`DEFAULT_FORMAT = 'board'`, which the app's "New comic" action and MCP `create_comic` pass. `PAGE_FORMATS.board` and `PAGE_FORMATS.comic` each carry
 a size and a grid, and `createComic(title, format = 'board')` builds from one. A new page copies
 the size and grid of the page it follows, as `addPage` already does for the grid. A page made
 next to a portrait page stays portrait.
@@ -113,11 +115,11 @@ print at 594 × 841 mm.
 
 ## Tasks
 
-- [ ] Plan, and the diary entry
-- [ ] Geometry: `top` and `bottom` grid insets in `grid.ts`, with tests
-- [ ] Factory: `PAGE_FORMATS`, a board default for new comics, and pages that copy their
+- [x] Plan, and the diary entry
+- [x] Geometry: `top` and `bottom` grid insets in `grid.ts`, with tests
+- [x] Factory: `PAGE_FORMATS`, a board default for new comics, and pages that copy their
       neighbour's size; tests
-- [ ] Model: `Comic.bands`, `Page.bands`, `resolveBands`, and Y.Doc round-trip and diff; tests
+- [x] Model: `Comic.bands`, `Page.bands`, `resolveBands`, and Y.Doc round-trip and diff; tests
 - [ ] Ops and MCP: `set_header_footer`, a `format` argument on `create_comic`, and a size-aware
       `get_comic` and schema text; tests
 - [ ] Render: header and footer bands in `PageView`, wired to every caller, and the PDF `@page`
@@ -169,21 +171,21 @@ fields: `Format  A1 board (594 × 841 mm)` or `Comic page`.
 
 ## Test list (TDD)
 
-- [ ] `cellRect` with `top` and `bottom` offsets the first row by `margin + top` and fits the
+- [x] `cellRect` with `top` and `bottom` offsets the first row by `margin + top` and fits the
       rows between the bands. Layer: unit, `src/lib/geometry/grid.test.ts`
-- [ ] `cellAt` returns null for points in the header or footer band. Layer: unit, `grid.test.ts`
-- [ ] `panelOutline` for a full-grid panel spans exactly the square inside the bands. Layer:
+- [x] `cellAt` returns null for points in the header or footer band. Layer: unit, `grid.test.ts`
+- [x] `panelOutline` for a full-grid panel spans exactly the square inside the bands. Layer:
       unit, `grid.test.ts`
-- [ ] `createComic()` makes a 1000 × 1416 page with a 4 × 4 grid and `top = bottom = 208`.
+- [x] `createComic(t, 'board')` makes a 1000 × 1416 page with a 4 × 4 grid and `top = bottom = 208`.
       `createComic(t, 'comic')` keeps the old portrait page. Layer: unit, `factory.test.ts`
-- [ ] `createPage(template)` copies the template's size and grid. Layer: unit,
+- [x] `createPage(template)` copies the template's size and grid. Layer: unit,
       `factory.test.ts`
-- [ ] `resolveBands` behaviour. Layer: unit, `src/lib/model/bands.test.ts`
+- [x] `resolveBands` behaviour. Layer: unit, `src/lib/model/bands.test.ts`
   - with no defaults and no overrides, it gives the house defaults;
   - a page override wins per slot, and the other slots fall through;
   - `''` blanks a slot;
   - `{comic}`, `{page}` and `{pages}` are substituted.
-- [ ] Y.Doc round-trips and diffs. Layer: unit, `src/lib/model/ydoc.test.ts`
+- [x] Y.Doc round-trips and diffs. Layer: unit, `src/lib/model/ydoc.test.ts`
   - `Comic.bands`, `Page.bands`, and grid `top`/`bottom` survive `comicToYDoc` →
     `projectComic`;
   - `applyComic` writes only the band keys that changed;

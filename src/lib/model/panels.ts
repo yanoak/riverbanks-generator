@@ -68,7 +68,15 @@ export function setGrid(
 ): { ok: true } | Rejected<'has-merges' | 'invalid'> {
 	const before = page.grid;
 	const next = { ...before, ...spec };
-	if (next.rows < 1 || next.cols < 1 || next.gutter < 0 || next.margin < 0) {
+	if (
+		next.rows < 1 ||
+		next.cols < 1 ||
+		next.gutter < 0 ||
+		next.margin < 0 ||
+		(next.top ?? 0) < 0 ||
+		(next.bottom ?? 0) < 0 ||
+		(next.top ?? 0) + (next.bottom ?? 0) + 2 * next.margin >= page.height
+	) {
 		return { ok: false, reason: 'invalid' };
 	}
 	const reshaped = next.rows !== before.rows || next.cols !== before.cols;

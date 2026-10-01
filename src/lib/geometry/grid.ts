@@ -4,10 +4,14 @@
 
 import type { GridSpec, Point, Rect, Size } from '$lib/model/types';
 
+/** Where the first row starts: below the header band, if any, and the margin. */
+const gridTop = (grid: GridSpec) => (grid.top ?? 0) + grid.margin;
+
 function cellSize(grid: GridSpec, size: Size) {
+	const bands = (grid.top ?? 0) + (grid.bottom ?? 0);
 	return {
 		w: (size.width - 2 * grid.margin - (grid.cols - 1) * grid.gutter) / grid.cols,
-		h: (size.height - 2 * grid.margin - (grid.rows - 1) * grid.gutter) / grid.rows
+		h: (size.height - bands - 2 * grid.margin - (grid.rows - 1) * grid.gutter) / grid.rows
 	};
 }
 
@@ -17,7 +21,7 @@ export function cellRect(grid: GridSpec, size: Size, cell: number): Rect {
 	const col = cell % grid.cols;
 	return {
 		x: grid.margin + col * (w + grid.gutter),
-		y: grid.margin + row * (h + grid.gutter),
+		y: gridTop(grid) + row * (h + grid.gutter),
 		w,
 		h
 	};
@@ -27,7 +31,7 @@ export function cellRect(grid: GridSpec, size: Size, cell: number): Rect {
 export function cellAt(grid: GridSpec, size: Size, p: Point): number | null {
 	const { w, h } = cellSize(grid, size);
 	const col = Math.floor((p.x - grid.margin) / (w + grid.gutter));
-	const row = Math.floor((p.y - grid.margin) / (h + grid.gutter));
+	const row = Math.floor((p.y - gridTop(grid)) / (h + grid.gutter));
 	if (col < 0 || row < 0 || col >= grid.cols || row >= grid.rows) return null;
 	const r = cellRect(grid, size, row * grid.cols + col);
 	if (p.x > r.x + r.w || p.y > r.y + r.h) return null;
@@ -216,7 +220,7 @@ export function panelOutline(cells: number[], grid: GridSpec, size: Size): Point
 
 	const { w, h } = cellSize(grid, size);
 	const colLeft = (i: number) => grid.margin + i * (w + grid.gutter);
-	const rowTop = (j: number) => grid.margin + j * (h + grid.gutter);
+	const rowTop = (j: number) => gridTop(grid) + j * (h + grid.gutter);
 
 	// Keep only corners: vertex i sits between loop[i-1] (incoming) and loop[i] (outgoing).
 	const points: Point[] = [];

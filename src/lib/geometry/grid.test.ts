@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	canMerge,
+	cellAt,
 	cellRect,
 	derivePanels,
 	hasHoles,
@@ -195,5 +196,36 @@ describe('derivePanels', () => {
 		const cells = out.flatMap((p) => p.cells).sort((x, y) => x - y);
 		expect(cells).toEqual([...Array(12).keys()]);
 		for (const p of out) expect(canMerge(p.cells, grid)).toEqual({ ok: true });
+	});
+});
+
+describe('header and footer bands (grid top/bottom)', () => {
+	// The A1 board: a 1000 × 1000 square between two 208-unit bands, margin 20, gutter 10.
+	const board: GridSpec = { rows: 4, cols: 4, gutter: 10, margin: 20, top: 208, bottom: 208 };
+	const page = { width: 1000, height: 1416 };
+
+	it('starts the first row below the header band and the margin', () => {
+		expect(cellRect(board, page, 0)).toEqual({ x: 20, y: 228, w: 232.5, h: 232.5 });
+	});
+
+	it('ends the last row above the footer band and the margin', () => {
+		const r = cellRect(board, page, 15);
+		expect(r.y + r.h).toBe(1416 - 208 - 20);
+	});
+
+	it('finds no cell in the bands', () => {
+		expect(cellAt(board, page, { x: 100, y: 100 })).toBeNull();
+		expect(cellAt(board, page, { x: 100, y: 1300 })).toBeNull();
+		expect(cellAt(board, page, { x: 100, y: 240 })).toBe(0);
+	});
+
+	it('traces a full-grid panel around exactly the square inside the bands', () => {
+		const all = [...Array(16).keys()];
+		expect(polygonBBox(panelOutline(all, board, page))).toEqual({ x: 20, y: 228, w: 960, h: 960 });
+	});
+
+	it('treats missing bands as zero', () => {
+		const plain: GridSpec = { rows: 4, cols: 4, gutter: 10, margin: 20 };
+		expect(cellRect(plain, page, 0).y).toBe(20);
 	});
 });

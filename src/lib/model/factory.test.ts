@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { createComic, createPage, DEFAULT_GRID, PAGE_SIZE } from './factory';
+import {
+	createComic,
+	createPage,
+	DEFAULT_FORMAT,
+	DEFAULT_GRID,
+	formatOf,
+	PAGE_SIZE
+} from './factory';
 import { DOC_VERSION } from './types';
 
 describe('createPage', () => {
@@ -35,5 +42,35 @@ describe('createComic', () => {
 		expect(comic.title).toBe('Riverbanks');
 		expect(comic.pages).toHaveLength(1);
 		expect(comic.docVersion).toBe(DOC_VERSION);
+	});
+});
+
+describe('page formats', () => {
+	it('makes an A1 board: a square grid between a header and a footer', () => {
+		const page = createComic('Taming Currents', 'board').pages[0];
+		expect(page.width / page.height).toBeCloseTo(1684 / 2384, 3);
+		expect(page.grid).toMatchObject({ rows: 4, cols: 4, top: 208, bottom: 208 });
+		expect(page.height - page.grid.top! - page.grid.bottom!).toBe(page.width);
+		expect(page.panels).toHaveLength(16);
+		expect(formatOf(page)).toBe('board');
+	});
+
+	it('still makes the portrait comic page', () => {
+		const page = createComic('Old', 'comic').pages[0];
+		expect(page).toMatchObject({ width: 1000, height: 1545 });
+		expect(page.grid.top).toBeUndefined();
+		expect(formatOf(page)).toBe('comic');
+	});
+
+	it('makes new comics as boards', () => {
+		expect(DEFAULT_FORMAT).toBe('board');
+	});
+
+	it('copies a neighbour’s size and grid', () => {
+		const board = createComic('t', 'board').pages[0];
+		const next = createPage(board.grid, board);
+		expect(next.width).toBe(board.width);
+		expect(next.height).toBe(board.height);
+		expect(next.grid).toEqual(board.grid);
 	});
 });

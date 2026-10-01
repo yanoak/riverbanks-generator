@@ -28,6 +28,10 @@ export interface GridSpec {
 	cols: number;
 	gutter: number;
 	margin: number;
+	/** Height of the header band above the grid (the A1 board's title strip); absent is 0. */
+	top?: number;
+	/** Height of the footer band below the grid; absent is 0. */
+	bottom?: number;
 }
 
 /** An image placed in a panel; offsets and scale position it relative to the panel's bbox. */
@@ -90,11 +94,39 @@ export interface Balloon extends Rect {
 	clipTo?: Id;
 }
 
+/** The header band's text: a large title line over a smaller subtitle. */
+export interface HeaderText {
+	title: string;
+	subtitle: string;
+}
+
+export interface FooterText {
+	left: string;
+	center: string;
+	right: string;
+}
+
+/**
+ * Text for the header and footer bands (see GridSpec top/bottom). Plain strings, where
+ * {comic}, {page} and {pages} stand for the title, this page's number and the page count.
+ */
+export interface Bands {
+	header: HeaderText;
+	footer: FooterText;
+}
+
+/** One page's departures from its comic's bands; '' blanks a slot on this page. */
+export interface BandOverrides {
+	header?: Partial<HeaderText>;
+	footer?: Partial<FooterText>;
+}
+
 export interface Page extends Size {
 	id: Id;
 	grid: GridSpec;
 	panels: Panel[];
 	balloons: Balloon[];
+	bands?: BandOverrides;
 }
 
 export interface Comic {
@@ -102,6 +134,8 @@ export interface Comic {
 	title: string;
 	/** The style profile every generation in this comic follows (a live link, by id). */
 	styleProfileId?: Id;
+	/** The header and footer every page shows unless it overrides them; absent is HOUSE_BANDS. */
+	bands?: Bands;
 	pages: Page[];
 	docVersion: number;
 }

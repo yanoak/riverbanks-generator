@@ -70,7 +70,7 @@ export function addPage(comic: Comic, args: { after?: number; grid?: Partial<Gri
 	const after = args.after ?? comic.pages.length;
 	if (after < 0 || after > comic.pages.length) throw invalid(`Can't add after page ${after}.`);
 	const template = comic.pages[Math.max(0, after - 1)];
-	comic.pages.splice(after, 0, createPage({ ...template?.grid, ...args.grid }));
+	comic.pages.splice(after, 0, createPage({ ...template?.grid, ...args.grid }, template));
 	return `Added page ${after + 1} (the comic now has ${comic.pages.length} pages).`;
 }
 

@@ -3,10 +3,10 @@
 // writes an edited draft back as the smallest set of Y changes, addressed by id, so edits made
 // concurrently by different people touch different keys and merge.
 //
-//   comic: Y.Map        id, title, docVersion, styleProfileId?, pages
+//   comic: Y.Map        id, title, docVersion, styleProfileId?, bands?, pages
 //     pages: Y.Map<pageId, Y.Map>     order is a number per page (midpoints on insert/move)
-//       id, width, height, order
-//       grid: Y.Map                   rows, cols, gutter, margin
+//       id, width, height, order, bands?   (bands are plain JSON values, last writer wins)
+//       grid: Y.Map                   rows, cols, gutter, margin, top?, bottom?
 //       cells: Y.Map<"r,c", panelId>  grid ownership: one entry per cell, see derivePanels
 //       panels: Y.Map<id, Y.Map>      every Panel field except cells
 //       balloons: Y.Map<id, Y.Map>    every Balloon field except html; text: Y.XmlFragment
@@ -76,6 +76,7 @@ function writePage(pages: YMap, page: Page) {
 	m.set('id', page.id);
 	m.set('width', page.width);
 	m.set('height', page.height);
+	if (page.bands) m.set('bands', clone(page.bands));
 	patch(child(m, 'grid'), {}, page.grid);
 	const cells = child(m, 'cells');
 	const panels = child(m, 'panels');
@@ -95,6 +96,7 @@ export function comicToYDoc(comic: Comic, doc = new Y.Doc()): Y.Doc {
 		root.set('title', comic.title);
 		root.set('docVersion', DOC_VERSION);
 		if (comic.styleProfileId) root.set('styleProfileId', comic.styleProfileId);
+		if (comic.bands) root.set('bands', clone(comic.bands));
 		const pages = child(root, 'pages');
 		comic.pages.forEach((page, i) => {
 			writePage(pages, page);
@@ -217,6 +219,10 @@ export function applyComic(doc: Y.Doc, before: Comic, after: Comic, origin: unkn
 			if (after.styleProfileId) root.set('styleProfileId', after.styleProfileId);
 			else root.delete('styleProfileId');
 		}
+		if (!same(before.bands, after.bands)) {
+			if (after.bands) root.set('bands', clone(after.bands));
+			else root.delete('bands');
+		}
 		const pages = pagesOf(doc);
 		const old = new Map(before.pages.map((p) => [p.id, p]));
 		for (const p of before.pages) {
@@ -325,13 +331,15 @@ function projectPage(m: YMap): Page {
 		})
 		.sort((a, b) => a.z - b.z || a.id.localeCompare(b.id));
 
+	const bands = clone(m.get('bands') as Page['bands']);
 	return {
 		id: m.get('id') as string,
 		width: m.get('width') as number,
 		height: m.get('height') as number,
 		grid,
 		panels: [...grids, ...frees],
-		balloons: texts
+		balloons: texts,
+		...(bands && { bands })
 	};
 }
 
@@ -348,10 +356,12 @@ export function projectComic(doc: Y.Doc): Comic {
 		)
 		.map(projectPage);
 	const styleProfileId = root.get('styleProfileId') as string | undefined;
+	const bands = clone(root.get('bands') as Comic['bands']);
 	return {
 		id: root.get('id') as string,
 		title: root.get('title') as string,
 		...(styleProfileId && { styleProfileId }),
+		...(bands && { bands }),
 		pages,
 		docVersion: DOC_VERSION
 	};

@@ -478,7 +478,7 @@ export class Editor {
 	// --- pages & view ---------------------------------------------------------------------
 
 	addPage(): void {
-		const page = createPage(this.page.grid);
+		const page = createPage(this.page.grid, this.page);
 		const at = this.pageIndex + 1;
 		this.change('Add page', (d) => d.pages.splice(at, 0, page));
 		this.goToPage(at);

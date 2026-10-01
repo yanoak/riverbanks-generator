@@ -158,6 +158,47 @@ describe('balloon fonts', () => {
 	});
 });
 
+describe('board format and bands', () => {
+	it('round-trips grid bands, comic defaults and page overrides', () => {
+		const comic = createComic('Taming Currents', 'board');
+		comic.bands = {
+			header: { title: 'ACT TWO', subtitle: '{comic}' },
+			footer: { left: 'RIVERBANKS', center: '{page}', right: '' }
+		};
+		comic.pages[0].bands = { header: { subtitle: 'The Invitation' } };
+		const projected = projectComic(comicToYDoc(comic));
+		expect(projected.bands).toEqual(comic.bands);
+		expect(projected.pages[0].bands).toEqual(comic.pages[0].bands);
+		expect(projected.pages[0].grid).toEqual(comic.pages[0].grid);
+		expect(projected.pages[0].height).toBe(1416);
+	});
+
+	it('sets, changes and clears bands as edits', () => {
+		const doc = comicToYDoc(createComic('Boards', 'board'));
+		const header = { title: 'ACT TWO', subtitle: '' };
+		const footer = { left: '', center: '{page}', right: '' };
+		edit(doc, (d) => {
+			d.bands = { header, footer };
+			d.pages[0].bands = { header: { subtitle: 'Scene 1' } };
+		});
+		expect(projectComic(doc).bands?.header.title).toBe('ACT TWO');
+		expect(projectComic(doc).pages[0].bands?.header?.subtitle).toBe('Scene 1');
+		edit(doc, (d) => {
+			delete d.bands;
+			delete d.pages[0].bands;
+		});
+		expect(projectComic(doc)).not.toHaveProperty('bands');
+		expect(projectComic(doc).pages[0]).not.toHaveProperty('bands');
+	});
+
+	it('a comic from before bands projects without them', () => {
+		const projected = projectComic(comicToYDoc(createComic('Old')));
+		expect(projected).not.toHaveProperty('bands');
+		expect(projected.pages[0]).not.toHaveProperty('bands');
+		expect(projected.pages[0].grid).not.toHaveProperty('top');
+	});
+});
+
 describe('applyComic', () => {
 	it('writes nothing when nothing changed', () => {
 		const doc = comicToYDoc(fixture());

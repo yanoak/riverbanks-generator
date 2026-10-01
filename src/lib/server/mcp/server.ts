@@ -445,7 +445,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Update panel',
 			description:
-				'Change a panel’s border or fill; for free panels also its rect and stacking (z).',
+				'Change a panel’s border or fill; for free panels also its rect and stacking (z); and crop or zoom its image. get_comic reports each image’s crop as size (% of filling the panel) and focus (the image point at the panel’s centre).',
 			inputSchema: {
 				comicId: z.string(),
 				page,
@@ -453,7 +453,28 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				rect: rect.optional(),
 				border: border.optional(),
 				fill: color.optional(),
-				z: z.number().int().optional()
+				z: z.number().int().optional(),
+				image: z
+					.object({
+						fit: z
+							.enum(['fill', 'fit'])
+							.optional()
+							.describe('Reset first: fill covers the panel (100%), fit shows the whole image.'),
+						size: z
+							.number()
+							.min(25)
+							.max(400)
+							.optional()
+							.describe('Zoom, in % of filling the panel: 100 fills it, 150 is half again closer.'),
+						focus: z
+							.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+							.optional()
+							.describe(
+								'The point of the image to put at the panel’s centre, as fractions of its width and height: { x: 0.5, y: 0.5 } is the middle, { x: 0.5, y: 0.2 } favours the top.'
+							)
+					})
+					.optional()
+					.describe('Crop and zoom the panel’s image, applied as fit, then size, then focus.')
 			}
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.updatePanel(c, args))

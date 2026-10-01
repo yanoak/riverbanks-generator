@@ -95,3 +95,27 @@ export function setFillPercent<T extends Placement & Natural>(
 ): T {
 	return zoomImage(img, percent / fillPercent(img, box), { x: box.w / 2, y: box.h / 2 });
 }
+
+/** The point of the image under the panel's centre, as fractions of its width and height. */
+export function imageFocus(
+	img: Placement & Natural,
+	box: { w: number; h: number }
+): { x: number; y: number } {
+	return {
+		x: (box.w / 2 - img.offsetX) / (img.naturalWidth * img.scale),
+		y: (box.h / 2 - img.offsetY) / (img.naturalHeight * img.scale)
+	};
+}
+
+/** Pan so the image's `focus` point (fractions 0–1) sits at the panel's centre; size unchanged. */
+export function focusImage<T extends Placement & Natural>(
+	img: T,
+	box: { w: number; h: number },
+	focus: { x: number; y: number }
+): T {
+	return {
+		...img,
+		offsetX: box.w / 2 - focus.x * img.naturalWidth * img.scale,
+		offsetY: box.h / 2 - focus.y * img.naturalHeight * img.scale
+	};
+}

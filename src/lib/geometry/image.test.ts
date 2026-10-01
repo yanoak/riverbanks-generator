@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
 	fillPercent,
 	fitImage,
+	focusImage,
+	imageFocus,
 	GENERATED_OVERSCAN,
 	panImage,
 	resizeFromCorner,
@@ -119,5 +121,21 @@ describe('fill percent', () => {
 		const back = setFillPercent(zoomed, box, 100);
 		expect(back.scale).toBeCloseTo(fill.scale, 9);
 		expect(back.offsetX).toBeCloseTo(fill.offsetX, 9);
+	});
+});
+
+describe('image focus', () => {
+	const img = { naturalWidth: 1000, naturalHeight: 500 };
+	const box = { w: 400, h: 400 };
+
+	it('reads the middle of a filled image, and puts a chosen point at the panel centre', () => {
+		const fill = { ...img, ...fitImage(img, box, 'fill') };
+		expect(imageFocus(fill, box).x).toBeCloseTo(0.5, 9);
+		expect(imageFocus(fill, box).y).toBeCloseTo(0.5, 9);
+		const zoomed = { ...fill, ...setFillPercent(fill, box, 150) };
+		const moved = { ...zoomed, ...focusImage(zoomed, box, { x: 0.3, y: 0.2 }) };
+		expect(imageFocus(moved, box).x).toBeCloseTo(0.3, 9);
+		expect(imageFocus(moved, box).y).toBeCloseTo(0.2, 9);
+		expect(moved.scale).toBe(zoomed.scale);
 	});
 });

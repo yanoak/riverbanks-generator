@@ -1,7 +1,7 @@
 // Tool-level operations on a loaded comic. Each runs the same model commands as the editor and
 // throws OpError('invalid', …) with the editor's own wording when the model refuses.
 
-import { fitImage } from '$lib/geometry/image';
+import { fillPercent, fitImage, focusImage, imageFocus, setFillPercent } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import {
 	anchorBalloon,
@@ -170,9 +170,16 @@ export function updatePanel(
 		border?: 'solid' | 'none';
 		fill?: string;
 		z?: number;
+		/** Reset to fill/fit, then size (% of filling the panel), then the point to centre. */
+		image?: {
+			fit?: 'fill' | 'fit';
+			size?: number;
+			focus?: { x: number; y: number };
+		};
 	}
 ): string {
-	const panel = panelIn(pageAt(comic, args.page), args.panelId);
+	const page = pageAt(comic, args.page);
+	const panel = panelIn(page, args.panelId);
 	if ((args.rect || args.z !== undefined) && panel.kind !== 'free') {
 		throw invalid(
 			'Only free panels can be moved, resized or re-stacked; grid panels follow the grid.'
@@ -184,6 +191,17 @@ export function updatePanel(
 	}
 	if (args.border) panel.border = args.border;
 	if (args.fill) panel.fill = args.fill;
+	if (args.image) {
+		if (!panel.image) throw invalid(`Panel ${panel.id} has no image to crop.`);
+		const box = panelBox(page, panel);
+		let img = panel.image;
+		if (args.image.fit) img = { ...img, ...fitImage(img, box, args.image.fit) };
+		if (args.image.size !== undefined) img = setFillPercent(img, box, args.image.size);
+		if (args.image.focus) img = focusImage(img, box, args.image.focus);
+		panel.image = img;
+		const focus = imageFocus(img, box);
+		return `Updated panel ${panel.id}: its image is at ${Math.round(fillPercent(img, box))}% of filling the panel, centred on (${focus.x.toFixed(2)}, ${focus.y.toFixed(2)}).`;
+	}
 	return `Updated panel ${panel.id}.`;
 }
 

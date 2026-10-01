@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_mcp-image-crop
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -39,19 +39,26 @@ agent can read the crop before changing it.
 
 ## Tasks
 
-- [ ] `imageFocus` and `focusImage`, `updatePanel` image option, MCP schema, `get_comic`;
+- [x] `imageFocus` and `focusImage`, `updatePanel` image option, MCP schema, `get_comic`;
       tests
-- [ ] `done`
+- [x] `done`
 
 ## Test list (TDD)
 
-- [ ] `focusImage` puts the chosen point at the panel's centre, `imageFocus` reads it back, and
+- [x] `focusImage` puts the chosen point at the panel's centre, `imageFocus` reads it back, and
       a filled image's focus is (0.5, 0.5). Layer: unit, `src/lib/geometry/image.test.ts`
-- [ ] MCP `update_panel` behaviour. Layer: unit, `src/lib/server/mcp/server.test.ts`
+- [x] MCP `update_panel` behaviour. Layer: unit, `src/lib/server/mcp/server.test.ts`
   - `{ size: 150, focus: { x: 0.3, y: 0.2 } }` gives `get_comic` the matching size and focus;
   - `{ fit: 'fill' }` returns it to 100 and (0.5, 0.5);
   - a panel with no image is refused.
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02.
+
+- **The option:** `update_panel` takes `image: { fit, size, focus }`, applied in that order. It
+  answers with the resulting size and focus.
+- **Reading the crop:** `get_comic` reports `image: { size, focus }` for every panel with an
+  image.
+- **Tests:** unit tests through the MCP client cover setting, resetting and the refusal.
+- **Deployment:** it reaches agents once deployed and they reconnect.

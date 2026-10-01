@@ -1,11 +1,12 @@
 // A compact, agent-readable view of a comic: what get_comic returns.
 
 import { gridArea } from '$lib/geometry/grid';
+import { fillPercent, imageFocus } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { resolveBands } from '$lib/model/bands';
 import { sfxRotation } from '$lib/model/balloons';
 import { formatOf } from '$lib/model/factory';
-import type { Balloon, Comic, Rect } from '$lib/model/types';
+import type { Balloon, Comic, PanelImage, Rect } from '$lib/model/types';
 import { htmlToPlain } from './text';
 
 const round = (r: Rect): Rect => ({
@@ -14,6 +15,13 @@ const round = (r: Rect): Rect => ({
 	w: Math.round(r.w),
 	h: Math.round(r.h)
 });
+
+/** How a panel's image is cropped: % of filling the panel, and the point at its centre. */
+function crop(img: PanelImage, box: { w: number; h: number }) {
+	const focus = imageFocus(img, box);
+	const r2 = (n: number) => Math.round(n * 100) / 100;
+	return { size: Math.round(fillPercent(img, box)), focus: { x: r2(focus.x), y: r2(focus.y) } };
+}
 
 /** The shape settings a balloon has of its own, if any. */
 function shapeOf(b: Balloon) {
@@ -50,7 +58,8 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 					...(p.kind === 'grid' ? { cells: [...p.cells].sort((a, b) => a - b) } : { z: p.z }),
 					bbox: round(panelBox(page, p)),
 					border: p.border,
-					hasImage: !!p.image
+					hasImage: !!p.image,
+					...(p.image ? { image: crop(p.image, panelBox(page, p)) } : {})
 				}))
 				.sort(
 					(a, b) =>

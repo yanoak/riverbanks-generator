@@ -704,6 +704,47 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].balloons[0].rotation).toBe(-6);
 	});
 
+	it('crops and zooms a panel image, resets it, and refuses a panel without one', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Crop' })).text);
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const [withImage, empty] = d.pages[0].panels;
+		await call('set_panel_image', {
+			comicId: id,
+			page: 1,
+			panelId: withImage.id,
+			url: 'https://img.test/a.png'
+		});
+		const res = await call('update_panel', {
+			comicId: id,
+			page: 1,
+			panelId: withImage.id,
+			image: { size: 150, focus: { x: 0.3, y: 0.2 } }
+		});
+		expect(res.isError).toBe(false);
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		let img = d.pages[0].panels.find((p: { id: string }) => p.id === withImage.id).image;
+		expect(img).toEqual({ size: 150, focus: { x: 0.3, y: 0.2 } });
+
+		await call('update_panel', {
+			comicId: id,
+			page: 1,
+			panelId: withImage.id,
+			image: { fit: 'fill' }
+		});
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		img = d.pages[0].panels.find((p: { id: string }) => p.id === withImage.id).image;
+		expect(img).toEqual({ size: 100, focus: { x: 0.5, y: 0.5 } });
+
+		const refused = await call('update_panel', {
+			comicId: id,
+			page: 1,
+			panelId: empty.id,
+			image: { size: 120 }
+		});
+		expect(refused.isError).toBe(true);
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

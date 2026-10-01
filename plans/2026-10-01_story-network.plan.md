@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-01_story-network
-status: active
+status: done
 started: 2026-10-01
-finished:
+finished: 2026-10-01
 issue:
 ---
 
@@ -97,7 +97,7 @@ the page with no deploy.
 - [x] MCP `get_story_network` / `set_story_network`; unit tests
 - [x] `/network` route: graph, story filters, year scrubber, detail panel; nav link
 - [x] Skill `riverbook-network`
-- [ ] Seed production from `content/network/riverbook.json` (after `supabase db push` and deploy)
+- [x] Seed production from `content/network/riverbook.json` (after `supabase db push` and deploy)
 - [x] README section
 
 ## UI mockups (ASCII)
@@ -172,3 +172,18 @@ States:
   with the earlier positions read in `untrack`.
 - **Fitting the view:** The view now starts centred and fits once, as soon as the layout has
   mostly settled. Before, it fitted only when the simulation stopped, several seconds in.
+
+## Outcome
+
+Live on 2026-10-01:
+
+- **Migration and deploy:** The migration was pushed and the code deployed.
+- **Seed:** The canon was read from the RIVERBOOK doc (Edited Drafts plus its three script tabs,
+  unchanged since it was built that morning) and saved over MCP `set_story_network`: 14 people and
+  21 ties across 4 stories.
+- **The page:** `https://riverbanks-generator.vercel.app/network` serves it publicly.
+- **Checks:** The graph, the story filters, the keyboard walk and the year scrubber are covered by
+  `e2e/network.e2e.ts`. They were also checked by rendering the real canon on the dev server, which
+  is how the effect loop was found.
+- **Not yet done:** Editing a tie in the doc and re-syncing waits for the first real change to the
+  doc.

@@ -1,7 +1,7 @@
 # Riverbanks: the canon
 
 The current canonical story and context for the Riverbanks exhibition, compiled for whoever picks
-this up next, human or agent. Compiled on **2026-10-02** from the sources below.
+this up next, human or agent. Compiled on **2026-10-02** from the sources below, and updated the same day with Yan's answers to the open questions.
 
 **This file is a snapshot, not the source.** The Google sources are canon. Where they and this
 file differ, the sources win, so re-read them before relying on anything here. The story text
@@ -44,11 +44,9 @@ below is copied word for word from the sources.
 | Act One | **Life, the Pluriverse, and Everything** | Sam's slides 5–8 (final text, below). Edited Drafts files *Ismahan: The Youngest Delegate* under "Prologue and Act One". |
 | Act Two | **Taming Currents** | Title only on the slides |
 | Act Three | **Yes We K.A.N.** | Title only on the slides |
-| Act Four | **Happy Meals** | Title only on the slides |
+| Act Four | *The Year It Snowed* (replaces **Happy Meals**) | *Dew & Ya: The Year It Snowed* (Edited Drafts). Yan, 2026-10-02: it replaces "Happy Meals"; the slide title has yet to change. |
 | Act Five | **A Visa for a Hilsa** | *Visa for a Hilsa* (Edited Drafts) |
-| Epilogue | **Moving House** | Title only. Khairun's Moving House material is not yet canonised; see [In development](#in-development). |
-
-Where *The Year It Snowed* sits is not stated. See open questions.
+| Epilogue | **Moving House** | Title only. Still in development; see [In development](#in-development). |
 
 ## Prologue: Six Disasters, One Dream (Sam, slide 3; final text)
 
@@ -68,6 +66,8 @@ Where *The Year It Snowed* sits is not stated. See open questions.
 The six disasters collapse the last global reinsurer, which is the precipitating event of
 PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsurance system".
 
+**The banker is a woman and stays unnamed** (Yan, 2026-10-02).
+
 ## Act One: Life, the Pluriverse, and Everything (Sam, slides 5–8; final text)
 
 **Slide 5: the Summit opens.**
@@ -82,7 +82,7 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
 >
 > FROM THE ANCIENT CELLS THAT MERGED TO BUILD US (WHAT LYNN MARGULIS CALLED SYMBIOGENESIS)…
 > …TO THE LIVING NETWORKS THAT UNLOCK THE ADJACENT POSSIBLE (STUART KAUFFMAN, FRITJOF CAPRA)…
-> …THE ARC OF OUR COMSOS BENDS TOWARDS COOPERATION (AS NOTED BY THOMAS BERRY AND BRIAN SWIMME)
+> …THE ARC OF OUR COSMOS BENDS TOWARDS COOPERATION (AS NOTED BY THOMAS BERRY AND BRIAN SWIMME)
 >
 > AWAKENING NOW TO OUR ROLE AS THE CONSCIOUS STEWARDS OF THIS ECOLOGICAL INHERITANCE WE HEREBY
 > DECLARE TOGETHER: THE PURPOSE OF LIFE (OUR PURPOSE AS LIFE) IS TO LIVE AND LET FLOURISH.
@@ -138,8 +138,8 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
 
 - **PLURIVERS Trust** (Planetary League of United Rivers): following the ratification and
   respective opting-intos of the Pluriversal Covenant, the PLURIVERS Trust is the stewardship body.
-- **KAN** (Kinetic Adaptation Network). *(The slide's description repeats PESA's; see open
-  questions.)*
+- **KAN** (Kinetic Adaptation Network). *(The slide currently repeats PESA's description;
+  Sam will fix it later.)*
 
 *Three key Pluriverse institutions:*
 
@@ -150,8 +150,8 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
 - **PESA** (Planetary Ecosystem Services Authority): the "customer-support" authority responsible
   for ensuring that all beings and communities who depend on the planet can be supported as best
   possible.
-- **PROSPER**. *(The slide repeats PESA's name and description here; slide 7 gives the canonical
-  description above.)*
+- **PROSPER**. *(The slide currently repeats PESA's name and description; Sam will fix it later.
+  Slide 7 has the description.)*
 
 *The Four Teal Truths, the starting principles of the Pluriverse:*
 
@@ -208,7 +208,14 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
 | 2065 | The Hilsa story | | 33, fieldwork with Meghna fishers | 55 | 26 | 1 | moves from fishing to data collection |
 | 2075 | | | 43 | 65 | 36 | 11, a scene with Grandma Ismahan | |
 
-Birth years: Dew 1965, Ismahan 2010, Ya 2032, Soraya 2039, Teja 2064. Jalal's is not in canon.
+Birth years: Dew 1965, Ismahan 2010, Ya 2032, Soraya 2039, Teja 2064.
+
+**Invented on 2026-10-02 to fill gaps** (Yan said to invent them). These are not yet in the sheet:
+
+- **Jalal:** born **2031**, so 34 in 2065.
+- **Shapla:** born **2033**, so 32 in 2065.
+
+Dew's script says "1964/65"; the sheet's 1965 is canon.
 
 **Family decisions** (Yan, 2026-10-01):
 
@@ -252,7 +259,7 @@ The Sultan turns to his youngest.
 **SULTAN:** You know what? Let the girl go. She can learn how the world works, learn to sit with dignitaries, and represent our kingdom as its youngest delegate.
 
 
-#### Scene 2: The Summit (early 2028)
+#### Scene 2: The Summit (July 2028)
 
 Ismahan is 18 and feels out of place among the foreign dignitaries. She is happiest in the mangroves, talking with people in the villages and playing with the mudskippers.
 
@@ -491,6 +498,9 @@ Final panel (wordless): Jalal and Shapla's boat follows a shoal of silver hilsa 
 
 ## In development
 
+**Ignore this for now.** Yan, 2026-10-02: "still in development". It is not canon, and nothing
+below should be built on yet.
+
 **"Script: Second half of Kar"** (a new tab under Edited Drafts), as written:
 
 > Merge the second half of Khairun into the main storyline. The way to do this is to let a
@@ -521,8 +531,8 @@ Drafts is canon.
 | **Dew** (1965–2041) | Delegate, Snow | Ya's grandmother; runs the stilt restaurant on the Ping; inspired Ismahan at the Summit; her shrine is under the restaurant |
 | **Ya** (b. 2032) | Snow, Hilsa | From a Chinese immigrant family on the Ping; cook turned food-ecosystem researcher with the Bengal Passage Cooperative; recruits Jalal |
 | **Taro** | Snow, Hilsa | Ya's grey tabby: a kitten in 2052, a teenage cat in 2065 |
-| **Jalal** | Hilsa | Meghna fisherman with a second-hand ex-KAN drone; his metis solves Ya's puzzle |
-| **Shapla** | Hilsa | Jalal's wife; her family history is one of leaving (Partition, the drowned delta) |
+| **Jalal** (b. 2031, invented) | Hilsa | Meghna fisherman with a second-hand ex-KAN drone; his metis solves Ya's puzzle |
+| **Shapla** (b. 2033, invented) | Hilsa | Jalal's wife; her family history is one of leaving (Partition, the drowned delta) |
 | **The drone** | Hilsa | Chatty, second-hand, formerly KAN's |
 | **Soraya** (b. 2039), **Teja** (b. 2064) | Timeline; Epilogue in development | Ismahan's daughter and granddaughter |
 
@@ -548,37 +558,28 @@ Drafts is canon.
   - It does not yet include Sam's prologue banker or the Epilogue material.
 - **Process for comics:** script first, house style, then check every page by eye.
 
-## Open questions and conflicts
+## Decisions and open questions
 
-1. **When is the Summit?** Sam's slides put the disasters in **November 2027** and the Summit in
-   **July 2028**.
-   - *The Youngest Delegate* has the invitation in "late 2027" (consistent) but the Summit in
-     "**early** 2028" (Scene 2 heading). Its comic caption also says "Early 2028".
-   - The sheet just says 2028.
-   - Suggest changing the script and caption to "July 2028". Ismahan is 18 either way.
-2. **Slide 8 copy errors:** **PROSPER** and **KAN** repeat **PESA**'s name and description.
-   - PROSPER's real description is on slide 7, with its name expanded as "… for Ecological
-     **Recovery**". The world bible says "toward Ecological **Richness**". Which is final?
-   - KAN has no description of its own on the slides yet.
-   - Slide 5 has a typo, "COMSOS" for "COSMOS".
-   - Since the text is said to be final, Sam should confirm these.
-3. **Where *The Year It Snowed* sits** is not stated. Is it Act Four, "Happy Meals" (food and the
-   GDI), or part of Act Three, "Yes We K.A.N." (KAN's sailabout)?
-   - Acts Two and Three have titles only.
-   - "Taming Currents" suggests Khairun's House of Taming, but nothing is canonised yet.
-4. **The Epilogue note doesn't add up.** "Script: Second half of Kar" says the Khairun character
-   is "the granddaughter of the king's daughter", which by canon is **Teja**. But it then has **Ya**
-   meet Shapla and make "a bold decision that overturns the old way of running the household".
-   - Is it Teja who meets Shapla, or Ya?
-   - In 2065 Teja is 1 and Ya is 33. When is this meeting?
-5. **Is Mua Johor?** Yan said to "follow the real history", and Ismahan cites 1914 Johor. Sam's
-   sixth disaster, "monsoon flooding: Singapore & Johor", fits Mua's late-2027 flood, which suggests
-   Mua stands in for Johor. This is not stated outright.
-6. **The banker:** the prologue's "grizzled veteran banker" who dreams the plan is not named or
-   connected to any character yet.
-7. **Missing facts:**
-   - Dew's script says "1964/65"; the sheet implies 1965, and the sheet wins.
-   - Jalal's birth year is not canon. Shapla is not in the sheet.
+**Settled by Yan on 2026-10-02:**
+
+1. **The Summit is July 2028.** The invitation arrives in late 2027, after the November disasters.
+   The Edited Drafts Scene 2 heading, the script tab and the comic caption now say July 2028.
+2. **The slides:** "COMSOS" is fixed on the slides. The PROSPER and KAN descriptions on slide 8
+   will be fixed later; slide 7's PROSPER text stands. PROSPER is expanded on the slides as "… for
+   Ecological Recovery", where the world bible says "… toward Ecological Richness". The slide
+   wording is the one to use.
+3. ***The Year It Snowed* replaces Act Four, "Happy Meals".**
+4. **The "Second half of Kar" note is still in development.** Ignore it.
+5. **Mua and Johor stay vague on purpose.** Don't state that Mua is Johor. The 1914 Johor line and
+   the "Singapore & Johor" flood can both stand as they are.
+6. **The prologue's banker is a woman, unnamed.**
+7. **Birth years were invented where canon had none:** Jalal 2031 and Shapla 2033.
+
+**Still open:**
+
+- What Acts Two ("Taming Currents") and Three ("Yes We K.A.N.") contain. They have titles only.
+- The Epilogue, "Moving House".
+- Whether the invented birth years should go into the timeline sheet.
 
 ## How to refresh this file
 

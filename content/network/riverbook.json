@@ -1,6 +1,6 @@
 {
 	"meta": {
-		"syncedAt": "2026-10-01",
+		"syncedAt": "2026-10-02",
 		"sources": [
 			{
 				"name": "RIVERBOOK › Edited Drafts (and its Script tabs)",
@@ -14,7 +14,8 @@
 		"notes": [
 			"The timeline sheet is canon for years and family; the Edited Drafts tab is canon for the stories.",
 			"Ages of the Sultan and the princes come from the character designs, not from canon.",
-			"Portraits are the starred cast sheets of the \"Riverbanks house style\", copied in on each sync."
+			"Portraits are the starred cast sheets of the \"Riverbanks house style\", copied in on each sync.",
+			"Jalal's and Shapla's birth years (2031, 2033) were invented on 2026-10-02 to fill gaps in canon."
 		],
 		"styleProfileId": "b5f76d95-af53-4a85-b365-b85bfc781eae"
 	},
@@ -221,7 +222,7 @@
 			"name": "Jalal",
 			"kind": "person",
 			"aliases": [],
-			"born": null,
+			"born": 2031,
 			"died": null,
 			"home": "A village on the Meghna",
 			"stories": ["hilsa"],
@@ -238,7 +239,7 @@
 			"name": "Shapla",
 			"kind": "person",
 			"aliases": [],
-			"born": null,
+			"born": 2033,
 			"died": null,
 			"home": "A village on the Meghna",
 			"stories": ["hilsa"],

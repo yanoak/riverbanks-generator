@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { composePrompt, NO_LETTERING } from './prompt';
+import { composePrompt, NO_LETTERING, roomSentence } from './prompt';
+import { ROOM_KEYS } from './room';
 
 const profile = {
 	style: 'Loose brush ink, heavy blacks.',
@@ -96,5 +97,24 @@ describe('composePrompt', () => {
 			].join('\n')
 		);
 		expect(text).not.toContain('Taro');
+	});
+});
+
+describe('room for lettering', () => {
+	it('follows the no-lettering line, naming where, and never asks for empty space', () => {
+		const p = composePrompt({ refs: [], prompt: 'a heron', room: 'upper-left' });
+		const after = p.split(NO_LETTERING)[1];
+		expect(after.trimStart().startsWith(roomSentence('upper-left'))).toBe(true);
+		expect(roomSentence('upper-left')).toContain('upper left');
+		for (const key of ROOM_KEYS) {
+			expect(roomSentence(key)).not.toMatch(/empty space|leave (calm )?space/i);
+			expect(roomSentence(key)).toMatch(/never bare paper/);
+		}
+	});
+
+	it('adds nothing without a room (portraits, print versions)', () => {
+		expect(composePrompt({ refs: [], prompt: 'a heron' })).toBe(
+			`Draw one comic panel.\n\n${NO_LETTERING}\n\nPanel: a heron`
+		);
 	});
 });

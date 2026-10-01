@@ -3,11 +3,28 @@
 // text, so a surprising image can be traced to its words.
 
 import type { PaletteColor, RefRole } from '$lib/styles/styles';
+import type { Room } from './room';
 
 export type PromptRefRole = RefRole | 'place';
 
 export const NO_LETTERING =
 	'Leave out any lettering, captions, speech balloons and sound effects: they are added later.';
+
+/**
+ * Room for the lettering that will be laid over the picture. It says what fills that part, not
+ * that it is empty: asked for "empty space", image models paint a blank band (2026-10-02, the
+ * Hilsa drone panels), and a style whose palette names a paper colour leaves it as bare paper.
+ */
+export function roomSentence(room: Room): string {
+	const where = room.replace('-', ' ');
+	return (
+		`Lettering will sit over the ${where} of the frame, so keep that part quiet and low in ` +
+		'detail: the scene’s own sky, water, wall or ground, continuing right to the edges, with ' +
+		'no faces or key action there. Never leave a blank or empty area, a plain band, a box or a ' +
+		'frame for it: the picture fills the whole panel, and backgrounds are part of the scene, ' +
+		'never bare paper.'
+	);
+}
 
 export interface PromptInput {
 	profile?: { style: string; palette: PaletteColor[]; avoid: string };
@@ -16,6 +33,8 @@ export interface PromptInput {
 	/** The style's cast members this panel needs; `image` is the 1-based number of the portrait. */
 	cast?: { name: string; description: string; image: number | null }[];
 	prompt: string;
+	/** Where the panel's lettering goes; absent for portraits and print redraws. */
+	room?: Room;
 }
 
 const sentence = (s: string) => {
@@ -43,7 +62,7 @@ function describeMember(m: { name: string; description: string; image: number | 
 	return `- ${m.name.trim()}${where}${what ? `: ${sentence(what)}` : '.'}`;
 }
 
-export function composePrompt({ profile, refs, cast = [], prompt }: PromptInput): string {
+export function composePrompt({ profile, refs, cast = [], prompt, room }: PromptInput): string {
 	const blocks: string[][] = [['Draw one comic panel.']];
 
 	const style: string[] = [];
@@ -64,6 +83,8 @@ export function composePrompt({ profile, refs, cast = [], prompt }: PromptInput)
 	const members = cast.filter((m) => m.image || m.description.trim());
 	if (members.length) blocks.push(['Cast in this panel:', ...members.map(describeMember)]);
 
-	blocks.push([NO_LETTERING], [`Panel: ${prompt.trim()}`]);
+	blocks.push(room ? [NO_LETTERING, roomSentence(room)] : [NO_LETTERING], [
+		`Panel: ${prompt.trim()}`
+	]);
 	return blocks.map((b) => b.join('\n')).join('\n\n');
 }

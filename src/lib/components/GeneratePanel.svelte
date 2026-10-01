@@ -15,6 +15,7 @@
 </script>
 
 <script lang="ts">
+	import { letteringRoom } from '$lib/generation/room';
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import { nearestAspect } from '$lib/generation/aspect';
 	import { matchCast, resolveCast } from '$lib/generation/cast';
@@ -144,7 +145,8 @@
 					prompt,
 					profileId: style?.id,
 					model: model.key,
-					box: { w: box.w, h: box.h }
+					box: { w: box.w, h: box.h },
+					room: letteringRoom(box, editor.page.balloons)
 				})
 			});
 			const body = await res.json().catch(() => ({}));

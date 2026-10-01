@@ -4,6 +4,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
+import { letteringRoom } from '$lib/generation/room';
 import type { Comic } from '$lib/model/types';
 import * as ops from '$lib/ops/comic-ops';
 import { describeComic } from '$lib/ops/describe';
@@ -791,6 +792,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 						profileId: comic.styleProfileId,
 						modelKey: model,
 						box: panelBox(at, target),
+						room: letteringRoom(panelBox(at, target), at.balloons),
 						cast: castIds
 					});
 				} catch (e) {

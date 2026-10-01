@@ -42,7 +42,8 @@ The cause is in the prompts:
 - `letteringRoom(box, balloons)` takes the balloons that overlap the panel and finds the centre
   of their overlap area, weighted by size.
 - It names that centre as one of `top`, `upper-left`, `upper-right`, `left`, `right`,
-  `bottom`, `lower-left`, `lower-right` or `centre-top`. If the panel has no balloons, it gives
+  `bottom`, `lower-left` or `lower-right`; a spot in the middle of the panel reads as `top`. If
+  the panel has no balloons, it gives
   `top`.
 - The result is a fixed key, not free text, so the API route can validate it.
 
@@ -75,27 +76,28 @@ the scene, never bare paper"* to its Avoid field on its style page.
 
 ## Tasks
 
-- [ ] Plan
-- [ ] `letteringRoom`, the `room` prompt sentence, and the callers (UI, API, MCP); tests
+- [x] Plan
+- [x] `letteringRoom`, the `room` prompt sentence, and the callers (UI, API, MCP); tests
 - [ ] Test generation: redraw panels 2.3 and 2.5 into a **scratch** comic (not the real one)
       and compare the results
 - [ ] Memory and diary; then `done`
 
 ## Test list (TDD)
 
-- [ ] `letteringRoom` behaviour. Layer: unit, `src/lib/generation/room.test.ts`
+- [x] `letteringRoom` behaviour. Layer: unit, `src/lib/generation/room.test.ts`
   - with no balloons it gives `top`;
   - one balloon in the panel's upper left gives `upper-left`;
   - balloons spread along the top give `top`;
   - a balloon that doesn't overlap the panel is ignored.
-- [ ] `composePrompt` placement. Layer: unit, `src/lib/generation/prompt.test.ts`
+- [x] `composePrompt` placement. Layer: unit, `src/lib/generation/prompt.test.ts`
   - with `room: 'upper-left'`, it puts the room sentence ("upper left") right after
     `NO_LETTERING`;
   - without `room`, it adds nothing;
   - the sentence never contains the words "empty space".
-- [ ] `generatePanelImage` passes `room` through, and a print version leaves it out. Layer:
-      unit, `src/lib/server/generation/*.test.ts` (fake provider)
-- [ ] The API route refuses an unknown `room`. Layer: unit
+- [x] `generatePanelImage` passes `room` through, and a print version leaves it out. Layer:
+      unit, `src/lib/server/mcp/server.test.ts` (the injected generator)
+- [ ] The API route refuses an unknown `room`. Layer: unit (not written: the route has no unit
+      tests yet. The check is one line, `isRoom`.)
 
 ## Verification
 

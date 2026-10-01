@@ -447,6 +447,7 @@ describe('Riverbanks MCP server', () => {
 				profileId: INK.id
 			});
 			expect(generated[0].box.w).toBeGreaterThan(0);
+			expect(generated[0].room).toBe('top'); // no balloons yet: lettering goes at the top
 
 			const panel = (await loadComic(store, id)).comic.pages[0].panels.find(
 				(p) => p.id === panelId
@@ -468,6 +469,7 @@ describe('Riverbanks MCP server', () => {
 			expect(res.isError).toBe(false);
 			expect(res.text).toMatch(/print version/i);
 			expect(generated[1]).toMatchObject({ quality: 'print', sourceAssetId: 'generated-1' });
+			expect(generated[1].room).toBeUndefined(); // a redraw needs no room
 
 			const after = (await loadComic(store, id)).comic.pages[0].panels[0].image!;
 			expect(after.offsetX).toBe(before.offsetX);

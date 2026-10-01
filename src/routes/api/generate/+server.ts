@@ -1,4 +1,5 @@
 import { error, json } from '@sveltejs/kit';
+import { isRoom } from '$lib/generation/room';
 import { OpError } from '$lib/ops/ops';
 import { generatePanelImage } from '$lib/server/generation/generate';
 import { providerFor } from '$lib/server/generation/providers';
@@ -14,6 +15,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!(await locals.getUser())) error(401, 'Sign in first.');
 	const body = await request.json().catch(() => null);
 	const box = body?.box;
+	if (body?.room !== undefined && !isRoom(body.room)) error(400, 'Unknown room for lettering.');
 	if (
 		typeof body?.comicId !== 'string' ||
 		typeof body?.panelId !== 'string' ||
@@ -32,6 +34,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					profileId: typeof body.profileId === 'string' ? body.profileId : undefined,
 					modelKey: typeof body.model === 'string' ? body.model : undefined,
 					box: { w: Number(box.w), h: Number(box.h) },
+					room: body.room,
 					quality: body.quality === 'print' ? 'print' : 'draft',
 					sourceAssetId: typeof body.sourceAssetId === 'string' ? body.sourceAssetId : undefined,
 					cast:

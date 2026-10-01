@@ -8,6 +8,7 @@ import { exactAspect, nearestAspect } from '$lib/generation/aspect';
 import { sanitizeSvg } from '$lib/generation/svg';
 import { DEFAULT_MODEL, PRINT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
 import { composePrompt } from '$lib/generation/prompt';
+import type { Room } from '$lib/generation/room';
 import { resolveCast } from '$lib/generation/cast';
 import { planRefs } from '$lib/generation/refs';
 import { newId } from '$lib/model/factory';
@@ -33,6 +34,8 @@ export interface GenerateInput {
 	sourceAssetId?: string;
 	/** Cast member ids to attach instead of those the prompt names (the panel's own list). */
 	cast?: string[];
+	/** Where the panel's lettering will go (generation/room.ts); a draft keeps it quiet. */
+	room?: Room;
 }
 
 export type Quality = 'draft' | 'print';
@@ -99,7 +102,8 @@ export async function generatePanelImage(
 			description: member.description,
 			image
 		})),
-		prompt
+		prompt,
+		room: input.room ?? 'top'
 	});
 
 	const refs: RefImage[] = await loadRefImages(supabase, used);

@@ -105,6 +105,8 @@ export interface Balloon extends Rect {
 	next?: Id;
 	/** How the connection to `next` is drawn; absent is a neck. */
 	connector?: 'neck' | 'line';
+	/** An sfx's lettering angle in degrees, −180 to 180; absent is −6 (see sfxRotation). */
+	rotation?: number;
 }
 
 export type Corner = 'tl' | 'tr' | 'bl' | 'br';

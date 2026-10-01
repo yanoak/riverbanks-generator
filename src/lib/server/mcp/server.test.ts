@@ -678,6 +678,26 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[1].bands.footer.qr).toBe('');
 	});
 
+	it('rotates sfx lettering, resets it, and refuses rotation on other balloons', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'SFX' })).text);
+		await call('add_balloon', { comicId: id, page: 1, type: 'sfx', text: 'KRAK!', rotation: 25 });
+		await call('add_balloon', { comicId: id, page: 1, type: 'speech', text: 'Hi' });
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const [sfx, speech] = d.pages[0].balloons;
+		expect(sfx.rotation).toBe(25);
+		const bad = await call('update_balloon', {
+			comicId: id,
+			page: 1,
+			balloonId: speech.id,
+			rotation: 10
+		});
+		expect(bad.isError).toBe(true);
+		await call('update_balloon', { comicId: id, page: 1, balloonId: sfx.id, rotation: null });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[0].rotation).toBe(-6);
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

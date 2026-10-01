@@ -127,3 +127,8 @@ export function removeBalloon(page: Page, id: string): void {
 		}
 	}
 }
+
+/** The angle an sfx's lettering is drawn at: its own, or the house tilt of −6°. */
+export function sfxRotation(b: Pick<Balloon, 'rotation'>): number {
+	return Math.min(180, Math.max(-180, b.rotation ?? -6));
+}

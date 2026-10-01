@@ -223,6 +223,8 @@ export interface ShapeArgs {
 	/** Connect to the next balloon in the exchange; null unlinks. */
 	next?: string | null;
 	connector?: 'neck' | 'line';
+	/** An sfx's lettering angle in degrees; null resets it to the −6° tilt. */
+	rotation?: number | null;
 }
 
 function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
@@ -230,6 +232,11 @@ function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
 		const v = args[key];
 		if (v === null) delete b[key];
 		else if (v !== undefined) b[key] = v;
+	}
+	if (args.rotation !== undefined) {
+		if (b.type !== 'sfx') throw invalid('Only sfx lettering rotates.');
+		if (args.rotation === null) delete b.rotation;
+		else b.rotation = args.rotation;
 	}
 	if (args.anchor === null) delete b.anchor;
 	else if (args.anchor) {

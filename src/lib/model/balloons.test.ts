@@ -5,7 +5,8 @@ import {
 	connectBalloons,
 	createBalloon,
 	removeBalloon,
-	repinAnchors
+	repinAnchors,
+	sfxRotation
 } from './balloons';
 import { panelBox } from '$lib/geometry/panel';
 import { BALLOON_STROKE } from '$lib/geometry/balloon';
@@ -143,5 +144,16 @@ describe('connecting balloons', () => {
 		expect(page.balloons.map((x) => x.id)).not.toContain(b.id);
 		expect(a).not.toHaveProperty('next');
 		expect(a).not.toHaveProperty('connector');
+	});
+});
+
+describe('sfx rotation', () => {
+	it('keeps today’s −6° tilt by default and clamps to a half-turn either way', () => {
+		const page = createComic('t', 'board').pages[0];
+		const sfx = createBalloon(page, 'sfx');
+		expect(sfxRotation(sfx)).toBe(-6);
+		expect(sfxRotation({ ...sfx, rotation: 30 })).toBe(30);
+		expect(sfxRotation({ ...sfx, rotation: 400 })).toBe(180);
+		expect(sfxRotation({ ...sfx, rotation: -400 })).toBe(-180);
 	});
 });

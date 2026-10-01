@@ -135,6 +135,15 @@ const shapeArgs = {
 		.describe(
 			'Connect this balloon to the next line in the same exchange (a balloon id on the same page): the two are joined, as when one speaker says several lines. Chains are fine; loops are refused. null unlinks.'
 		),
+	rotation: z
+		.number()
+		.min(-180)
+		.max(180)
+		.nullable()
+		.optional()
+		.describe(
+			'sfx only: the lettering’s angle in degrees (default −6, a slight tilt). null resets.'
+		),
 	connector: z
 		.enum(['neck', 'line'])
 		.optional()

@@ -23,6 +23,7 @@
 	import { tick } from 'svelte';
 	import { pointsOf, POINTS_RANGE, roundnessOf } from '$lib/geometry/balloon';
 	import { htmlToPlain } from '$lib/ops/text';
+	import { sfxRotation } from '$lib/model/balloons';
 	import type { Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
 
@@ -227,6 +228,38 @@
 					})}
 			/>
 		</label>
+		{#if b.type === 'sfx'}
+			{@const angle = sfxRotation(b)}
+			<h3 class="sub">Shape</h3>
+			<label class="row gap-2">
+				<span>Rotation</span>
+				<span class="flex items-center gap-2">
+					<input
+						class="w-20"
+						type="range"
+						min="-180"
+						max="180"
+						value={angle}
+						data-shape="rotation"
+						aria-valuetext="{angle} degrees"
+						oninput={(e) => slide(b.id, 'Rotation', { rotation: +e.currentTarget.value })}
+						onchange={endSlide}
+					/>
+					<input
+						class="w-14 rounded border border-stone-300 px-1 py-0.5 text-right"
+						type="number"
+						min="-180"
+						max="180"
+						value={angle}
+						aria-label="Rotation in degrees"
+						onchange={(e) =>
+							editor.patch('Rotation', b.id, {
+								rotation: Math.min(180, Math.max(-180, +e.currentTarget.value || 0))
+							})}
+					/>°
+				</span>
+			</label>
+		{/if}
 		{#if ROUNDED.includes(b.type) || b.type === 'thought' || b.type === 'shout'}
 			<h3 class="sub">Shape</h3>
 		{/if}

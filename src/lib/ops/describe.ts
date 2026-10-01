@@ -3,6 +3,7 @@
 import { gridArea } from '$lib/geometry/grid';
 import { panelBox } from '$lib/geometry/panel';
 import { resolveBands } from '$lib/model/bands';
+import { sfxRotation } from '$lib/model/balloons';
 import { formatOf } from '$lib/model/factory';
 import type { Balloon, Comic, Rect } from '$lib/model/types';
 import { htmlToPlain } from './text';
@@ -65,6 +66,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 					rect: round(b),
 					...shapeOf(b),
 					...(b.anchor ? { anchor: b.anchor } : {}),
+					...(b.type === 'sfx' ? { rotation: sfxRotation(b) } : {}),
 					...(b.next ? { next: b.next, connector: b.connector ?? 'neck' } : {}),
 					...(b.tail
 						? { tailTip: { x: Math.round(b.x + b.tail.x), y: Math.round(b.y + b.tail.y) } }

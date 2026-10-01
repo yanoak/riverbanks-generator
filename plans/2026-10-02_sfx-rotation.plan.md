@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_sfx-rotation
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -32,8 +32,8 @@ Inspector, with a slider and a number, and over MCP (`rotation` on `add_balloon`
 
 ## Tasks
 
-- [ ] `rotation` field, render, Inspector, MCP; tests
-- [ ] Verify; `done`
+- [x] `rotation` field, render, Inspector, MCP; tests
+- [x] Verify; `done`
 
 ## UI mockups (ASCII)
 
@@ -51,9 +51,9 @@ Inspector, with a slider and a number, and over MCP (`rotation` on `add_balloon`
 
 ## Test list (TDD)
 
-- [ ] `sfxRotation(b)` gives −6 when the balloon has no rotation, and otherwise clamps it to
+- [x] `sfxRotation(b)` gives −6 when the balloon has no rotation, and otherwise clamps it to
       −180…180. Layer: unit, `src/lib/model/balloons.test.ts`
-- [ ] MCP `update_balloon` with `rotation` sets it on an SFX, `null` resets it, and setting it on
+- [x] MCP `update_balloon` with `rotation` sets it on an SFX, `null` resets it, and setting it on
       a speech balloon is refused. `get_comic` reports it. Layer: unit,
       `src/lib/server/mcp/server.test.ts`
 
@@ -65,4 +65,7 @@ Inspector, with a slider and a number, and over MCP (`rotation` on `add_balloon`
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02. SFX lettering takes a `rotation` (−180° to 180°, default −6°) from an
+Inspector slider plus number field, and over MCP (`rotation` on `add_balloon`/`update_balloon`;
+other balloon types refuse it). Checked in Chrome: a new SFX shows −6°, and typing 30 turns
+"KRAK!" to 30°. The drag-undo step is unit-level only (the same grouping as the shape sliders).

@@ -4,6 +4,7 @@
 	import { BALLOON_STROKE, balloonShape, textInset } from '$lib/geometry/balloon';
 	import type { Balloon } from '$lib/model/types';
 	import { letteringFor, type Typography } from '$lib/typography/typography';
+	import { sfxRotation } from '$lib/model/balloons';
 
 	let {
 		balloon,
@@ -63,6 +64,7 @@
 		style:font-size="{balloon.fontSize}px"
 		style:--sfx-fill={balloon.fill}
 		style:--sfx-stroke={balloon.stroke}
+		style:--sfx-rotation="{sfxRotation(balloon)}deg"
 	>
 		{#if text}
 			{@render text()}
@@ -88,6 +90,6 @@
 		paint-order: stroke fill;
 		letter-spacing: 0.03em;
 		white-space: nowrap;
-		transform: rotate(-6deg);
+		transform: rotate(var(--sfx-rotation, -6deg));
 	}
 </style>

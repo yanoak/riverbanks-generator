@@ -67,4 +67,34 @@ describe('composePrompt', () => {
 		});
 		expect(text).toContain('Avoid: gradients.\n');
 	});
+
+	it('describes the panel’s cast after the references, with image numbers where attached', () => {
+		const text = composePrompt({
+			refs: [
+				{ role: 'style', label: '' },
+				{ role: 'character', label: 'Ismahan at 42' },
+				{ role: 'place', label: 'the stilt restaurant' }
+			],
+			cast: [
+				{ name: 'Ismahan at 42', description: 'Long dark braid streaked grey', image: 2 },
+				{ name: 'Ya at 20', description: 'Short black bob, red apron.', image: null },
+				{ name: 'the stilt restaurant', description: '', image: 3 },
+				{ name: 'Taro', description: '  ', image: null }
+			],
+			prompt: 'Ya cooks; Ismahan listens'
+		});
+		expect(text).toContain(
+			[
+				'- Image 3: the place “the stilt restaurant”. Keep its appearance consistent.',
+				'',
+				'Cast in this panel:',
+				'- Ismahan at 42 (Image 2): Long dark braid streaked grey.',
+				'- Ya at 20: Short black bob, red apron.',
+				'- the stilt restaurant (Image 3).',
+				'',
+				NO_LETTERING
+			].join('\n')
+		);
+		expect(text).not.toContain('Taro');
+	});
 });

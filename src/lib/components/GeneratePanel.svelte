@@ -17,6 +17,7 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import { nearestAspect } from '$lib/generation/aspect';
+	import { matchCast, resolveCast } from '$lib/generation/cast';
 	import { DEFAULT_MODEL, PRINT_MODEL, VECTOR_MODELS } from '$lib/generation/models';
 	import { pending } from '$lib/generation/pending.svelte';
 	import { panelBox } from '$lib/geometry/panel';
@@ -58,6 +59,35 @@
 		const box = panelBox(editor.page, panel);
 		return model.anyAspect ? 'exact' : nearestAspect(box, model.aspects);
 	});
+	// The style's cast this panel gets: whoever the prompt names, until someone picks by hand.
+	const castList = $derived(style?.cast ?? []);
+	const castAuto = $derived(panel.cast === undefined);
+	const castChips = $derived(
+		castAuto ? matchCast(text, castList) : resolveCast('', castList, panel.cast)
+	);
+	const castSpare = $derived(castList.filter((m) => !castChips.some((c) => c.id === m.id)));
+	let castBox = $state<HTMLElement>();
+
+	function setCast(ids: string[] | undefined, label: string) {
+		editor.patch(label, panel.id, { cast: ids });
+	}
+	function removeCast(id: string, i: number) {
+		setCast(
+			castChips.filter((c) => c.id !== id).map((c) => c.id),
+			'Remove from panel cast'
+		);
+		queueMicrotask(() => {
+			const chips = castBox?.querySelectorAll<HTMLElement>('[data-cast-chip]');
+			(
+				chips?.[Math.min(i, chips.length - 1)] ?? castBox?.querySelector<HTMLElement>('select')
+			)?.focus();
+		});
+	}
+	function addCast(id: string) {
+		if (!id) return;
+		setCast([...castChips.map((c) => c.id), id], 'Add to panel cast');
+	}
+
 	const job = $derived(pending.get(panel.id));
 	const busy = $derived(!!job && !job.error);
 
@@ -241,6 +271,54 @@
 		onfocus={() => (focused = true)}
 		onblur={savePrompt}
 		onkeydown={onPromptKey}></textarea>
+	{#if castList.length}
+		<div class="mt-1" bind:this={castBox} role="group" aria-label="Cast in this panel">
+			<p class="mb-0.5 flex items-baseline justify-between text-xs text-stone-500">
+				<span>Cast <span class="text-stone-400">{castAuto ? 'auto' : 'custom'}</span></span>
+				{#if !castAuto}
+					<button
+						class="underline hover:text-stone-700"
+						title="Go back to whoever the prompt names"
+						onclick={() => setCast(undefined, 'Detect panel cast')}>↺ Auto</button
+					>
+				{/if}
+			</p>
+			<div class="flex flex-wrap items-center gap-1">
+				{#each castChips as m, i (m.id)}
+					<button
+						data-cast-chip
+						class="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-200"
+						aria-label="Remove {m.name} from this panel"
+						title="Remove {m.name} (Backspace)"
+						onclick={() => removeCast(m.id, i)}
+						onkeydown={(e) => {
+							if (e.key === 'Backspace' || e.key === 'Delete') {
+								e.preventDefault();
+								e.stopPropagation();
+								removeCast(m.id, i);
+							}
+						}}>{m.name} ✕</button
+					>
+				{:else}
+					<span class="text-xs text-stone-400">Nobody named yet</span>
+				{/each}
+				{#if castSpare.length}
+					<select
+						class="rounded border border-stone-300 px-1 py-0.5 text-xs text-stone-600"
+						aria-label="Add to this panel’s cast"
+						value=""
+						onchange={(e) => {
+							addCast(e.currentTarget.value);
+							e.currentTarget.value = '';
+						}}
+					>
+						<option value="">+ Add</option>
+						{#each castSpare as m (m.id)}<option value={m.id}>{m.name}</option>{/each}
+					</select>
+				{/if}
+			</div>
+		</div>
+	{/if}
 	{#if gen.models.length}
 		<div class="mt-1 flex items-center gap-2">
 			<select

@@ -33,7 +33,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					modelKey: typeof body.model === 'string' ? body.model : undefined,
 					box: { w: Number(box.w), h: Number(box.h) },
 					quality: body.quality === 'print' ? 'print' : 'draft',
-					sourceAssetId: typeof body.sourceAssetId === 'string' ? body.sourceAssetId : undefined
+					sourceAssetId: typeof body.sourceAssetId === 'string' ? body.sourceAssetId : undefined,
+					cast:
+						Array.isArray(body.cast) && body.cast.every((c: unknown) => typeof c === 'string')
+							? body.cast
+							: undefined
 				},
 				{ provider: providerFor, signal: request.signal }
 			)

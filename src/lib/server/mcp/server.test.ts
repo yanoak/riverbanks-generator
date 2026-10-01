@@ -4,7 +4,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { MemoryStore } from '$lib/ops/memory-store';
 import { OpError, loadComic } from '$lib/ops/ops';
 import type { GenerateInput } from '$lib/server/generation/generate';
-import type { StyleProfile } from '$lib/styles/styles';
+import type { CastMember, StyleProfile, StyleRef } from '$lib/styles/styles';
 import { createMcpServer } from './server';
 
 const INK: StyleProfile = {
@@ -18,7 +18,48 @@ const INK: StyleProfile = {
 	model: null,
 	updatedAt: '2026-09-29T00:00:00Z',
 	refs: [
-		{ id: 'r1', profileId: 'p', role: 'character', label: 'Mae', sort: 0, width: 1, height: 1 }
+		{
+			id: 's1',
+			profileId: 'p',
+			role: 'style',
+			label: '',
+			castId: null,
+			sort: 0,
+			width: 1,
+			height: 1
+		},
+		{
+			id: 'r1',
+			profileId: 'p',
+			role: 'character',
+			label: '',
+			castId: 'c-mae',
+			sort: 1,
+			width: 1,
+			height: 1
+		}
+	],
+	cast: [
+		{
+			id: 'c-mae',
+			profileId: '11111111-1111-4111-8111-111111111111',
+			kind: 'character',
+			name: 'Mae',
+			aliases: ['the girl'],
+			description: 'Twelve, red scarf',
+			sort: 0,
+			portraitId: null
+		},
+		{
+			id: 'c-raft',
+			profileId: '11111111-1111-4111-8111-111111111111',
+			kind: 'object',
+			name: 'the raft',
+			aliases: [],
+			description: '',
+			sort: 1,
+			portraitId: null
+		}
 	]
 };
 
@@ -27,6 +68,17 @@ async function connect() {
 	const imported: string[] = [];
 	const generated: GenerateInput[] = [];
 	const sketches: { svg: string; box: { w: number; h: number } }[] = [];
+	const styleCalls: unknown[][] = [];
+	const ref = (id: string, castId: string | null = null): StyleRef => ({
+		id,
+		profileId: INK.id,
+		role: castId ? 'character' : 'style',
+		label: '',
+		castId,
+		sort: 9,
+		width: 640,
+		height: 480
+	});
 	const server = createMcpServer({
 		store,
 		user: { id: 'user-1', email: 'yan@test.local' },
@@ -47,8 +99,32 @@ async function connect() {
 				aspect: '1000:333',
 				model: 'svg-agent',
 				dropped: 0,
-				quality: 'draft'
+				quality: 'draft',
+				cast: []
 			};
+		},
+		styles: {
+			create: async (name) => (styleCalls.push(['create', name]), 'new-style'),
+			save: async (id, patch) => void styleCalls.push(['save', id, patch]),
+			addReference: async (profileId, source, castId) => (
+				styleCalls.push(['addReference', profileId, source, castId]),
+				ref('new-ref', castId ?? null)
+			),
+			addMember: async (profileId, fields) => {
+				styleCalls.push(['addMember', profileId, fields]);
+				return {
+					...INK.cast[0],
+					id: 'new-member',
+					name: fields.name ?? '',
+					kind: fields.kind ?? 'character'
+				} as CastMember;
+			},
+			updateMember: async (member, patch) =>
+				void styleCalls.push(['updateMember', member.id, patch]),
+			drawPortrait: async (profileId, castId, model) => (
+				styleCalls.push(['drawPortrait', profileId, castId, model]),
+				ref('sheet-1', castId)
+			)
 		},
 		generate: async (input) => {
 			if (input.prompt === 'fail') throw new Error('Gemini: quota exceeded');
@@ -62,7 +138,12 @@ async function connect() {
 				aspect: '16:9',
 				model: input.modelKey ?? 'gemini-flash',
 				dropped: 0,
-				quality: input.quality ?? 'draft'
+				quality: input.quality ?? 'draft',
+				cast: (input.cast ?? []).map((id) => ({
+					id,
+					name: INK.cast.find((m) => m.id === id)?.name ?? id,
+					image: id === 'c-mae'
+				}))
 			};
 		}
 	});
@@ -77,7 +158,7 @@ async function connect() {
 		};
 		return { text: res.content[0].text, isError: !!res.isError, structured: res.structuredContent };
 	};
-	return { client, call, store, imported, generated, sketches };
+	return { client, call, store, imported, generated, sketches, styleCalls };
 }
 
 describe('Riverbanks MCP server', () => {
@@ -102,6 +183,10 @@ describe('Riverbanks MCP server', () => {
 				'set_grid',
 				'set_panel_image',
 				'list_style_profiles',
+				'create_style_profile',
+				'add_style_reference',
+				'set_cast_member',
+				'generate_cast_portrait',
 				'set_comic_style',
 				'generate_panel_image',
 				'make_print_version',
@@ -159,9 +244,137 @@ describe('Riverbanks MCP server', () => {
 					palette: [{ hex: '#1d3557', name: 'deep navy' }],
 					avoid: 'gradients',
 					model: null,
-					references: [{ role: 'character', label: 'Mae' }]
+					styleReferences: 1,
+					cast: [
+						{
+							id: 'c-mae',
+							kind: 'character',
+							name: 'Mae',
+							aliases: ['the girl'],
+							description: 'Twelve, red scarf',
+							portraits: 1
+						},
+						{
+							id: 'c-raft',
+							kind: 'object',
+							name: 'the raft',
+							aliases: [],
+							description: '',
+							portraits: 0
+						}
+					]
 				}
 			]);
+		});
+
+		it('builds a style and its cast: create, references, members and portraits', async () => {
+			const { call, styleCalls } = await connect();
+			expect(
+				(
+					await call('create_style_profile', {
+						name: 'House',
+						style: 'Ligne claire',
+						avoid: 'text'
+					})
+				).text
+			).toBe('Created style House: new-style.');
+			expect(styleCalls).toEqual([
+				['create', 'House'],
+				['save', 'new-style', { style: 'Ligne claire', avoid: 'text' }]
+			]);
+
+			const added = await call('set_cast_member', {
+				styleProfileId: INK.id,
+				name: 'Jalal',
+				kind: 'character',
+				aliases: [' Jalal the fisher ', ''],
+				description: 'Wiry, moustache'
+			});
+			expect(added.text).toMatch(/Added character Jalal to Tidewater ink: new-member\./);
+			expect(styleCalls.at(-1)).toEqual([
+				'addMember',
+				INK.id,
+				{
+					kind: 'character',
+					name: 'Jalal',
+					aliases: ['Jalal the fisher'],
+					description: 'Wiry, moustache'
+				}
+			]);
+
+			// An existing name edits that member rather than adding a second.
+			await call('set_cast_member', { styleProfileId: INK.id, name: 'mae', portraitId: 'r1' });
+			expect(styleCalls.at(-1)).toEqual([
+				'updateMember',
+				'c-mae',
+				{ name: 'mae', portraitId: 'r1' }
+			]);
+
+			const portrait = await call('add_style_reference', {
+				styleProfileId: INK.id,
+				url: 'https://example.com/mae.png',
+				castMember: 'Mae'
+			});
+			expect(portrait.text).toMatch(/Added a portrait of Mae \(640×480\): new-ref\./);
+			expect(styleCalls.at(-1)).toEqual([
+				'addReference',
+				INK.id,
+				{ url: 'https://example.com/mae.png', base64: undefined, mimeType: undefined },
+				'c-mae'
+			]);
+
+			const sheet = await call('generate_cast_portrait', {
+				styleProfileId: INK.id,
+				castMember: 'the raft'
+			});
+			expect(sheet.text).toMatch(
+				/Drew a 640×480 sheet of the raft: portrait sheet-1\. As its only portrait/
+			);
+
+			const nobody = await call('generate_cast_portrait', {
+				styleProfileId: INK.id,
+				castMember: 'Zed'
+			});
+			expect(nobody).toMatchObject({
+				isError: true,
+				text: expect.stringMatching(/no cast member “Zed”/)
+			});
+		});
+
+		it('attaches the cast a panel asks for, by name, saves it on the panel and reports it', async () => {
+			const { call, store, generated } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Raft' })).text);
+			await call('set_comic_style', { comicId: id, styleProfileId: INK.id });
+			const panelId = (await loadComic(store, id)).comic.pages[0].panels[0].id;
+
+			const res = await call('generate_panel_image', {
+				comicId: id,
+				page: 1,
+				panelId,
+				prompt: 'dawn on the river',
+				cast: ['Mae', 'c-raft']
+			});
+			expect(res.text).toMatch(/Cast: Mae, the raft \(description only\)\./);
+			expect(generated[0].cast).toEqual(['c-mae', 'c-raft']);
+			const panel = () =>
+				loadComic(store, id).then((l) => l.comic.pages[0].panels.find((p) => p.id === panelId)!);
+			expect((await panel()).cast).toEqual(['c-mae', 'c-raft']);
+
+			// Omitting cast keeps the panel's own choice.
+			await call('generate_panel_image', { comicId: id, page: 1, panelId, prompt: 'noon' });
+			expect(generated[1].cast).toEqual(['c-mae', 'c-raft']);
+
+			const bad = await call('generate_panel_image', {
+				comicId: id,
+				page: 1,
+				panelId,
+				prompt: 'x',
+				cast: ['Zed']
+			});
+			expect(bad).toMatchObject({
+				isError: true,
+				text: expect.stringMatching(/no cast member “Zed”/)
+			});
 		});
 
 		it('sets and clears a comic’s style; an unknown style is refused', async () => {

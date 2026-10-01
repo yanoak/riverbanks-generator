@@ -4,16 +4,23 @@
 	import X from '@lucide/svelte/icons/x';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import AppHeader from '$lib/components/AppHeader.svelte';
+	import CastDialog from '$lib/components/CastDialog.svelte';
 	import { DEFAULT_MODEL } from '$lib/generation/models';
 	import { downscale } from '$lib/styles/downscale';
 	import {
+		CAST_KINDS,
 		MAX_REFS,
-		REF_ROLES,
+		addCastMember,
 		addRef,
 		deleteProfile,
+		portraitRole,
+		removeCastMember,
 		removeRef,
 		saveProfile,
-		updateRef,
+		updateCastMember,
+		type CastKind,
+		type CastMember,
+		type CastPatch,
 		type PaletteColor,
 		type ProfilePatch,
 		type StyleRef
@@ -33,6 +40,13 @@
 	let avoid = $state(initial.avoid);
 	let model = $state(initial.model ?? '');
 	let refs = $state<StyleRef[]>(initial.refs);
+	let cast = $state<CastMember[]>(initial.cast);
+	const styleRefs = $derived(refs.filter((r) => !r.castId));
+	const portraitsOf = (m: CastMember) => refs.filter((r) => r.castId === m.id);
+	const MAX_PORTRAITS = 6;
+	let openId = $state<string | null>(null);
+	const open = $derived(cast.find((m) => m.id === openId));
+	let drawing = $state<Record<string, boolean>>({});
 	// svelte-ignore state_referenced_locally
 	let urls = $state<Record<string, string>>({ ...data.thumbs });
 
@@ -81,7 +95,7 @@
 	async function upload(files: Iterable<File>) {
 		if (readonly) return;
 		const images = [...files].filter((f) => f.type.startsWith('image/'));
-		const room = MAX_REFS - refs.length - uploading;
+		const room = MAX_REFS - styleRefs.length - uploading;
 		if (images.length > room) message = `A style holds up to ${MAX_REFS} references.`;
 		for (const file of images.slice(0, Math.max(0, room))) {
 			uploading++;
@@ -99,18 +113,8 @@
 		}
 	}
 
-	async function changeRef(ref: StyleRef, patch: Partial<Pick<StyleRef, 'role' | 'label'>>) {
-		Object.assign(ref, patch);
-		try {
-			await updateRef(supabase, ref.id, patch);
-		} catch (e) {
-			status = 'error';
-			message = (e as Error).message;
-		}
-	}
-
 	async function remove(ref: StyleRef, index: number) {
-		refs.splice(index, 1);
+		refs.splice(refs.indexOf(ref), 1);
 		await tick();
 		// Focus the next reference's remove button, else Upload.
 		const next = document.querySelectorAll<HTMLElement>('[data-ref-remove]')[index];
@@ -131,6 +135,108 @@
 			e.preventDefault();
 			upload(files);
 		}
+	}
+
+	// --- cast ---------------------------------------------------------------------------
+	const KIND_GROUP: Record<CastKind, string> = {
+		character: 'Characters',
+		object: 'Props',
+		place: 'Places'
+	};
+	const fail = (e: unknown) => {
+		status = 'error';
+		message = (e as Error).message;
+	};
+
+	async function addMember(kind: CastKind) {
+		try {
+			const m = await addCastMember(supabase, data.profile.id, { kind });
+			cast.push(m);
+			openId = m.id;
+		} catch (e) {
+			fail(e);
+		}
+	}
+
+	async function changeMember(m: CastMember, patch: CastPatch) {
+		Object.assign(m, patch);
+		if (patch.kind) for (const r of portraitsOf(m)) r.role = portraitRole(patch.kind);
+		try {
+			await updateCastMember(supabase, m, patch);
+		} catch (e) {
+			fail(e);
+		}
+	}
+
+	async function deleteMember(m: CastMember) {
+		const i = cast.indexOf(m);
+		openId = null;
+		cast.splice(i, 1);
+		refs = refs.filter((r) => r.castId !== m.id);
+		await tick();
+		const cards = document.querySelectorAll<HTMLElement>('[data-cast-card]');
+		(cards[i] ?? cards[i - 1] ?? document.querySelector<HTMLElement>('[data-cast-add]'))?.focus();
+		try {
+			await removeCastMember(supabase, m);
+		} catch (e) {
+			fail(e);
+		}
+	}
+
+	async function uploadPortraits(m: CastMember, files: File[]) {
+		const room = MAX_PORTRAITS - portraitsOf(m).length;
+		for (const file of files.filter((f) => f.type.startsWith('image/')).slice(0, room)) {
+			try {
+				const small = await downscale(file);
+				const ref = await addRef(
+					supabase,
+					data.profile.id,
+					small.blob,
+					small,
+					portraitRole(m.kind),
+					m.id
+				);
+				urls[ref.id] = URL.createObjectURL(small.blob);
+				refs.push(ref);
+			} catch (e) {
+				fail(e);
+			}
+		}
+	}
+
+	async function removePortrait(m: CastMember, ref: StyleRef) {
+		refs.splice(refs.indexOf(ref), 1);
+		if (m.portraitId === ref.id) m.portraitId = null;
+		try {
+			await removeRef(supabase, ref);
+		} catch (e) {
+			fail(e);
+		}
+	}
+
+	async function drawSheet(m: CastMember) {
+		drawing[m.id] = true;
+		try {
+			const res = await fetch(`/api/styles/${data.profile.id}/cast/${m.id}/portrait`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ model: model || undefined })
+			});
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok) throw new Error(body.message ?? `Drawing failed (HTTP ${res.status}).`);
+			urls[body.ref.id] = body.url;
+			refs.push(body.ref);
+		} catch (e) {
+			fail(e);
+		} finally {
+			drawing[m.id] = false;
+		}
+	}
+
+	function closeMember() {
+		const id = openId;
+		openId = null;
+		tick().then(() => document.querySelector<HTMLElement>(`[data-cast-card="${id}"]`)?.focus());
 	}
 
 	// --- describe -----------------------------------------------------------------------
@@ -209,13 +315,13 @@
 		{/if}
 
 		<section class="mb-8">
-			<h2 class="section">References</h2>
+			<h2 class="section">Style references</h2>
 			<p class="mb-3 text-xs text-stone-500">
-				Up to {MAX_REFS} images. <em>Style</em> images set the look; label <em>character</em> and
-				<em>object</em> images with a name you can use in prompts, like “Mae”.
+				Up to {MAX_REFS} images that set the look. They go with every panel. Characters and props belong
+				in the cast below.
 			</p>
 			<ul class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
-				{#each refs as ref, i (ref.id)}
+				{#each styleRefs as ref, i (ref.id)}
 					<li class="rounded bg-white p-2 shadow-sm ring-1 ring-stone-200">
 						<div class="relative">
 							<img
@@ -232,25 +338,6 @@
 								>
 							{/if}
 						</div>
-						<select
-							class="mt-2 w-full rounded border border-stone-300 px-1 py-0.5 text-xs"
-							aria-label="Reference {i + 1} role"
-							value={ref.role}
-							disabled={readonly}
-							onchange={(e) => changeRef(ref, { role: e.currentTarget.value as StyleRef['role'] })}
-						>
-							{#each REF_ROLES as role (role)}<option value={role}>{role}</option>{/each}
-						</select>
-						{#if ref.role !== 'style'}
-							<input
-								class="mt-1 w-full rounded border border-stone-300 px-1 py-0.5 text-xs"
-								aria-label="Reference {i + 1} name"
-								placeholder={ref.role === 'character' ? 'Name, e.g. Mae' : 'Name, e.g. the raft'}
-								value={ref.label}
-								{readonly}
-								onchange={(e) => changeRef(ref, { label: e.currentTarget.value.trim() })}
-							/>
-						{/if}
 					</li>
 				{/each}
 				{#each { length: uploading }, i (i)}
@@ -258,7 +345,7 @@
 						Uploading…
 					</li>
 				{/each}
-				{#if !readonly && refs.length + uploading < MAX_REFS}
+				{#if !readonly && styleRefs.length + uploading < MAX_REFS}
 					<li
 						class="grid h-36 place-items-center rounded border-2 border-dashed text-center text-xs text-stone-500 {dragOver
 							? 'border-sky-500 bg-sky-50'
@@ -301,7 +388,7 @@
 				<div class="mt-4 flex items-center gap-3">
 					<button
 						class="flex items-center gap-2 rounded border border-stone-300 bg-white px-3 py-1.5 text-sm hover:bg-stone-50 disabled:opacity-50"
-						disabled={describing || !refs.length}
+						disabled={describing || !styleRefs.length}
 						onclick={describe}
 					>
 						<Sparkles size={15} />
@@ -316,6 +403,84 @@
 				{/if}
 			{/if}
 		</section>
+
+		<section class="mb-8" aria-labelledby="cast-heading">
+			<div class="mb-2 flex items-baseline gap-3">
+				<h2 class="section mb-0" id="cast-heading">Cast</h2>
+				<p class="flex-1 text-xs text-stone-500">
+					Characters, props and places, attached only to the panels whose prompts name them.
+				</p>
+				{#if !readonly}
+					{#each CAST_KINDS as kind, k (kind)}
+						<button
+							class="rounded border border-stone-300 bg-white px-2 py-1 text-xs hover:bg-stone-50"
+							data-cast-add={k === 0 ? '' : undefined}
+							onclick={() => addMember(kind)}
+							>+ {kind === 'object' ? 'Prop' : kind[0].toUpperCase() + kind.slice(1)}</button
+						>
+					{/each}
+				{/if}
+			</div>
+			{#if !cast.length}
+				<p
+					class="rounded border-2 border-dashed border-stone-300 p-6 text-center text-sm text-stone-500"
+				>
+					No cast yet. Add the characters and props that recur, with a portrait each, and every
+					panel that names them will draw them the same way.
+				</p>
+			{/if}
+			{#each CAST_KINDS as kind (kind)}
+				{@const group = cast.filter((m) => m.kind === kind)}
+				{#if group.length}
+					<h3 class="mt-3 mb-1.5 text-xs text-stone-500">{KIND_GROUP[kind]}</h3>
+					<ul class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+						{#each group as m (m.id)}
+							{@const ps = portraitsOf(m)}
+							{@const face = ps.find((p) => p.id === m.portraitId) ?? ps[0]}
+							<li>
+								<button
+									data-cast-card={m.id}
+									class="w-full rounded bg-white p-2 text-left shadow-sm ring-1 ring-stone-200 hover:ring-stone-400 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+									onclick={() => (openId = m.id)}
+								>
+									{#if face}
+										<img src={urls[face.id]} alt="" class="h-28 w-full rounded object-cover" />
+									{:else}
+										<div
+											class="grid h-28 w-full place-items-center rounded bg-stone-100 text-xs text-stone-400"
+										>
+											{drawing[m.id] ? 'Drawing…' : 'No portrait yet'}
+										</div>
+									{/if}
+									<p class="mt-1.5 truncate text-sm font-medium">{m.name || 'Unnamed'}</p>
+									<p class="truncate text-xs text-stone-500">
+										{m.aliases.length ? `also ${m.aliases.join(', ')}` : m.description || ' '}
+									</p>
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			{/each}
+		</section>
+
+		{#if open}
+			<CastDialog
+				member={open}
+				portraits={portraitsOf(open)}
+				{urls}
+				{readonly}
+				generating={!!drawing[open.id]}
+				maxPortraits={MAX_PORTRAITS}
+				onchange={(patch) => changeMember(open, patch)}
+				onupload={(files) => uploadPortraits(open, files)}
+				onremoveportrait={(ref) => removePortrait(open, ref)}
+				onstar={(ref) => changeMember(open, { portraitId: ref.id })}
+				ongenerate={() => drawSheet(open)}
+				ondelete={() => deleteMember(open)}
+				onclose={closeMember}
+			/>
+		{/if}
 
 		<fieldset class="space-y-6" disabled={describing}>
 			<section>

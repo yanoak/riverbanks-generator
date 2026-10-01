@@ -16,9 +16,30 @@ export interface StyleRef {
 	profileId: string;
 	role: RefRole;
 	label: string;
+	/** The cast member this is a portrait of; null for a style reference. */
+	castId: string | null;
 	sort: number;
 	width: number;
 	height: number;
+}
+
+export type CastKind = 'character' | 'object' | 'place';
+export const CAST_KINDS: CastKind[] = ['character', 'object', 'place'];
+
+/**
+ * A named character, prop or place. Its portraits are the refs that point at it; it rides along
+ * with a generation only when the panel's prompt names it (generation/cast.ts).
+ */
+export interface CastMember {
+	id: string;
+	profileId: string;
+	kind: CastKind;
+	name: string;
+	aliases: string[];
+	description: string;
+	sort: number;
+	/** The portrait sent with panels; null means the member's first portrait. */
+	portraitId: string | null;
 }
 
 export interface StyleProfile {
@@ -33,16 +54,20 @@ export interface StyleProfile {
 	model: string | null;
 	updatedAt: string;
 	refs: StyleRef[];
+	cast: CastMember[];
 }
 
-/** Enough to pick a style from a list. */
-export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette' | 'model'>;
+/** Enough to pick a style from a list, and to show which of its cast a panel will get. */
+export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette' | 'model'> & {
+	cast: Pick<CastMember, 'id' | 'kind' | 'name' | 'aliases'>[];
+};
 
 export const summarize = (p: StyleProfile): StyleSummary => ({
 	id: p.id,
 	name: p.name,
 	palette: p.palette,
-	model: p.model
+	model: p.model,
+	cast: p.cast.map(({ id, kind, name, aliases }) => ({ id, kind, name, aliases }))
 });
 
 export type ProfilePatch = Partial<
@@ -55,16 +80,30 @@ export const refPath = (r: Pick<StyleRef, 'profileId' | 'id'>) => `${r.profileId
 
 const COLUMNS =
 	'id, created_by, name, style, palette, avoid, model, updated_at, ' +
-	'style_refs (id, profile_id, role, label, sort, width, height)';
+	'style_refs (id, profile_id, role, label, cast_id, sort, width, height), ' +
+	'style_cast (id, profile_id, kind, name, aliases, description, sort, portrait_id)';
+const REF_COLUMNS = 'id, profile_id, role, label, cast_id, sort, width, height';
+const CAST_COLUMNS = 'id, profile_id, kind, name, aliases, description, sort, portrait_id';
 
 type RefRow = {
 	id: string;
 	profile_id: string;
 	role: RefRole;
 	label: string;
+	cast_id: string | null;
 	sort: number;
 	width: number;
 	height: number;
+};
+type CastRow = {
+	id: string;
+	profile_id: string;
+	kind: CastKind;
+	name: string;
+	aliases: string[];
+	description: string;
+	sort: number;
+	portrait_id: string | null;
 };
 type Row = {
 	id: string;
@@ -76,6 +115,7 @@ type Row = {
 	model: string | null;
 	updated_at: string;
 	style_refs: RefRow[];
+	style_cast: CastRow[];
 };
 
 const toRef = (r: RefRow): StyleRef => ({
@@ -83,10 +123,24 @@ const toRef = (r: RefRow): StyleRef => ({
 	profileId: r.profile_id,
 	role: r.role,
 	label: r.label,
+	castId: r.cast_id,
 	sort: r.sort,
 	width: r.width,
 	height: r.height
 });
+
+const toMember = (r: CastRow): CastMember => ({
+	id: r.id,
+	profileId: r.profile_id,
+	kind: r.kind,
+	name: r.name,
+	aliases: r.aliases,
+	description: r.description,
+	sort: r.sort,
+	portraitId: r.portrait_id
+});
+
+const bySort = <T extends { sort: number }>(xs: T[]) => [...xs].sort((a, b) => a.sort - b.sort);
 
 function toProfile(r: Row, emails: Map<string, string>): StyleProfile {
 	return {
@@ -99,7 +153,8 @@ function toProfile(r: Row, emails: Map<string, string>): StyleProfile {
 		avoid: r.avoid,
 		model: r.model,
 		updatedAt: r.updated_at,
-		refs: [...r.style_refs].sort((a, b) => a.sort - b.sort).map(toRef)
+		refs: bySort(r.style_refs).map(toRef),
+		cast: bySort(r.style_cast ?? []).map(toMember)
 	};
 }
 
@@ -175,7 +230,8 @@ export async function addRef(
 	profileId: string,
 	blob: Blob,
 	size: { width: number; height: number },
-	role: RefRole = 'style'
+	role: RefRole = 'style',
+	castId: string | null = null
 ): Promise<StyleRef> {
 	const { data: last } = await supabase
 		.from('style_refs')
@@ -194,11 +250,12 @@ export async function addRef(
 			id,
 			profile_id: profileId,
 			role,
+			cast_id: castId,
 			sort: (last?.[0]?.sort ?? -1) + 1,
 			width: size.width,
 			height: size.height
 		})
-		.select('id, profile_id, role, label, sort, width, height')
+		.select(REF_COLUMNS)
 		.single();
 	if (error) {
 		await supabase.storage.from(REFS_BUCKET).remove([`${profileId}/${id}`]);
@@ -220,4 +277,70 @@ export async function removeRef(supabase: SupabaseClient, ref: StyleRef): Promis
 	const { error } = await supabase.from('style_refs').delete().eq('id', ref.id);
 	if (error) throw new Error(`Could not remove the reference: ${error.message}`);
 	await supabase.storage.from(REFS_BUCKET).remove([refPath(ref)]);
+}
+
+/** The reference role a member's portraits carry (places budget as objects). */
+export const portraitRole = (kind: CastKind): RefRole =>
+	kind === 'character' ? 'character' : 'object';
+
+/** Creator only: a new member at the end of the cast. */
+export async function addCastMember(
+	supabase: SupabaseClient,
+	profileId: string,
+	fields: Partial<Pick<CastMember, 'kind' | 'name' | 'aliases' | 'description'>> = {}
+): Promise<CastMember> {
+	const { data: last } = await supabase
+		.from('style_cast')
+		.select('sort')
+		.eq('profile_id', profileId)
+		.order('sort', { ascending: false })
+		.limit(1);
+	const { data, error } = await supabase
+		.from('style_cast')
+		.insert({ profile_id: profileId, ...fields, sort: (last?.[0]?.sort ?? -1) + 1 })
+		.select(CAST_COLUMNS)
+		.single();
+	if (error) throw new Error(`Could not add to the cast: ${error.message}`);
+	return toMember(data as CastRow);
+}
+
+export type CastPatch = Partial<
+	Pick<CastMember, 'kind' | 'name' | 'aliases' | 'description' | 'sort' | 'portraitId'>
+>;
+
+export async function updateCastMember(
+	supabase: SupabaseClient,
+	member: Pick<CastMember, 'id'>,
+	patch: CastPatch
+): Promise<void> {
+	const { portraitId, ...rest } = patch;
+	const row = { ...rest, ...(portraitId !== undefined ? { portrait_id: portraitId } : {}) };
+	const { data, error } = await supabase
+		.from('style_cast')
+		.update(row)
+		.eq('id', member.id)
+		.select('id');
+	if (error) throw new Error(`Could not change the cast member: ${error.message}`);
+	if (!data?.length) throw new Error('Only the person who made this style can change its cast.');
+	if (patch.kind) {
+		await supabase
+			.from('style_refs')
+			.update({ role: portraitRole(patch.kind) })
+			.eq('cast_id', member.id);
+	}
+}
+
+/** Creator only: the member's portrait files, then the row (its refs cascade). */
+export async function removeCastMember(
+	supabase: SupabaseClient,
+	member: Pick<CastMember, 'id' | 'profileId'>
+): Promise<void> {
+	const { data: refs } = await supabase.from('style_refs').select('id').eq('cast_id', member.id);
+	const { error } = await supabase.from('style_cast').delete().eq('id', member.id);
+	if (error) throw new Error(`Could not remove the cast member: ${error.message}`);
+	if (refs?.length) {
+		await supabase.storage
+			.from(REFS_BUCKET)
+			.remove(refs.map((r) => refPath({ profileId: member.profileId, id: r.id as string })));
+	}
 }

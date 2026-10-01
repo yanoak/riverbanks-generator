@@ -25,13 +25,21 @@ page offers to import that local comic.
 
 ## Styles and generating images
 
-A **style** (the **Styles** tab) is up to 14 reference images plus a written description,
-a palette and an "avoid" list. Every account sees every style; only its maker can change it.
+A **style** (the **Styles** tab) is up to 14 style reference images plus a written description,
+a palette, an "avoid" list and a **cast**. Every account sees every style; only its maker can
+change it.
 
-- Mark each reference as a **style** image (sets the look), a **character** or an **object**,
-  and give characters and objects a name ("Mae") to use in prompts.
+- **Style references** set the look and go with every panel.
+- The **cast** holds the characters, props and places that recur, each with a name, aliases, a
+  description of what stays the same, and up to 6 portraits. **Generate sheet** (⌘Enter in the
+  member's dialog) draws front, three-quarter and side views in the style from the description;
+  ★ marks the portrait that is sent with panels.
+- A panel gets the cast members its prompt names, by name or alias ("the girl" for Mae), and only
+  those: their starred portraits as references and their descriptions in the prompt. The
+  Inspector shows them as chips under the prompt; remove or add one to choose by hand for that
+  panel, and **↺ Auto** to go back. Members over a model's image limit go in as words only.
 - **Describe from references** asks Gemini to draft the description, palette and avoid list
-  from the images. Edit what it writes.
+  from the style references. Edit what it writes.
 
 Pick a style when you create a comic (**New comic**, or `N`), or later from the Inspector with
 nothing selected. The comic follows the style as it is edited: a change to a style applies to
@@ -95,8 +103,10 @@ The tools are:
 - **Panels:** `merge_panels`, `split_panel`, `add_free_panel`, `update_panel`
 - **Images:** `set_panel_image`, `remove_panel_image`
 - **Balloons:** `add_balloon`, `update_balloon`, `delete_balloon`
-- **Styles and generation:** `list_style_profiles`, `set_comic_style`, `generate_panel_image`,
-  `make_print_version`, `draw_panel_svg`
+- **Styles and generation:** `list_style_profiles`, `set_comic_style`, `generate_panel_image`
+  (with an optional `cast`), `make_print_version`, `draw_panel_svg`
+- **Building styles:** `create_style_profile`, `add_style_reference`, `set_cast_member`,
+  `generate_cast_portrait`
 - **Search and account:** `search`, `fetch` (the comic as a script, for deep research), `whoami`
 
 Each page is also available as the resource `comic://{id}/page/{n}`. Agents get the same

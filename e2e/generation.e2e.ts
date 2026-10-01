@@ -20,7 +20,7 @@ test('prompt a panel in the comic’s style, keep takes, switch between them', a
 	const name = `Gen ink ${crypto.randomUUID().slice(0, 6)}`;
 	await page.getByLabel('Style name').fill(name);
 	await page.locator('input[type=file]').setInputFiles([pngFile('ink.png')]);
-	await expect(page.getByLabel('Reference 1 role')).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Remove reference 1' })).toBeVisible();
 	await expect(page.getByRole('status')).toHaveText('Saved ✓');
 
 	// A comic in that style.

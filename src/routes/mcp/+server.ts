@@ -9,7 +9,16 @@ import { importImage } from '$lib/server/mcp/images';
 import { createMcpServer } from '$lib/server/mcp/server';
 import { generatePanelImage, saveAgentSketch } from '$lib/server/generation/generate';
 import { providerFor } from '$lib/server/generation/providers';
-import { listProfiles } from '$lib/styles/styles';
+import {
+	addCastMember,
+	addRef,
+	createProfile,
+	listProfiles,
+	saveProfile,
+	updateCastMember
+} from '$lib/styles/styles';
+import { generatePortrait } from '$lib/server/generation/portrait';
+import { readImage } from '$lib/server/mcp/images';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import type { RequestHandler } from './$types';
 
@@ -37,7 +46,35 @@ const handle: RequestHandler = async ({ request, url }) => {
 		listStyles: () => listProfiles(supabase),
 		generate: (input) =>
 			generatePanelImage(supabase, input, { provider: providerFor, signal: request.signal }),
-		saveSketch: (input) => saveAgentSketch(supabase, input)
+		saveSketch: (input) => saveAgentSketch(supabase, input),
+		styles: {
+			create: (name) => createProfile(supabase, name),
+			save: (id, patch) => saveProfile(supabase, id, patch),
+			addReference: async (profileId, source, castId) => {
+				const img = await readImage(source);
+				const member = castId
+					? (await listProfiles(supabase))
+							.find((p) => p.id === profileId)
+							?.cast.find((m) => m.id === castId)
+					: undefined;
+				return addRef(
+					supabase,
+					profileId,
+					new Blob([new Uint8Array(img.bytes)], { type: img.mimeType }),
+					{ width: img.width, height: img.height },
+					member ? (member.kind === 'character' ? 'character' : 'object') : 'style',
+					member?.id ?? null
+				);
+			},
+			addMember: (profileId, fields) => addCastMember(supabase, profileId, fields),
+			updateMember: (member, patch) => updateCastMember(supabase, member, patch),
+			drawPortrait: (profileId, castId, model) =>
+				generatePortrait(
+					supabase,
+					{ profileId, castId, modelKey: model },
+					{ provider: providerFor, signal: request.signal }
+				)
+		}
 	});
 	const transport = new WebStandardStreamableHTTPServerTransport({
 		sessionIdGenerator: undefined,

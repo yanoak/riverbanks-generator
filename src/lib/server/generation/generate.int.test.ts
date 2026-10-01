@@ -4,7 +4,13 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createComic } from '$lib/model/factory';
 import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
-import { addRef, createProfile, saveProfile, updateRef } from '$lib/styles/styles';
+import {
+	addCastMember,
+	addRef,
+	createProfile,
+	saveProfile,
+	type CastMember
+} from '$lib/styles/styles';
 import { fakeProvider, solidPng } from './fake';
 import { PRINT_PROMPT, generatePanelImage, saveAgentSketch } from './generate';
 import type { GenerateRequest, ImageProvider } from './provider';
@@ -39,6 +45,7 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 	let comicId: string;
 	let panelId: string;
 	let profileId: string;
+	let mae: CastMember;
 
 	beforeAll(async () => {
 		const admin = createClient(url!, serviceKey!, { auth: { persistSession: false } });
@@ -55,8 +62,12 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 		});
 		const png = new Blob([solidPng(4, 4, [10, 20, 30]) as BlobPart], { type: 'image/png' });
 		await addRef(member, profileId, png, { width: 4, height: 4 });
-		const mae = await addRef(member, profileId, png, { width: 4, height: 4 });
-		await updateRef(member, mae.id, { role: 'character', label: 'Mae' });
+		mae = await addCastMember(member, profileId, {
+			kind: 'character',
+			name: 'Mae',
+			description: 'Twelve, red scarf'
+		});
+		await addRef(member, profileId, png, { width: 4, height: 4 }, 'character', mae.id);
 	});
 
 	it('generates with the style, stores the image, and logs a done take', async () => {
@@ -85,13 +96,15 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 		expect(calls[0].refs).toHaveLength(2);
 		expect(calls[0].prompt).toContain('Style: Loose ink.');
 		expect(calls[0].prompt).toContain('- Image 2: the character “Mae”.');
+		expect(calls[0].prompt).toContain('Cast in this panel:\n- Mae (Image 2): Twelve, red scarf.');
 		expect(calls[0].prompt).toMatch(/Panel: Mae on the raft$/);
+		expect(out.cast).toEqual([{ id: mae.id, name: 'Mae', image: true }]);
 
 		const stored = await member.storage.from('assets').download(`${comicId}/${out.assetId}`);
 		expect(stored.error).toBeNull();
 		const { data: row } = await member
 			.from('generations')
-			.select('status, asset_id, full_prompt, profile_id, aspect')
+			.select('status, asset_id, full_prompt, profile_id, aspect, cast_ids')
 			.eq('id', out.generationId)
 			.single();
 		expect(row).toMatchObject({
@@ -99,8 +112,28 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 			asset_id: out.assetId,
 			profile_id: profileId,
 			aspect: '21:9',
-			full_prompt: calls[0].prompt
+			full_prompt: calls[0].prompt,
+			cast_ids: [mae.id]
 		});
+	});
+
+	it('leaves out cast the panel does not name, unless the panel asks for them', async () => {
+		const { calls, provider } = recording();
+		const input = {
+			comicId,
+			panelId,
+			prompt: 'an empty river',
+			profileId,
+			box: { w: 900, h: 300 }
+		};
+		const alone = await generatePanelImage(member, input, { provider });
+		expect(calls[0].refs).toHaveLength(1);
+		expect(calls[0].prompt).not.toContain('Mae');
+		expect(alone.cast).toEqual([]);
+
+		await generatePanelImage(member, { ...input, cast: [mae.id] }, { provider });
+		expect(calls[1].refs).toHaveLength(2);
+		expect(calls[1].prompt).toContain('- Mae (Image 2)');
 	});
 
 	it('a print version redraws the chosen image at 4K, with it as the only reference', async () => {
@@ -263,7 +296,7 @@ describe.skipIf(!url || !serviceKey)('generatePanelImage', () => {
 			{
 				comicId,
 				panelId,
-				prompt: 'x',
+				prompt: 'Mae waves',
 				profileId,
 				modelKey: 'hf-grok-image-2',
 				box: { w: 1, h: 1 }

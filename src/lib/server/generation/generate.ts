@@ -8,7 +8,8 @@ import { exactAspect, nearestAspect } from '$lib/generation/aspect';
 import { sanitizeSvg } from '$lib/generation/svg';
 import { DEFAULT_MODEL, PRINT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
 import { composePrompt } from '$lib/generation/prompt';
-import { selectRefs } from '$lib/generation/refs';
+import { resolveCast } from '$lib/generation/cast';
+import { planRefs } from '$lib/generation/refs';
 import { newId } from '$lib/model/factory';
 import { OpError } from '$lib/ops/ops';
 import { REFS_BUCKET, getProfile, refPath } from '$lib/styles/styles';
@@ -30,6 +31,8 @@ export interface GenerateInput {
 	quality?: Quality;
 	/** For a print version: the comic's image to redraw. */
 	sourceAssetId?: string;
+	/** Cast member ids to attach instead of those the prompt names (the panel's own list). */
+	cast?: string[];
 }
 
 export type Quality = 'draft' | 'print';
@@ -50,6 +53,8 @@ export interface GenerateResult {
 	/** References the model had no room for. */
 	dropped: number;
 	quality: Quality;
+	/** The style's cast members attached, in order; `image` false means description only. */
+	cast: { id: string; name: string; image: boolean }[];
 }
 
 export interface GenerateDeps {
@@ -74,14 +79,28 @@ export async function generatePanelImage(
 	const model = modelFor(modelKey);
 	if (!model) throw new OpError('invalid', `Unknown model “${modelKey}”.`);
 
-	const { used, dropped } = selectRefs(profile?.refs ?? [], model);
+	const members = resolveCast(prompt, profile?.cast ?? [], input.cast);
+	const { used, dropped, cast } = planRefs(profile?.refs ?? [], model, members);
 	if (used.length < (model.minRefs ?? 0))
 		throw new OpError(
 			'invalid',
 			`${model.label} redraws reference images: give the comic a style with at least ${model.minRefs}.`
 		);
 	const aspect = model.anyAspect ? exactAspect(input.box) : nearestAspect(input.box, model.aspects);
-	const fullPrompt = composePrompt({ profile: profile ?? undefined, refs: used, prompt });
+	const castById = new Map((profile?.cast ?? []).map((m) => [m.id, m]));
+	const fullPrompt = composePrompt({
+		profile: profile ?? undefined,
+		refs: used.map((r) => {
+			const m = r.castId ? castById.get(r.castId) : undefined;
+			return m ? { role: m.kind, label: m.name } : { role: 'style' as const, label: '' };
+		}),
+		cast: cast.map(({ member, image }) => ({
+			name: member.name,
+			description: member.description,
+			image
+		})),
+		prompt
+	});
 
 	const refs: RefImage[] = await loadRefImages(supabase, used);
 	if (model.provider === 'higgsfield' && used.length) {
@@ -101,7 +120,8 @@ export async function generatePanelImage(
 			fullPrompt,
 			quality: 'draft',
 			size: model.sizes.draft,
-			dropped: dropped.length
+			dropped: dropped.length,
+			cast: cast.map(({ member, image }) => ({ id: member.id, name: member.name, image: !!image }))
 		},
 		async () => refs
 	);
@@ -144,7 +164,8 @@ async function printVersion(
 			fullPrompt,
 			quality: 'print',
 			size: model.sizes.print,
-			dropped: 0
+			dropped: 0,
+			cast: []
 		},
 		load
 	);
@@ -177,7 +198,8 @@ export async function saveAgentSketch(
 			fullPrompt: prompt,
 			quality: 'draft',
 			size: 'svg',
-			dropped: 0
+			dropped: 0,
+			cast: []
 		},
 		async () => []
 	);
@@ -190,6 +212,7 @@ interface Plan {
 	quality: Quality;
 	size: string;
 	dropped: number;
+	cast: GenerateResult['cast'];
 }
 
 /** Log the attempt, generate, store the image, log the result. */
@@ -212,7 +235,8 @@ async function run(
 			full_prompt: fullPrompt,
 			aspect,
 			quality,
-			source_asset_id: input.sourceAssetId ?? null
+			source_asset_id: input.sourceAssetId ?? null,
+			cast_ids: plan.cast.map((c) => c.id)
 		})
 		.select('id')
 		.single();
@@ -259,7 +283,8 @@ async function run(
 			aspect,
 			model: model.key,
 			dropped: plan.dropped,
-			quality
+			quality,
+			cast: plan.cast
 		};
 	} catch (e) {
 		await finish({ status: 'failed', error: (e as Error).message.slice(0, 1000) });

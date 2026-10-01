@@ -20,10 +20,7 @@ test('make a style from references, describe it, and share it read-only', async 
 
 	await page.getByLabel('Style name').fill(name);
 	await page.locator('input[type=file]').setInputFiles([pngFile('mae.png'), pngFile('ink.png')]);
-	await expect(page.getByLabel('Reference 2 role')).toBeVisible();
-	await page.getByLabel('Reference 1 role').selectOption('character');
-	await page.getByLabel('Reference 1 name').fill('Mae');
-	await page.getByLabel('Reference 1 name').press('Tab');
+	await expect(page.getByRole('button', { name: 'Remove reference 2' })).toBeVisible();
 
 	await page.getByRole('button', { name: 'Describe from references' }).click();
 	await expect(page.getByLabel('Style', { exact: true })).toHaveValue(/Fake style/);
@@ -36,16 +33,14 @@ test('make a style from references, describe it, and share it read-only', async 
 	await page.keyboard.press('Enter');
 	await expect(page.getByRole('button', { name: 'Remove reference 1' })).toBeFocused();
 	await page.getByRole('button', { name: 'Remove reference 1' }).press('Enter');
-	await expect(page.getByLabel('Reference 1 role')).toHaveCount(0);
-	await page.locator('input[type=file]').setInputFiles([pngFile('mae.png')]);
-	await page.getByLabel('Reference 1 role').selectOption('character');
-	await page.getByLabel('Reference 1 name').fill('Mae');
-	await page.getByLabel('Reference 1 name').press('Tab');
+	await expect(page.getByRole('button', { name: 'Remove reference 1' })).toHaveCount(0);
+	await page.locator('input[type=file]').setInputFiles([pngFile('ink.png')]);
+	await expect(page.getByRole('button', { name: 'Remove reference 1' })).toBeVisible();
 	await expect(page.getByRole('status')).toHaveText('Saved ✓');
 
 	await page.reload();
 	await expect(page.getByLabel('Style name')).toHaveValue(name);
-	await expect(page.getByLabel('Reference 1 name')).toHaveValue('Mae');
+	await expect(page.getByRole('button', { name: 'Remove reference 1' })).toBeVisible();
 	await expect(page.getByLabel('Style', { exact: true })).toHaveValue(/Fake style/);
 
 	// Someone else sees it in the list and can open it, but not change it.

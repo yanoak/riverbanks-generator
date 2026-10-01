@@ -4,13 +4,17 @@
 
 import type { PaletteColor, RefRole } from '$lib/styles/styles';
 
+export type PromptRefRole = RefRole | 'place';
+
 export const NO_LETTERING =
 	'Leave out any lettering, captions, speech balloons and sound effects: they are added later.';
 
 export interface PromptInput {
 	profile?: { style: string; palette: PaletteColor[]; avoid: string };
 	/** The references actually attached, in order. */
-	refs: { role: RefRole; label: string }[];
+	refs: { role: PromptRefRole; label: string }[];
+	/** The style's cast members this panel needs; `image` is the 1-based number of the portrait. */
+	cast?: { name: string; description: string; image: number | null }[];
 	prompt: string;
 }
 
@@ -19,7 +23,7 @@ const sentence = (s: string) => {
 	return /[.!?]$/.test(t) ? t : `${t}.`;
 };
 
-function describeRef(ref: { role: RefRole; label: string }, n: number): string {
+function describeRef(ref: { role: PromptRefRole; label: string }, n: number): string {
 	const name = ref.label.trim();
 	switch (ref.role) {
 		case 'style':
@@ -28,10 +32,18 @@ function describeRef(ref: { role: RefRole; label: string }, n: number): string {
 			return `- Image ${n}: ${name ? `the character “${name}”` : 'a character'}. Keep their appearance consistent.`;
 		case 'object':
 			return `- Image ${n}: ${name ? `the object “${name}”` : 'an object'}. Keep its appearance consistent.`;
+		case 'place':
+			return `- Image ${n}: ${name ? `the place “${name}”` : 'a place'}. Keep its appearance consistent.`;
 	}
 }
 
-export function composePrompt({ profile, refs, prompt }: PromptInput): string {
+function describeMember(m: { name: string; description: string; image: number | null }): string {
+	const where = m.image ? ` (Image ${m.image})` : '';
+	const what = m.description.trim();
+	return `- ${m.name.trim()}${where}${what ? `: ${sentence(what)}` : '.'}`;
+}
+
+export function composePrompt({ profile, refs, cast = [], prompt }: PromptInput): string {
 	const blocks: string[][] = [['Draw one comic panel.']];
 
 	const style: string[] = [];
@@ -48,6 +60,9 @@ export function composePrompt({ profile, refs, prompt }: PromptInput): string {
 			'Reference images, in the order attached:',
 			...refs.map((r, i) => describeRef(r, i + 1))
 		]);
+
+	const members = cast.filter((m) => m.image || m.description.trim());
+	if (members.length) blocks.push(['Cast in this panel:', ...members.map(describeMember)]);
 
 	blocks.push([NO_LETTERING], [`Panel: ${prompt.trim()}`]);
 	return blocks.map((b) => b.join('\n')).join('\n\n');

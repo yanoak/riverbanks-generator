@@ -301,10 +301,11 @@ function projectPage(m: YMap): Page {
 			kind: 'grid',
 			cells: d.cells
 		};
-		// Only the piece that kept the id keeps the image and its prompt.
+		// Only the piece that kept the id keeps the image, its prompt and its cast.
 		if (d.derived) {
 			delete panel.image;
 			delete panel.prompt;
+			delete panel.cast;
 		}
 		return panel;
 	});

@@ -47,6 +47,11 @@ interface PanelBase {
 	image?: PanelImage;
 	/** What to generate for this panel; kept so anyone can tweak it and generate again. */
 	prompt?: string;
+	/**
+	 * Which of the style's cast to attach, by id, when someone chose by hand. Absent means
+	 * "whoever the prompt names" (generation/cast.ts).
+	 */
+	cast?: string[];
 }
 
 /**

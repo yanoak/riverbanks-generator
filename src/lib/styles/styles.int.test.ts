@@ -5,13 +5,16 @@ import { createComic } from '$lib/model/factory';
 import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import {
+	addCastMember,
 	addRef,
 	createProfile,
 	deleteProfile,
 	getProfile,
 	listProfiles,
+	removeCastMember,
 	removeRef,
 	saveProfile,
+	updateCastMember,
 	updateRef
 } from './styles';
 
@@ -95,6 +98,50 @@ describe.skipIf(!url || !serviceKey)('style profiles and generations (RLS)', () 
 
 		await removeRef(maker.client, second);
 		expect((await getProfile(maker.client, profileId))!.refs).toHaveLength(1);
+	});
+
+	it('the creator builds a cast with portraits; others read it but cannot change it', async () => {
+		const mae = await addCastMember(maker.client, profileId, {
+			kind: 'character',
+			name: 'Mae',
+			aliases: ['the girl'],
+			description: 'Twelve, red scarf'
+		});
+		const raft = await addCastMember(maker.client, profileId, { kind: 'object', name: 'the raft' });
+		expect(raft.sort).toBe(mae.sort + 1);
+		const portrait = await addRef(
+			maker.client,
+			profileId,
+			png(),
+			{ width: 3, height: 2 },
+			'character',
+			mae.id
+		);
+		expect(portrait.castId).toBe(mae.id);
+		await updateCastMember(maker.client, mae, { portraitId: portrait.id, aliases: ['Mae', 'kid'] });
+
+		const seen = (await getProfile(other.client, profileId))!;
+		expect(seen.cast.map((m) => [m.name, m.kind, m.aliases])).toEqual([
+			['Mae', 'character', ['Mae', 'kid']],
+			['the raft', 'object', []]
+		]);
+		expect(seen.cast[0].portraitId).toBe(portrait.id);
+		expect(seen.refs.find((r) => r.id === portrait.id)?.castId).toBe(mae.id);
+
+		await expect(addCastMember(other.client, profileId, { name: 'Intruder' })).rejects.toThrow();
+		await expect(updateCastMember(other.client, mae, { name: 'Mine' })).rejects.toThrow();
+
+		// A kind change carries over to the portraits' reference role.
+		await updateCastMember(maker.client, raft, { kind: 'place' });
+		// Removing a member removes its portraits and their files.
+		await removeCastMember(maker.client, mae);
+		const after = (await getProfile(maker.client, profileId))!;
+		expect(after.cast.map((m) => [m.name, m.kind])).toEqual([['the raft', 'place']]);
+		expect(after.refs.some((r) => r.id === portrait.id)).toBe(false);
+		const gone = await maker.client.storage
+			.from('style-refs')
+			.download(`${profileId}/${portrait.id}`);
+		expect(gone.error).not.toBeNull();
 	});
 
 	it('generations: members log and read them; outsiders cannot', async () => {

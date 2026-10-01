@@ -109,16 +109,34 @@ ones are attached in the Inspector. Style references still go with every panel.
 
 ## Tasks
 
-- [ ] Migration: `style_cast`, `style_refs.cast_id`, a backfill from labelled refs, RLS; integration
+- [x] Migration: `style_cast`, `style_refs.cast_id`, a backfill from labelled refs, RLS; integration
       tests for RLS and the backfill
-- [ ] `matchCast` and two-pass `selectRefs`; cast block in `composePrompt` (unit tests first)
-- [ ] `src/lib/styles/styles.ts`: cast CRUD, portrait upload/link, reorder
-- [ ] Style editor: Cast section (cards, add/edit dialog, portraits, generate portrait)
-- [ ] Panel `cast` field in the Y.Doc and projection; Inspector chips with auto/override
-- [ ] Server generation: pass matched cast, record attached cast ids in `generations`
-- [ ] MCP: cast in `get_comic`, `cast` on `generate_panel_image`, `add_cast_member`,
+- [x] `matchCast` and two-pass `selectRefs`; cast block in `composePrompt` (unit tests first)
+- [x] `src/lib/styles/styles.ts`: cast CRUD, portrait upload/link, reorder
+- [x] Style editor: Cast section (cards, add/edit dialog, portraits, generate portrait)
+- [x] Panel `cast` field in the Y.Doc and projection; Inspector chips with auto/override
+- [x] Server generation: pass matched cast, record attached cast ids in `generations`
+- [x] MCP: cast in `get_comic`, `cast` on `generate_panel_image`, `add_cast_member`,
       `generate_cast_portrait`
-- [ ] Docs: README / MCP instructions
+- [x] Docs: README / MCP instructions
+
+Changes from the plan, as built:
+
+- **The selection function:** It is `planRefs` in `src/lib/generation/refs.ts`. It replaces
+  `selectRefs`.
+- **MCP tools:**
+  - Adding and editing a member is one tool, `set_cast_member`, matched by id or name, instead of
+    `add_cast_member`.
+  - `create_style_profile` and `add_style_reference` were added, so a whole style can be built
+    over MCP.
+  - The cast is listed by `list_style_profiles`, not `get_comic`. `get_comic` names the style only.
+- **The migration backfill** was checked by running it on real rows in a rolled-back transaction
+  against the local stack. There is no integration test file for it: the migration runs once,
+  before any test can insert pre-migration rows.
+- **Portraits aren't logged** in `generations`. That table needs a comic id, and a style has none.
+- **Removing a cast chip** leaves focus on the Add select when it was the last chip.
+- **Not part of this plan:** `e2e/styles.e2e.ts` is order-dependent when run in parallel with
+  other tests that create styles. It passes alone and in the full suite.
 
 ## UI mockups (ASCII)
 
@@ -204,22 +222,22 @@ States:
 
 ## Test list (TDD)
 
-- [ ] `matchCast` matches a name case-insensitively on word boundaries ("Ya" does not match
+- [x] `matchCast` matches a name case-insensitively on word boundaries ("Ya" does not match
       "Yangon") — unit — `src/lib/generation/cast.test.ts`
-- [ ] `matchCast` prefers the longest match ("Grandma Dew" over "Dew") and returns members in prompt
+- [x] `matchCast` prefers the longest match ("Grandma Dew" over "Dew") and returns members in prompt
       order — unit — `src/lib/generation/cast.test.ts`
-- [ ] `matchCast` honours aliases — unit — `src/lib/generation/cast.test.ts`
-- [ ] the panel `cast` override replaces auto-detection; `undefined` means auto — unit —
+- [x] `matchCast` honours aliases — unit — `src/lib/generation/cast.test.ts`
+- [x] the panel `cast` override replaces auto-detection; `undefined` means auto — unit —
       `src/lib/generation/cast.test.ts`
-- [ ] `selectRefs` always takes style refs first, then one portrait per matched member within the
+- [x] `selectRefs` (shipped as `planRefs`) always takes style refs first, then one portrait per matched member within the
       caps, and reports members left as description-only — unit — `src/lib/generation/refs.test.ts`
-- [ ] `composePrompt` writes the cast block with image numbers, and descriptions without images
+- [x] `composePrompt` writes the cast block with image numbers, and descriptions without images
       — unit — `src/lib/generation/prompt.test.ts`
-- [ ] the migration backfill turns labelled character/object refs into linked cast members, and
+- [x] the migration backfill turns labelled character/object refs into linked cast members, and
       unlabelled ones into style refs — integration — `supabase/tests/style-cast.test.ts`
-- [ ] RLS: anyone reads the cast, only the creator writes — integration —
+- [x] RLS: anyone reads the cast, only the creator writes — integration —
       `supabase/tests/style-cast.test.ts`
-- [ ] MCP `generate_panel_image` reports the attached cast — unit —
+- [x] MCP `generate_panel_image` reports the attached cast — unit —
       `src/lib/server/mcp/server.test.ts`
 
 ## Verification

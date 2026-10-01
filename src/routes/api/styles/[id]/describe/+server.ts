@@ -26,8 +26,8 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	const apiKey = geminiKey();
 	if (!apiKey) error(503, NO_GEMINI);
 
-	// Style references describe the look best; fall back to all of them.
-	const styled = profile.refs.filter((r) => r.role === 'style');
+	// Style references describe the look best; fall back to all of them (portraits too).
+	const styled = profile.refs.filter((r) => !r.castId);
 	const images = await loadRefImages(locals.supabase, styled.length ? styled : profile.refs);
 	try {
 		return json(await describeStyle(images, { apiKey, signal: AbortSignal.timeout(60_000) }));

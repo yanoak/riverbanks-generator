@@ -14,7 +14,14 @@ import { initialState } from '$lib/ops/ydoc-store';
 import type { ComicStore } from '$lib/ops/store';
 import { panelBox } from '$lib/geometry/panel';
 import type { GenerateInput, GenerateResult } from '$lib/server/generation/generate';
-import type { StyleProfile } from '$lib/styles/styles';
+import {
+	CAST_KINDS,
+	type CastMember,
+	type CastPatch,
+	type ProfilePatch,
+	type StyleProfile,
+	type StyleRef
+} from '$lib/styles/styles';
 
 export interface ImportedImage {
 	assetId: string;
@@ -42,6 +49,8 @@ export interface McpContext {
 	listStyles: () => Promise<StyleProfile[]>;
 	/** Generate a panel image into the comic's folder (not yet placed). */
 	generate: (input: GenerateInput) => Promise<GenerateResult>;
+	/** Building styles and their casts, as the user (RLS: only a style's creator can change it). */
+	styles?: StyleTools;
 	/** Sanitise and store SVG the agent drew itself (not yet placed). */
 	saveSketch: (input: {
 		comicId: string;
@@ -50,6 +59,22 @@ export interface McpContext {
 		box: { w: number; h: number };
 		svg: string;
 	}) => Promise<GenerateResult>;
+}
+
+export interface StyleTools {
+	create: (name: string) => Promise<string>;
+	save: (id: string, patch: ProfilePatch) => Promise<void>;
+	addReference: (
+		profileId: string,
+		source: { url?: string; base64?: string; mimeType?: string },
+		castId?: string
+	) => Promise<StyleRef>;
+	addMember: (
+		profileId: string,
+		fields: Partial<Pick<CastMember, 'kind' | 'name' | 'aliases' | 'description'>>
+	) => Promise<CastMember>;
+	updateMember: (member: CastMember, patch: CastPatch) => Promise<void>;
+	drawPortrait: (profileId: string, castId: string, model?: string) => Promise<StyleRef>;
 }
 
 const page = z.number().int().min(1).describe('1-based page number');
@@ -110,7 +135,9 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				'0.. row-major) whose cells merge into panels; free panels float above; balloons ' +
 				'(speech, thought, whisper, shout, caption, sfx) sit on the page. Call get_comic first ' +
 				'and after edits to see ids and geometry. Every edit is saved immediately and shows up ' +
-				'live in the user’s open editor.'
+				'live in the user’s open editor. A comic’s style may have a cast (list_style_profiles): ' +
+				'name a member in a panel prompt, by name or alias, and their portrait and description ' +
+				'are attached to that panel.'
 		}
 	);
 	const { store } = ctx;
@@ -364,7 +391,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: READ,
 			title: 'List style profiles',
 			description:
-				'The team’s art styles: written style, palette, things to avoid, and reference images (role and name). A comic with a style generates every image in it. Name characters and objects from the references in prompts.'
+				'The team’s art styles: written style, palette, things to avoid, style reference images, and a cast of characters, props and places. A comic with a style generates every image in it. Name cast members (by name or alias) in a panel prompt and their portrait and description are attached to that panel automatically.'
 		},
 		async () =>
 			guard(async () =>
@@ -376,10 +403,175 @@ export function createMcpServer(ctx: McpContext): McpServer {
 						palette: s.palette,
 						avoid: s.avoid,
 						model: s.model,
-						references: s.refs.map((r) => ({ role: r.role, label: r.label }))
+						styleReferences: s.refs.filter((r) => !r.castId).length,
+						cast: s.cast.map((m) => ({
+							id: m.id,
+							kind: m.kind,
+							name: m.name,
+							aliases: m.aliases,
+							description: m.description,
+							portraits: s.refs.filter((r) => r.castId === m.id).length
+						}))
 					}))
 				)
 			)
+	);
+
+	const styles = () => {
+		if (!ctx.styles) throw new OpError('invalid', 'Editing styles is not available here.');
+		return ctx.styles;
+	};
+	const styleById = async (id: string) => {
+		const style = (await ctx.listStyles()).find((st) => st.id === id);
+		if (!style) throw new OpError('invalid', 'No style with that id; see list_style_profiles.');
+		return style;
+	};
+	const imageSource = {
+		url: z.string().url().optional().describe('A public http(s) image URL'),
+		base64: z.string().optional().describe('Image bytes, base64'),
+		mimeType: z.string().optional()
+	};
+
+	server.registerTool(
+		'create_style_profile',
+		{
+			annotations: WRITE,
+			title: 'Create style profile',
+			description:
+				'Make a new style profile that you can then edit: its written style (medium, linework, rendering), palette and things to avoid. Add style reference images with add_style_reference and a cast with set_cast_member.',
+			inputSchema: {
+				name: z.string().min(1).max(120),
+				style: z.string().max(4000).optional(),
+				palette: z
+					.array(
+						z.object({ hex: z.string().regex(/^#[0-9a-fA-F]{6}$/), name: z.string().optional() })
+					)
+					.max(16)
+					.optional(),
+				avoid: z.string().max(2000).optional(),
+				model: z.string().optional().describe('Default model key for comics in this style')
+			}
+		},
+		async ({ name, style, palette, avoid, model }) =>
+			guard(async () => {
+				const id = await styles().create(name);
+				const patch: ProfilePatch = {
+					...(style !== undefined && { style }),
+					...(palette !== undefined && { palette }),
+					...(avoid !== undefined && { avoid }),
+					...(model !== undefined && { model })
+				};
+				if (Object.keys(patch).length) await styles().save(id, patch);
+				return text(`Created style ${name}: ${id}.`);
+			})
+	);
+
+	server.registerTool(
+		'add_style_reference',
+		{
+			annotations: WRITE,
+			title: 'Add style reference',
+			description:
+				'Add an image to a style you made: a style reference (sent with every panel) or, with castMember, a portrait of that cast member (sent only with panels that name them). Give a URL or base64.',
+			inputSchema: {
+				styleProfileId: z.string(),
+				...imageSource,
+				castMember: z.string().optional().describe('Cast member id or name this is a portrait of')
+			}
+		},
+		async ({ styleProfileId, url, base64, mimeType, castMember }) =>
+			guard(async () => {
+				if (!url && !base64) throw new OpError('invalid', 'Give a url or base64.');
+				const style = await styleById(styleProfileId);
+				const member = castMember
+					? style.cast.find(
+							(m) => m.id === castMember || m.name.toLowerCase() === castMember.trim().toLowerCase()
+						)
+					: undefined;
+				if (castMember && !member)
+					throw new OpError('invalid', `This style has no cast member “${castMember}”.`);
+				const ref = await styles().addReference(style.id, { url, base64, mimeType }, member?.id);
+				return text(
+					member
+						? `Added a portrait of ${member.name} (${ref.width}×${ref.height}): ${ref.id}.`
+						: `Added a style reference (${ref.width}×${ref.height}): ${ref.id}.`
+				);
+			})
+	);
+
+	server.registerTool(
+		'set_cast_member',
+		{
+			annotations: WRITE,
+			title: 'Add or edit a cast member',
+			description:
+				'Add a character, prop or place to a style you made, or edit one (give its id, or a name it already has). The description says what stays the same in every panel; panels whose prompt uses the name or an alias get the portrait and description. Draw a portrait with generate_cast_portrait.',
+			inputSchema: {
+				styleProfileId: z.string(),
+				id: z.string().optional().describe('An existing member to edit'),
+				kind: z.enum(CAST_KINDS as [string, ...string[]]).optional(),
+				name: z.string().max(120).optional(),
+				aliases: z.array(z.string().max(120)).max(20).optional(),
+				description: z.string().max(2000).optional(),
+				portraitId: z.string().optional().describe('Which of its portraits to send with panels')
+			}
+		},
+		async ({ styleProfileId, id, kind, name, aliases, description, portraitId }) =>
+			guard(async () => {
+				const style = await styleById(styleProfileId);
+				const fields = {
+					...(kind !== undefined && { kind: kind as CastMember['kind'] }),
+					...(name !== undefined && { name: name.trim() }),
+					...(aliases !== undefined && { aliases: aliases.map((a) => a.trim()).filter(Boolean) }),
+					...(description !== undefined && { description: description.trim() })
+				};
+				const existing =
+					style.cast.find((m) => m.id === id) ??
+					(!id && name
+						? style.cast.find((m) => m.name.toLowerCase() === name.trim().toLowerCase())
+						: undefined);
+				if (id && !existing) throw new OpError('invalid', `This style has no cast member ${id}.`);
+				if (existing) {
+					await styles().updateMember(existing, {
+						...fields,
+						...(portraitId !== undefined && { portraitId })
+					});
+					return text(`Updated ${fields.name ?? existing.name} (${existing.id}).`);
+				}
+				if (!name?.trim()) throw new OpError('invalid', 'A new cast member needs a name.');
+				const m = await styles().addMember(style.id, fields);
+				return text(`Added ${m.kind} ${m.name} to ${style.name}: ${m.id}.`);
+			})
+	);
+
+	server.registerTool(
+		'generate_cast_portrait',
+		{
+			annotations: { ...WRITE, openWorldHint: true },
+			title: 'Generate cast portrait',
+			description:
+				'Draw a reference sheet for a cast member in its style: front, three-quarter and side views for a character or prop, a wide view for a place, from its description, the style references and its current portrait. Adds it to the member’s portraits; star a portrait with set_cast_member portraitId. Takes 10–60 s.',
+			inputSchema: {
+				styleProfileId: z.string(),
+				castMember: z.string().describe('Cast member id or name'),
+				model: z.string().optional()
+			}
+		},
+		async ({ styleProfileId, castMember, model }) =>
+			guard(async () => {
+				const style = await styleById(styleProfileId);
+				const member = style.cast.find(
+					(m) => m.id === castMember || m.name.toLowerCase() === castMember.trim().toLowerCase()
+				);
+				if (!member) throw new OpError('invalid', `This style has no cast member “${castMember}”.`);
+				const first = !style.refs.some((r) => r.castId === member.id);
+				const ref = await styles().drawPortrait(style.id, member.id, model);
+				return text(
+					`Drew a ${ref.width}×${ref.height} sheet of ${member.name}: portrait ${ref.id}.${
+						first ? ' As its only portrait, it is the one sent with panels.' : ''
+					}`
+				);
+			})
 	);
 
 	server.registerTool(
@@ -424,15 +616,34 @@ export function createMcpServer(ctx: McpContext): McpServer {
 					.optional()
 					.describe(
 						'Model key, e.g. gemini-flash (default), gemini-pro, hf-grok-image-2. Defaults to the style’s model.'
+					),
+				cast: z
+					.array(z.string())
+					.optional()
+					.describe(
+						'Which of the style’s cast to attach, by name or id, instead of those the prompt names. [] for nobody. Saved on the panel; omit to keep the panel’s choice (or auto-detect).'
 					)
 			}
 		},
-		async ({ comicId, page: n, panelId, prompt, model }) =>
+		async ({ comicId, page: n, panelId, prompt, model, cast }) =>
 			guard(async () => {
 				const { comic } = await loadComic(store, comicId);
 				const at = ops.pageAt(comic, n);
 				const target = at.panels.find((p) => p.id === panelId);
 				if (!target) throw new OpError('invalid', `Page ${n} has no panel ${panelId}.`);
+				let castIds = target.cast;
+				if (cast) {
+					const members = comic.styleProfileId
+						? ((await ctx.listStyles()).find((st) => st.id === comic.styleProfileId)?.cast ?? [])
+						: [];
+					castIds = cast.map((c) => {
+						const m = members.find(
+							(x) => x.id === c || x.name.toLowerCase() === c.trim().toLowerCase()
+						);
+						if (!m) throw new OpError('invalid', `The comic’s style has no cast member “${c}”.`);
+						return m.id;
+					});
+				}
 				let made: GenerateResult;
 				try {
 					made = await ctx.generate({
@@ -441,7 +652,8 @@ export function createMcpServer(ctx: McpContext): McpServer {
 						prompt,
 						profileId: comic.styleProfileId,
 						modelKey: model,
-						box: panelBox(at, target)
+						box: panelBox(at, target),
+						cast: castIds
 					});
 				} catch (e) {
 					if (e instanceof OpError) throw e;
@@ -454,14 +666,19 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				};
 				const { rev } = await mutateComic(store, comicId, (c) => {
 					ops.setPanelImage(c, { page: n, panelId, image });
-					ops.pageAt(c, n).panels.find((p) => p.id === panelId)!.prompt = prompt.trim();
+					const placed = ops.pageAt(c, n).panels.find((p) => p.id === panelId)!;
+					placed.prompt = prompt.trim();
+					if (cast) placed.cast = castIds;
 					return '';
 				});
 				const note = made.dropped
 					? ` ${made.dropped} reference image(s) did not fit this model.`
 					: '';
+				const who = made.cast?.length
+					? ` Cast: ${made.cast.map((c) => (c.image ? c.name : `${c.name} (description only)`)).join(', ')}.`
+					: '';
 				return text(
-					`Generated a ${made.aspect} image with ${made.model} and filled panel ${panelId}.${note} (rev ${rev})`
+					`Generated a ${made.aspect} image with ${made.model} and filled panel ${panelId}.${who}${note} (rev ${rev})`
 				);
 			})
 	);

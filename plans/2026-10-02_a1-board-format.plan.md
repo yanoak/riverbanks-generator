@@ -104,8 +104,10 @@ next to a portrait page stays portrait.
 
 - Each band is a focusable hit target. Selecting it gives a new selection kind,
   `{ kind: 'band', band: 'header' | 'footer' }`.
-- The Inspector then shows that band's fields for this page. Each input's placeholder shows the
-  comic default.
+- The Inspector then shows that band's fields for this page. Each input holds the text the page
+  actually shows (its override or the default), and overridden slots are tagged "this page".
+  Placeholders were rejected: an empty field would read as "uses the default" when it means
+  "blank". Typing the default back drops the override.
 - **"Use on every page"** makes this page's values the comic default and clears this page's
   override. Other pages' overrides stay; a page someone retitled on purpose keeps its title.
 - **"Reset to default"** clears this page's override.
@@ -122,11 +124,14 @@ print at 594 × 841 mm.
 - [x] Model: `Comic.bands`, `Page.bands`, `resolveBands`, and Y.Doc round-trip and diff; tests
 - [x] Ops and MCP: `set_header_footer`, a `format` argument on `create_comic`, and a size-aware
       `get_comic` and schema text; tests
-- [ ] Render: header and footer bands in `PageView`, wired to every caller, and the PDF `@page`
+- [x] Render: header and footer bands in `PageView`, wired to every caller, and the PDF `@page`
       from the page size
-- [ ] Editor: band selection, Inspector fields, "Use on every page" and "Reset to default", and
+- [x] Editor: band selection, Inspector fields, "Use on every page" and "Reset to default", and
       the keyboard path
-- [ ] Verify in the browser (below); then status `done`
+- [x] New balloons start inside the grid area, not over the header (found while verifying)
+- [ ] Verify in the browser (below); then status `done`. Steps 1–5 passed on 2026-10-02; steps 6
+      (an existing portrait comic) and 7 (MCP updating an open editor) are covered by unit tests
+      only so far
 
 ## UI mockups (ASCII)
 
@@ -198,7 +203,7 @@ fields: `Format  A1 board (594 × 841 mm)` or `Comic page`.
       Layer: unit, `src/lib/ops/describe.test.ts`
 - [x] MCP: `create_comic` with `format`, and `set_header_footer`, both work end to end. Layer:
       unit, `src/lib/server/mcp/server.test.ts`
-- [ ] The editor can select a band, "Use on every page" sets the default and clears this page's
+- [x] The editor can select a band, "Use on every page" sets the default and clears this page's
       override, and "Reset to default" clears it. Layer: unit, `src/lib/editor/editor.test.ts`
 
 ## Verification

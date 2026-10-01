@@ -663,6 +663,19 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].balloons[0]).not.toHaveProperty('next');
 	});
 
+	it('puts a QR link to riverbanks.lol in the footer, which a page can change or hide', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'QR' })).text);
+		await call('add_page', { comicId: id });
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].bands.footer.qr).toBe('riverbanks.lol');
+		await call('set_header_footer', { comicId: id, page: 2, footer: { qr: '' } });
+		await call('set_header_footer', { comicId: id, footer: { qr: 'riverbanks.lol/act-two' } });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].bands.footer.qr).toBe('riverbanks.lol/act-two');
+		expect(d.pages[1].bands.footer.qr).toBe('');
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

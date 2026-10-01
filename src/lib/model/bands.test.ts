@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createComic } from './factory';
 import {
 	HOUSE_BANDS,
+	qrHref,
 	resetPageBands,
 	resolveBands,
 	setDefaultBands,
@@ -21,7 +22,7 @@ describe('resolveBands', () => {
 		expect(HOUSE_BANDS.header.title).toBe('{comic}');
 		expect(resolveBands(comic(), 1)).toEqual({
 			header: { title: 'Taming Currents', subtitle: '' },
-			footer: { left: 'RIVERBANKS', center: '2', right: 'SEAPUNK STUDIOS' }
+			footer: { left: 'RIVERBANKS', center: '2', right: 'SEAPUNK STUDIOS', qr: 'riverbanks.lol' }
 		});
 	});
 
@@ -33,7 +34,7 @@ describe('resolveBands', () => {
 		};
 		expect(resolveBands(c, 2)).toEqual({
 			header: { title: 'ACT TWO', subtitle: 'Taming Currents' },
-			footer: { left: '', center: '3 / 3', right: '' }
+			footer: { left: '', center: '3 / 3', right: '', qr: 'riverbanks.lol' }
 		});
 	});
 
@@ -42,7 +43,7 @@ describe('resolveBands', () => {
 		c.pages[0].bands = { header: { subtitle: 'The Invitation' }, footer: { right: '' } };
 		const b = resolveBands(c, 0);
 		expect(b.header).toEqual({ title: 'Taming Currents', subtitle: 'The Invitation' });
-		expect(b.footer).toEqual({ left: 'RIVERBANKS', center: '1', right: '' });
+		expect(b.footer).toEqual({ left: 'RIVERBANKS', center: '1', right: '', qr: 'riverbanks.lol' });
 	});
 
 	it('leaves other pages on the default', () => {
@@ -86,5 +87,31 @@ describe('editing bands', () => {
 		expect(c.pages[0].bands).toEqual({ header: { title: 'A' } });
 		resetPageBands(c.pages[0]);
 		expect(c.pages[0]).not.toHaveProperty('bands');
+	});
+});
+
+describe('footer QR link', () => {
+	it('defaults to riverbanks.lol, and a page can change or blank it', () => {
+		const c = comic();
+		expect(resolveBands(c, 0).footer.qr).toBe('riverbanks.lol');
+		setPageBands(c.pages[1], { footer: { qr: '' } });
+		expect(resolveBands(c, 1).footer.qr).toBe('');
+		setPageBands(c.pages[2], { footer: { qr: 'example.org/{page}' } });
+		expect(resolveBands(c, 2).footer.qr).toBe('example.org/3');
+	});
+
+	it('fills a slot that stored bands predate from the house bands', () => {
+		const c = comic();
+		c.bands = {
+			header: { title: 'ACT TWO', subtitle: '' },
+			footer: { left: '', center: '{page}', right: '' }
+		} as Comic['bands'];
+		expect(resolveBands(c, 0).footer.qr).toBe('riverbanks.lol');
+	});
+
+	it('links a bare host over https and keeps an explicit scheme', () => {
+		expect(qrHref('riverbanks.lol')).toBe('https://riverbanks.lol');
+		expect(qrHref('http://example.org/x')).toBe('http://example.org/x');
+		expect(qrHref('  ')).toBe('');
 	});
 });

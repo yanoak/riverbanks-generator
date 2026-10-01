@@ -23,7 +23,8 @@
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
 	import { DEFAULT_TYPOGRAPHY, type Typography } from '$lib/typography/typography';
-	import type { Band } from '$lib/model/bands';
+	import { qrHref, type Band } from '$lib/model/bands';
+	import { qrMatrix, qrPath } from '$lib/geometry/qr';
 	import type { Bands } from '$lib/model/types';
 
 	let {
@@ -31,7 +32,8 @@
 		scale,
 		editor,
 		typography = DEFAULT_TYPOGRAPHY,
-		bands
+		bands,
+		linkable = false
 	}: {
 		page: Page;
 		scale: number;
@@ -39,7 +41,12 @@
 		typography?: Typography;
 		/** What the header and footer say, resolved (see model/bands.ts). */
 		bands?: Bands;
+		/** Make the footer's QR a live link: only where it isn't inside another link (print). */
+		linkable?: boolean;
 	} = $props();
+
+	/** The footer QR's side: most of the 208-unit footer, ~95 mm on an A1 board. */
+	const QR_SIZE = 150;
 
 	/** The bands' boxes: a strip above and below the grid, where the page has them. */
 	const top = $derived(page.grid.top ?? 0);
@@ -493,14 +500,42 @@
 {/snippet}
 
 {#snippet footer()}
+	{@const href = qrHref(bands?.footer.qr ?? '')}
+	{@const qr = href ? qrMatrix(href) : null}
+	{@const side = qr ? QR_SIZE + 48 : 32}
 	<div
-		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-8"
+		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6"
 		style:height="{bottom}px"
+		style:padding-inline="{side}px"
 	>
 		<span class="text-left">{bands?.footer.left}</span>
 		<span class="text-center">{bands?.footer.center}</span>
 		<span class="text-right">{bands?.footer.right}</span>
 	</div>
+	{#if qr}
+		<!-- The QR and its address at the footer's right end; a live link in the printed PDF. -->
+		<svelte:element
+			this={linkable ? 'a' : 'div'}
+			href={linkable ? href : undefined}
+			class="band qr absolute flex flex-col items-center"
+			style:right="32px"
+			style:bottom="{(bottom - QR_SIZE - 26) / 2}px"
+			style:width="{QR_SIZE}px"
+		>
+			<svg
+				width={QR_SIZE}
+				height={QR_SIZE}
+				viewBox="-1 -1 {qr.length + 2} {qr.length + 2}"
+				shape-rendering="crispEdges"
+				aria-label="QR code for {href}"
+				role="img"
+			>
+				<rect x="-1" y="-1" width={qr.length + 2} height={qr.length + 2} fill="white" />
+				<path d={qrPath(qr)} fill="black" />
+			</svg>
+			<span class="qr-label">{href.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+		</svelte:element>
+	{/if}
 {/snippet}
 
 <!-- Beneath the balloons and free panels (z 1), so text that spills into a band stays on top. -->
@@ -619,6 +654,18 @@
 		font-family: 'Rubik', sans-serif;
 		font-weight: 600;
 		font-size: 18px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+	.qr {
+		color: inherit;
+		text-decoration: none;
+	}
+	.qr-label {
+		margin-top: 6px;
+		font-family: 'Rubik', sans-serif;
+		font-weight: 600;
+		font-size: 16px;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 	}

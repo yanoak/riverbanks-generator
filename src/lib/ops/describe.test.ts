@@ -44,7 +44,12 @@ describe('describeComic', () => {
 		expect(p.grid).toEqual({ rows: 4, cols: 4 });
 		expect(p.bands).toEqual({
 			header: { title: 'Taming Currents', subtitle: 'The Invitation' },
-			footer: { left: 'RIVERBANKS', center: '1', right: 'SEAPUNK STUDIOS' },
+			footer: {
+				left: 'RIVERBANKS',
+				center: '1',
+				right: 'SEAPUNK STUDIOS',
+				qr: 'riverbanks.lol'
+			},
 			overrides: { header: { subtitle: 'The Invitation' } }
 		});
 	});

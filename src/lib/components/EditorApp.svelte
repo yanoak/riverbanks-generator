@@ -253,6 +253,7 @@
 					scale={sheet.px / page.width}
 					{typography}
 					bands={resolveBands(editor.comic, i)}
+					linkable
 				/>
 			</div>
 		{/each}

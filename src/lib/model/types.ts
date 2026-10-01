@@ -124,6 +124,11 @@ export interface FooterText {
 	left: string;
 	center: string;
 	right: string;
+	/**
+	 * An address for the QR code at the footer's right end (and its link); '' shows none. Absent
+	 * in comics stored before it existed, which then show the house default.
+	 */
+	qr?: string;
 }
 
 /**

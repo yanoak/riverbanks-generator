@@ -359,13 +359,22 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Set header and footer',
 			description:
-				'Set the text in an A1 board’s header (a large title over a smaller subtitle) and footer (left, center, right). Without a page, it sets the comic’s defaults, which every page shows; with a page, it overrides slots on that page only. Give only the slots to change; "" blanks a slot. {comic}, {page} and {pages} are replaced by the title, the page number and the page count. reset: true first returns the page to the defaults.',
+				'Set the text in an A1 board’s header (a large title over a smaller subtitle) and footer (left, center, right, and qr: a QR code with its address at the right end). Without a page, it sets the comic’s defaults, which every page shows; with a page, it overrides slots on that page only. Give only the slots to change; "" blanks a slot. {comic}, {page} and {pages} are replaced by the title, the page number and the page count. reset: true first returns the page to the defaults.',
 			inputSchema: {
 				comicId: z.string(),
 				page: page.optional(),
 				header: z.object({ title: slot.optional(), subtitle: slot.optional() }).optional(),
 				footer: z
-					.object({ left: slot.optional(), center: slot.optional(), right: slot.optional() })
+					.object({
+						left: slot.optional(),
+						center: slot.optional(),
+						right: slot.optional(),
+						qr: slot
+							.optional()
+							.describe(
+								'The address the footer’s QR code encodes and links to (default riverbanks.lol; a bare host is https); "" hides the QR.'
+							)
+					})
 					.optional(),
 				reset: z.boolean().optional()
 			}

@@ -73,7 +73,8 @@
 		footer: [
 			['left', 'Left'],
 			['center', 'Centre'],
-			['right', 'Right']
+			['right', 'Right'],
+			['qr', 'QR link']
 		]
 	};
 

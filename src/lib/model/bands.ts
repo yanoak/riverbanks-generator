@@ -9,8 +9,15 @@ export const BANDS: Band[] = ['header', 'footer'];
 /** After the slide master of Sam's "RIVERBANKS Paneling" deck. */
 export const HOUSE_BANDS: Bands = {
 	header: { title: '{comic}', subtitle: '' },
-	footer: { left: 'RIVERBANKS', center: '{page}', right: 'SEAPUNK STUDIOS' }
+	footer: { left: 'RIVERBANKS', center: '{page}', right: 'SEAPUNK STUDIOS', qr: 'riverbanks.lol' }
 };
+
+/** What a footer QR code encodes and links to: a bare host is taken to be https. */
+export function qrHref(address: string): string {
+	const a = address.trim();
+	if (!a) return '';
+	return /^[a-z][a-z0-9+.-]*:/i.test(a) ? a : `https://${a}`;
+}
 
 export const BAND_TOKENS = ['{comic}', '{page}', '{pages}'];
 
@@ -34,7 +41,12 @@ export function bandSource<B extends Band>(
 	page: Page | undefined,
 	band: B
 ): Bands[B] {
-	return { ...(defaults ?? HOUSE_BANDS)[band], ...page?.bands?.[band] } as Bands[B];
+	// Fill from the house bands first: comics stored before a slot existed lack it.
+	return {
+		...HOUSE_BANDS[band],
+		...(defaults ?? HOUSE_BANDS)[band],
+		...page?.bands?.[band]
+	} as Bands[B];
 }
 
 /** The text page `index` (0-based) shows in its bands. */
@@ -62,7 +74,8 @@ export function bandsFor(ctx: BandContext, page: Page | undefined, index: number
 		footer: {
 			left: fill(footer.left),
 			center: fill(footer.center),
-			right: fill(footer.right)
+			right: fill(footer.right),
+			qr: fill(footer.qr ?? '')
 		}
 	};
 }
@@ -74,8 +87,8 @@ export type BandsPatch = BandOverrides;
 export function setDefaultBands(comic: Comic, patch: BandsPatch): void {
 	const base = comicBands(comic);
 	comic.bands = {
-		header: { ...base.header, ...defined(patch.header) },
-		footer: { ...base.footer, ...defined(patch.footer) }
+		header: { ...HOUSE_BANDS.header, ...base.header, ...defined(patch.header) },
+		footer: { ...HOUSE_BANDS.footer, ...base.footer, ...defined(patch.footer) }
 	};
 }
 

@@ -177,6 +177,10 @@ the "Riverbanks" wordmark.
 - [x] Toolbar fits in Rubik: the editor toolbar needed 1466px (it clipped at 1440). Icon
       buttons' labels are screen-reader-only below 2xl (names unchanged), and the title field
       shrinks
+- [x] Font menus show each font in its own face (`FontPicker`, a button + listbox), in the
+      Inspector and on the style page, so a balloon or a style can pick any Rubik cut by eye. Yan
+      asked for this on seeing Microbe as the one SFX font. A native `<select>` can't style its
+      options in Chrome.
 - [ ] Deploy, run the migration on production, Verification below, then Outcome
 
 ## UI mockups (ASCII)
@@ -227,6 +231,12 @@ Inspector, balloon selected:
 2. **Shortcuts:** none new.
    - Space or Enter flips a focused toggle.
    - The selects are native, so the arrow keys change them.
+   - **Font menus** (`FontPicker`):
+     - ↓ or ↑ on the button, or Enter or Space, opens the list with focus on it.
+     - ↑/↓ and Home/End move. Typing jumps to a name, and a space mid-name is part of the search.
+     - Enter, or Space after a pause, picks and returns focus to the button. Escape closes. Tab
+       closes and moves on.
+     - Keys in the open list never reach the editor's window shortcuts.
 3. **Focus management:**
    - Changing a family that lacks the current weight snaps the weight to the nearest one the
      family has. Focus stays on the family select.

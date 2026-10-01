@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { createUser, signIn } from './support/accounts';
+import { arrowTo } from './support/styles';
 import { waitForEditor } from './support/editor';
 import { pngFile } from './support/images';
 
@@ -56,16 +57,15 @@ test('make a style from references, describe it, and share it read-only', async 
 	await expect(otherPage.getByRole('button', { name: 'Delete' })).toHaveCount(0);
 	await expect(otherPage.getByRole('button', { name: 'Describe from references' })).toHaveCount(0);
 
-	// A new comic with this style, by keyboard: N, title, Tab into the styles, ↓ wraps from
-	// "No style" to the first one (the most recently edited, so this one), Enter creates.
+	// A new comic with this style, by keyboard: N, title, Tab into the styles, ↓ from
+	// "No style" to this one (normally the first: the most recently edited), Enter creates.
 	await page.goto('/comics');
 	await page.locator('body[data-hydrated]').waitFor();
 	await page.keyboard.press('n');
 	await page.keyboard.type('Sediment');
 	await page.keyboard.press('Tab');
 	await expect(page.getByRole('radio', { name: 'No style' })).toBeFocused();
-	await page.keyboard.press('ArrowDown');
-	await expect(page.getByRole('radio', { name })).toBeChecked();
+	await arrowTo(page, page.getByRole('radio', { name }));
 	await page.keyboard.press('Enter');
 	await page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
 	await waitForEditor(page);
@@ -77,8 +77,8 @@ test('make a style from references, describe it, and share it read-only', async 
 	await page.getByRole('button', { name: 'Change…' }).click();
 	const dialog = page.getByRole('dialog', { name: 'Comic style' });
 	await expect(dialog.getByRole('radio', { name })).toBeFocused();
-	await page.keyboard.press('ArrowUp'); // wraps to "No style", the last choice
-	await expect(dialog.getByRole('radio', { name: 'No style' })).toBeChecked();
+	// ↑ wraps to "No style", the last choice.
+	await arrowTo(page, dialog.getByRole('radio', { name: 'No style' }), 'ArrowUp');
 	await page.keyboard.press('Enter');
 	await expect(dialog).toBeHidden();
 	await expect(page.getByRole('button', { name: 'Change…' })).toBeFocused();

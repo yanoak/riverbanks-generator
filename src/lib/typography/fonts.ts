@@ -34,6 +34,16 @@ export function fontStack(family: string): string {
 	return `'${family}', ${font?.fallback ?? 'sans-serif'}`;
 }
 
+/** The catalog font a CSS font-family names first, if any. */
+export function fontOfStack(stack: string): Font | undefined {
+	return fontNamed(
+		stack
+			.split(',')[0]
+			.trim()
+			.replace(/^['"]|['"]$/g, '')
+	);
+}
+
 /** The weight in `font` closest to `weight`. */
 export function nearestWeight(font: Font, weight: number): number {
 	return font.weights.reduce((best, w) =>

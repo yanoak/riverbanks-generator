@@ -1,5 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { createUser, signIn } from './support/accounts';
+import { arrowTo } from './support/styles';
 import { openEditor, waitForEditor } from './support/editor';
 
 const family = (text: Locator) => text.evaluate((el) => getComputedStyle(el).fontFamily);
@@ -28,7 +29,18 @@ test('balloons follow their style’s typography unless given a font of their ow
 	await page.locator('body[data-hydrated]').waitFor();
 	const stylePath = new URL(page.url()).pathname;
 	await page.getByLabel('Style name').fill(name);
-	await page.getByLabel('caption font').selectOption('Rubik Dirt');
+	// The font menu shows each font in its own face; ↓ opens it, type-ahead and Enter pick.
+	await page.getByRole('button', { name: /^Caption font/ }).focus();
+	await page.keyboard.press('ArrowDown');
+	const menu = page.getByRole('listbox', { name: 'Caption font' });
+	await expect(menu).toBeFocused();
+	await expect(
+		menu.getByRole('option', { name: 'Rubik Wet Paint' }).getByText('Rubik Wet Paint')
+	).toHaveCSS('font-family', /^"Rubik Wet Paint"/);
+	await page.keyboard.type('Rubik D');
+	await page.keyboard.press('Enter');
+	await expect(menu).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Caption font: Rubik Dirt' })).toBeFocused();
 	await expect(page.getByLabel('caption weight')).toBeDisabled();
 	await expect(page.getByRole('status')).toHaveText('Saved ✓');
 
@@ -38,8 +50,7 @@ test('balloons follow their style’s typography unless given a font of their ow
 	await page.keyboard.press('n');
 	await page.keyboard.type('Lettered');
 	await page.keyboard.press('Tab');
-	await page.keyboard.press('ArrowDown');
-	await expect(page.getByRole('radio', { name })).toBeChecked();
+	await arrowTo(page, page.getByRole('radio', { name }));
 	await page.keyboard.press('Enter');
 	await page.waitForURL(/\/comics\/[0-9a-f-]{36}$/);
 	await waitForEditor(page);
@@ -51,11 +62,16 @@ test('balloons follow their style’s typography unless given a font of their ow
 	await expect.poll(() => family(caption)).toMatch(/^"Rubik Dirt"/);
 
 	// Its own font wins; "Style — …" hands it back.
-	const font = page.getByRole('combobox', { name: 'Font', exact: true });
-	await expect(font).toHaveValue('');
-	await font.selectOption({ label: 'Bangers' });
+	// Typing in the open menu must not reach the editor's shortcuts (B, S… add balloons).
+	const font = page.getByRole('button', { name: /^Font: / });
+	await expect(font).toHaveAccessibleName(/^Font: Style — Rubik Dirt/);
+	await font.click();
+	await page.keyboard.type('Bangers');
+	await page.keyboard.press('Enter');
 	await expect.poll(() => family(caption)).toMatch(/^Bangers/);
-	await font.selectOption({ index: 0 });
+	await expect(page.locator('main .balloon-text')).toHaveCount(1);
+	await font.click();
+	await page.getByRole('option', { name: /^Style — / }).click();
 	await expect.poll(() => family(caption)).toMatch(/^"Rubik Dirt"/);
 
 	// Resetting the style re-letters the comic.

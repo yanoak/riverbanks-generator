@@ -3,7 +3,8 @@
 	import Italic from '@lucide/svelte/icons/italic';
 	import CaseUpper from '@lucide/svelte/icons/case-upper';
 	import type { BalloonType } from '$lib/model/types';
-	import { FONTS, fontNamed, nearestWeight } from '$lib/typography/fonts';
+	import FontPicker from './FontPicker.svelte';
+	import { fontNamed, nearestWeight } from '$lib/typography/fonts';
 	import {
 		BALLOON_TYPES,
 		DEFAULT_TYPOGRAPHY,
@@ -62,20 +63,17 @@
 		{@const weights = fontNamed(l.family)!.weights}
 		<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
 			<span class="w-full text-sm text-stone-600 sm:w-16" id="type-{type}">{LABELS[type]}</span>
+			<div class="w-44 text-sm">
+				<FontPicker
+					label="{LABELS[type]} font"
+					value={l.family}
+					disabled={readonly}
+					onchange={(family) => set(type, { family })}
+				/>
+			</div>
 			<select
 				class="rounded border border-stone-300 bg-white px-1 py-1 text-sm"
-				aria-label="{type} font"
-				value={l.family}
-				disabled={readonly}
-				onchange={(e) => set(type, { family: e.currentTarget.value })}
-			>
-				{#each FONTS as f (f.family)}
-					<option value={f.family}>{f.family}</option>
-				{/each}
-			</select>
-			<select
-				class="rounded border border-stone-300 bg-white px-1 py-1 text-sm"
-				aria-label="{type} weight"
+				aria-label="{LABELS[type]} weight"
 				value={l.weight}
 				disabled={readonly || weights.length < 2}
 				onchange={(e) => set(type, { weight: Number(e.currentTarget.value) })}
@@ -86,7 +84,7 @@
 			</select>
 			<button
 				class="toggle"
-				aria-label="{type} italic"
+				aria-label="{LABELS[type]} italic"
 				title="Italic"
 				aria-pressed={l.italic}
 				disabled={readonly}
@@ -94,7 +92,7 @@
 			>
 			<button
 				class="toggle"
-				aria-label="{type} capitals"
+				aria-label="{LABELS[type]} capitals"
 				title="All capitals"
 				aria-pressed={l.uppercase}
 				disabled={readonly}

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FONTS, fontStack } from './fonts';
+import { FONTS, fontOfStack, fontStack } from './fonts';
 
 // The PNG export only sees fonts the page has loaded, so every catalog font must be in app.html.
 const html = readFileSync('src/app.html', 'utf8');
@@ -26,5 +26,11 @@ describe('the font catalog', () => {
 
 	it('quotes the family and ends in a generic fallback', () => {
 		expect(fontStack('Rubik Microbe')).toMatch(/^'Rubik Microbe', .*(sans-serif|cursive)$/);
+	});
+
+	it('reads the catalog font back from a stack, old or new', () => {
+		expect(fontOfStack(fontStack('Rubik Dirt'))?.family).toBe('Rubik Dirt');
+		expect(fontOfStack("'Bangers', 'Impact', sans-serif")?.family).toBe('Bangers');
+		expect(fontOfStack('Papyrus, fantasy')).toBeUndefined();
 	});
 });

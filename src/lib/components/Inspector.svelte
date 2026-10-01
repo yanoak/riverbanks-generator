@@ -8,8 +8,14 @@
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import AlignCenter from '@lucide/svelte/icons/align-center';
 	import AlignRight from '@lucide/svelte/icons/align-right';
-	import { FONTS, fontStack } from '$lib/typography/fonts';
-	import { DEFAULT_TYPOGRAPHY, describeLettering, followsStyle } from '$lib/typography/typography';
+	import { fontOfStack, fontStack } from '$lib/typography/fonts';
+	import FontPicker from './FontPicker.svelte';
+	import {
+		DEFAULT_TYPOGRAPHY,
+		describeLettering,
+		followsStyle,
+		letteringCss
+	} from '$lib/typography/typography';
 	import type { StyleSummary } from '$lib/styles/styles';
 	import StyleDialog from './StyleDialog.svelte';
 	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
@@ -112,23 +118,22 @@
 		{:else}
 			<p class="mb-3 text-xs text-stone-500">Double-click or press Enter to edit the text.</p>
 		{/if}
-		<label class="row">
+		<div class="row">
 			<span>Font</span>
-			<select
-				class="w-36 rounded border border-stone-300 px-1 py-0.5"
-				value={own}
-				onchange={(e) => editor.patch('Font', b.id, { font: e.currentTarget.value || undefined })}
-			>
-				<option value="">Style — {describeLettering(typography[b.type])}</option>
-				<hr />
-				{#each FONTS as f (f.family)}
-					<option value={fontStack(f.family)}>{f.family}</option>
-				{/each}
-				{#if own && !FONTS.some((f) => fontStack(f.family) === own)}
-					<option value={own}>{own.split(',')[0].replace(/'/g, '')}</option>
-				{/if}
-			</select>
-		</label>
+			<div class="w-36">
+				<FontPicker
+					label="Font"
+					align="right"
+					value={own ? (fontOfStack(own)?.family ?? own) : ''}
+					inherit={{
+						label: `Style — ${describeLettering(typography[b.type])}`,
+						css: letteringCss(typography[b.type])
+					}}
+					onchange={(family) =>
+						editor.patch('Font', b.id, { font: family ? fontStack(family) : undefined })}
+				/>
+			</div>
+		</div>
 		<label class="row">
 			<span>Type</span>
 			<select

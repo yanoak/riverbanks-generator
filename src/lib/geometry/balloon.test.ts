@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
 	balloonShape,
+	connectorEnds,
+	neckShape,
 	outlinePoint,
 	roundedPath,
 	textInset,
@@ -168,5 +170,32 @@ describe('bumps and spikes', () => {
 	it('clamps silly counts', () => {
 		expect(arcs(balloonShape('thought', w, h, undefined, { points: 1 }).paths[0])).toBe(5);
 		expect(vertices(balloonShape('shout', w, h, undefined, { points: 500 }).paths[0])).toBe(96);
+	});
+});
+
+describe('connectors', () => {
+	const a = { x: 0, y: 0, w: 200, h: 100, type: 'speech' as const };
+	const b = { x: 300, y: 200, w: 200, h: 100, type: 'speech' as const };
+
+	it('runs a line from outline to outline, along the line between the centres', () => {
+		const { from, to } = connectorEnds(a, b);
+		const local = (p: { x: number; y: number }, o: typeof a) => ({ x: p.x - o.x, y: p.y - o.y });
+		expect(onEllipse(local(from, a))).toBeCloseTo(1, 6);
+		expect(onEllipse(local(to, b))).toBeCloseTo(1, 6);
+		expect(from.x).toBeGreaterThan(100);
+		expect(to.x).toBeLessThan(400);
+	});
+
+	it('ends on a box’s edge too', () => {
+		const box = { ...b, roundness: 0, x: 0, y: 200 };
+		const { to } = connectorEnds(a, box);
+		expect(to.y).toBeCloseTo(200, 6);
+	});
+
+	it('draws a neck as a closed band and its fill reaching into both balloons', () => {
+		const neck = neckShape(a, b);
+		expect(neck.outline).toMatch(/Z$/);
+		expect(neck.fill).toMatch(/Z$/);
+		expect(neck.width).toBeCloseTo(22, 6); // 22% of the smaller height
 	});
 });

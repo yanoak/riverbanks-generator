@@ -1,22 +1,12 @@
 import type { Page, Panel, Point, Rect } from '$lib/model/types';
-import { panelOutline, polygonBBox } from './grid';
+import { insidePolygon, panelOutline, polygonBBox } from './grid';
+
+export { insidePolygon };
 
 /** The panel's bounding box in page units — what its image is positioned against. */
 export function panelBox(page: Page, panel: Panel): Rect {
 	if (panel.kind === 'free') return { x: panel.x, y: panel.y, w: panel.w, h: panel.h };
 	return polygonBBox(panelOutline(panel.cells, page.grid, page));
-}
-
-/** Even-odd ray test. */
-export function insidePolygon(p: Point, poly: Point[]): boolean {
-	let hit = false;
-	for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-		const a = poly[i];
-		const b = poly[j];
-		if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x)
-			hit = !hit;
-	}
-	return hit;
 }
 
 /** The panel's outline: a grid panel's traced polygon, a free panel's rectangle. */

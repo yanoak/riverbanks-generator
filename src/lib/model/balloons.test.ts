@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createComic, createPage } from './factory';
-import { anchorBalloon, createBalloon, repinAnchors } from './balloons';
+import {
+	anchorBalloon,
+	connectBalloons,
+	createBalloon,
+	removeBalloon,
+	repinAnchors
+} from './balloons';
 import { panelBox } from '$lib/geometry/panel';
 import { BALLOON_STROKE } from '$lib/geometry/balloon';
 
@@ -98,5 +104,44 @@ describe('anchoring to a panel corner', () => {
 	it('refuses an unknown panel', () => {
 		const { page, b } = board();
 		expect(() => anchorBalloon(page, b.id, { panelId: 'nope', corner: 'tl' })).toThrow(/panel/);
+	});
+});
+
+describe('connecting balloons', () => {
+	function three() {
+		const page = createComic('t', 'board').pages[0];
+		const [a, b, c] = ['speech', 'speech', 'speech'].map(() => {
+			const x = createBalloon(page, 'speech');
+			page.balloons.push(x);
+			return x;
+		});
+		return { page, a, b, c };
+	}
+
+	it('chains a balloon to the next, and unlinks', () => {
+		const { page, a, b } = three();
+		connectBalloons(page, a.id, b.id);
+		expect(a.next).toBe(b.id);
+		connectBalloons(page, a.id, null);
+		expect(a).not.toHaveProperty('next');
+	});
+
+	it('refuses itself, an unknown balloon and a cycle', () => {
+		const { page, a, b, c } = three();
+		expect(() => connectBalloons(page, a.id, a.id)).toThrow(/itself/);
+		expect(() => connectBalloons(page, a.id, 'nope')).toThrow(/No balloon/);
+		connectBalloons(page, a.id, b.id);
+		connectBalloons(page, b.id, c.id);
+		expect(() => connectBalloons(page, c.id, a.id)).toThrow(/loop/);
+	});
+
+	it('drops connections to a deleted balloon, with their connector style', () => {
+		const { page, a, b } = three();
+		connectBalloons(page, a.id, b.id);
+		a.connector = 'line';
+		removeBalloon(page, b.id);
+		expect(page.balloons.map((x) => x.id)).not.toContain(b.id);
+		expect(a).not.toHaveProperty('next');
+		expect(a).not.toHaveProperty('connector');
 	});
 });

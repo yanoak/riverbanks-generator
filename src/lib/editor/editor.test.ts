@@ -454,10 +454,45 @@ describe('Editor anchored balloons', () => {
 		expect(balloon().x).toBeCloseTo(at.x, 6);
 	});
 
+	it('re-seats in its corner when its roundness changes', () => {
+		const { editor, balloon, id } = setup();
+		editor.setAnchor('tl');
+		const x = balloon().x;
+		editor.patch('Roundness', id, { roundness: 0 });
+		expect(balloon().x).toBeGreaterThan(x); // a box overhangs by its stroke only
+	});
+
 	it('a nudge lets go too', () => {
 		const { editor, balloon } = setup();
 		editor.setAnchor('tl');
 		editor.nudge(1, 0);
 		expect(balloon().anchor).toBeUndefined();
+	});
+});
+
+describe('Editor connected balloons', () => {
+	it('connects, switches to a line, refuses a loop, and unlinks on delete', () => {
+		const editor = new Editor();
+		editor.load(createComic('Chains', 'board'));
+		const ids = [0, 1].map(() => {
+			const id = editor.addBalloon('speech');
+			editor.stopEditing();
+			return id;
+		});
+		editor.select({ kind: 'balloon', id: ids[0] });
+		editor.setNext(ids[1]);
+		editor.setConnector('line');
+		const first = () => editor.page.balloons.find((b) => b.id === ids[0])!;
+		expect(first()).toMatchObject({ next: ids[1], connector: 'line' });
+
+		editor.select({ kind: 'balloon', id: ids[1] });
+		editor.setNext(ids[0]);
+		expect(editor.status).toMatch(/loop/);
+		expect(editor.page.balloons.find((b) => b.id === ids[1])).not.toHaveProperty('next');
+
+		editor.deleteSelection();
+		expect(first()).not.toHaveProperty('next');
+		editor.undo();
+		expect(first().next).toBe(ids[1]);
 	});
 });

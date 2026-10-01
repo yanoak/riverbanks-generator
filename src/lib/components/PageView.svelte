@@ -4,14 +4,21 @@
   export).
 -->
 <script lang="ts">
-	import { clipPathFor, insetOrthogonal, panelOutline, polygonBBox } from '$lib/geometry/grid';
+	import {
+		clipPathFor,
+		insetOrthogonal,
+		panelOutline,
+		polygonBBox,
+		pullInside
+	} from '$lib/geometry/grid';
 	import { panelPolygon } from '$lib/geometry/panel';
+	import { BALLOON_STROKE, connectorEnds, neckShape } from '$lib/geometry/balloon';
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import type { FreePanel, GridPanel, Page } from '$lib/model/types';
 	import Transformer from './Transformer.svelte';
 	import PanelImage from './PanelImage.svelte';
 	import ImageOverlay from './ImageOverlay.svelte';
-	import type { Balloon, Panel, Rect } from '$lib/model/types';
+	import type { Balloon, Panel, Point, Rect } from '$lib/model/types';
 	import type { Peer } from '$lib/collab/presence.svelte';
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
@@ -64,16 +71,40 @@
 
 	const balloons = $derived([...page.balloons].sort((a, b) => a.z - b.z));
 
+	/** Each connection on the page, drawn from where its balloons are right now. */
+	const links = $derived(
+		page.balloons.flatMap((original) => {
+			const target = original.next && page.balloons.find((b) => b.id === original.next);
+			if (!target) return [];
+			const a = shown(original);
+			const b = shown(target);
+			// An anchored balloon is clipped; meet it where it shows, not at its hidden outline.
+			const { from, to } = connectorEnds(a, b);
+			const visible = (end: Point, other: Point, balloon: Balloon) => {
+				const outline = visibleOutline(balloon);
+				return outline ? pullInside(end, other, outline) : end;
+			};
+			const ends = { from: visible(from, to, a), to: visible(to, from, b) };
+			const neck = original.connector === 'line' ? null : neckShape(a, b, BALLOON_STROKE, ends);
+			return [{ id: a.id, neck, ends, fill: original.fill, stroke: original.stroke }];
+		})
+	);
+
 	/**
 	 * An anchored balloon is cut off at the inside of its panel's border (in the balloon's own
 	 * units), so the border stays whole over it: a grid panel's 4-unit stroke is centred on its
 	 * outline, a free panel's lies inside its box.
 	 */
-	function clipFor(b: Balloon): string | undefined {
+	function visibleOutline(b: Balloon): Point[] | undefined {
 		const panel = b.anchor && page.panels.find((p) => p.id === b.anchor!.panelId);
 		if (!panel) return undefined;
 		const border = panel.border === 'none' ? 0 : panel.kind === 'grid' ? 2 : 4;
-		const outline = insetOrthogonal(panelPolygon(page, panel), border);
+		return insetOrthogonal(panelPolygon(page, panel), border);
+	}
+
+	function clipFor(b: Balloon): string | undefined {
+		const outline = visibleOutline(b);
+		if (!outline) return undefined;
 		const pts = outline.map((p) => `${p.x - b.x}px ${p.y - b.y}px`);
 		return `polygon(${pts.join(', ')})`;
 	}
@@ -280,6 +311,39 @@
 			{/if}
 		{/each}
 
+		<!-- Connections between balloons: necks' outlines and lines, beneath the balloons. -->
+		{#if links.length}
+			<svg
+				class="pointer-events-none absolute inset-0 overflow-visible"
+				style:z-index={editor ? 99 : undefined}
+				width={page.width}
+				height={page.height}
+				aria-hidden="true"
+			>
+				{#each links as link (link.id)}
+					{#if link.neck}
+						<path
+							d={link.neck.outline}
+							fill={link.fill}
+							stroke={link.stroke}
+							stroke-width={BALLOON_STROKE}
+							stroke-linejoin="round"
+						/>
+					{:else}
+						<line
+							x1={link.ends.from.x}
+							y1={link.ends.from.y}
+							x2={link.ends.to.x}
+							y2={link.ends.to.y}
+							stroke={link.stroke}
+							stroke-width={BALLOON_STROKE * 0.6}
+							stroke-linecap="round"
+						/>
+					{/if}
+				{/each}
+			</svg>
+		{/if}
+
 		{#each balloons as original, i (original.id)}
 			{@const balloon = shown(original)}
 			{#if editor}
@@ -344,6 +408,21 @@
 				</div>
 			{/if}
 		{/each}
+
+		<!-- A neck's fill over both balloons, painting out their outlines across its mouth. -->
+		{#if links.some((l) => l.neck)}
+			<svg
+				class="pointer-events-none absolute inset-0 overflow-visible"
+				style:z-index={editor ? 100 + balloons.length : undefined}
+				width={page.width}
+				height={page.height}
+				aria-hidden="true"
+			>
+				{#each links as link (link.id)}
+					{#if link.neck}<path d={link.neck.fill} fill={link.fill} />{/if}
+				{/each}
+			</svg>
+		{/if}
 
 		{#if editor && bottom > 0}{@render bandHit('footer')}{/if}
 

@@ -19,7 +19,7 @@ import {
 	useOnEveryPage,
 	type Band
 } from '$lib/model/bands';
-import { anchorBalloon, repinAnchors } from '$lib/model/balloons';
+import { anchorBalloon, connectBalloons, removeBalloon, repinAnchors } from '$lib/model/balloons';
 import { createComic, createPage } from '$lib/model/factory';
 import { panelNear } from '$lib/geometry/panel';
 import { createBalloon } from '$lib/model/balloons';
@@ -148,7 +148,15 @@ export class Editor {
 		fields: Partial<Balloon> | Partial<Panel>,
 		opts: { group?: boolean } = {}
 	): void {
-		this.change(description, (_d, page) => Object.assign(find(page, id), fields), opts);
+		this.change(
+			description,
+			(_d, page) => {
+				const target = Object.assign(find(page, id), fields);
+				// Size and roundness set an anchored balloon's overhang.
+				if ('anchor' in target && target.anchor) repinAnchors(page);
+			},
+			opts
+		);
 	}
 
 	/**
@@ -380,6 +388,25 @@ export class Editor {
 		return own || panelNear(this.page, { x: b.x + b.w / 2, y: b.y + b.h / 2 });
 	}
 
+	/** Connect the selected balloon to the next line, or unlink it; says why if it can't. */
+	setNext(nextId: string | null): void {
+		const b = this.selectedBalloon;
+		if (!b) return;
+		try {
+			this.change(nextId ? 'Connect balloons' : 'Disconnect balloons', (_d, page) =>
+				connectBalloons(page, b.id, nextId)
+			);
+		} catch (e) {
+			this.say((e as Error).message);
+		}
+	}
+
+	setConnector(kind: 'neck' | 'line'): void {
+		const b = this.selectedBalloon;
+		if (!b?.next) return;
+		this.patch('Connector', b.id, { connector: kind === 'neck' ? undefined : kind });
+	}
+
 	setAnchor(corner: Corner | null): void {
 		const b = this.selectedBalloon;
 		const panel = this.anchorPanel();
@@ -455,9 +482,7 @@ export class Editor {
 		const balloon = this.selectedBalloon;
 		if (balloon) {
 			if (this.refuseHeld(balloon.id)) return;
-			this.change(`Delete ${balloon.type}`, (_d, page) => {
-				page.balloons = page.balloons.filter((b) => b.id !== balloon.id);
-			});
+			this.change(`Delete ${balloon.type}`, (_d, page) => removeBalloon(page, balloon.id));
 			return this.select({ kind: 'none' });
 		}
 		const free = this.selectedPanels.filter((p) => p.kind === 'free').map((p) => p.id);

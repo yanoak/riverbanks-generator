@@ -266,6 +266,35 @@ export function insetOrthogonal(points: Point[], d: number): Point[] {
 	});
 }
 
+/** Even-odd ray test. */
+export function insidePolygon(p: Point, poly: Point[]): boolean {
+	let hit = false;
+	for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+		const a = poly[i];
+		const b = poly[j];
+		if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x)
+			hit = !hit;
+	}
+	return hit;
+}
+
+/**
+ * `p` if it is inside `poly`, else the first point inside on the way to `toward` (which should
+ * be inside): where a connector meets the visible part of a clipped balloon.
+ */
+export function pullInside(p: Point, toward: Point, poly: Point[]): Point {
+	if (insidePolygon(p, poly) || !insidePolygon(toward, poly)) return p;
+	let out = 0;
+	let inn = 1;
+	for (let i = 0; i < 24; i++) {
+		const mid = (out + inn) / 2;
+		const q = { x: p.x + (toward.x - p.x) * mid, y: p.y + (toward.y - p.y) * mid };
+		if (insidePolygon(q, poly)) inn = mid;
+		else out = mid;
+	}
+	return { x: p.x + (toward.x - p.x) * inn, y: p.y + (toward.y - p.y) * inn };
+}
+
 export function polygonBBox(points: Point[]): Rect {
 	const xs = points.map((p) => p.x);
 	const ys = points.map((p) => p.y);

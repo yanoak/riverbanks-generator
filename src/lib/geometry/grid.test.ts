@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	canMerge,
 	insetOrthogonal,
+	pullInside,
 	cellAt,
 	cellRect,
 	derivePanels,
@@ -252,5 +253,25 @@ describe('insetOrthogonal', () => {
 		const inset = insetOrthogonal(l, 2);
 		const box = polygonBBox(l);
 		expect(polygonBBox(inset)).toEqual({ x: box.x + 2, y: box.y + 2, w: box.w - 4, h: box.h - 4 });
+	});
+});
+
+describe('pullInside', () => {
+	const square = [
+		{ x: 0, y: 0 },
+		{ x: 100, y: 0 },
+		{ x: 100, y: 100 },
+		{ x: 0, y: 100 }
+	];
+
+	it('leaves a point that is already inside', () => {
+		expect(pullInside({ x: 10, y: 10 }, { x: 50, y: 50 }, square)).toEqual({ x: 10, y: 10 });
+	});
+
+	it('slides an outside point along the line until it is just inside', () => {
+		const p = pullInside({ x: -40, y: 50 }, { x: 60, y: 50 }, square);
+		expect(p.y).toBe(50);
+		expect(p.x).toBeGreaterThan(0);
+		expect(p.x).toBeLessThan(1);
 	});
 });

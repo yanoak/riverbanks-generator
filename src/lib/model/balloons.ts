@@ -90,3 +90,40 @@ export function repinAnchors(page: Page): void {
 		if (b.anchor && !pin(page, b, b.anchor, false)) delete b.anchor;
 	}
 }
+
+// --- connected balloons --------------------------------------------------------------------
+
+/** Make `toId` the next line after `fromId` (null unlinks). Refuses itself and loops. */
+export function connectBalloons(page: Page, fromId: string, toId: string | null): void {
+	const byId = (id: string) => {
+		const b = page.balloons.find((x) => x.id === id);
+		if (!b) throw new Error(`No balloon ${id} on this page.`);
+		return b;
+	};
+	const from = byId(fromId);
+	if (toId === null) {
+		delete from.next;
+		delete from.connector;
+		return;
+	}
+	if (toId === fromId) throw new Error('A balloon can’t connect to itself.');
+	byId(toId);
+	for (let id: string | undefined = toId, steps = 0; id; steps++) {
+		if (id === fromId || steps > page.balloons.length) {
+			throw new Error('That would make a loop: the chain already leads back to this balloon.');
+		}
+		id = page.balloons.find((x) => x.id === id)?.next;
+	}
+	from.next = toId;
+}
+
+/** Delete a balloon and any connection that led to it. */
+export function removeBalloon(page: Page, id: string): void {
+	page.balloons = page.balloons.filter((b) => b.id !== id);
+	for (const b of page.balloons) {
+		if (b.next === id) {
+			delete b.next;
+			delete b.connector;
+		}
+	}
+}

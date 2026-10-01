@@ -126,6 +126,19 @@ const shapeArgs = {
 		.optional()
 		.describe(
 			'Tuck the balloon into this corner of a panel (tl, tr, bl, br): it overhangs the corner and the panel border cuts it off flush, and it follows the corner when the grid changes. Keeps its size and its tail tip. null lets go.'
+		),
+	next: z
+		.string()
+		.nullable()
+		.optional()
+		.describe(
+			'Connect this balloon to the next line in the same exchange (a balloon id on the same page): the two are joined, as when one speaker says several lines. Chains are fine; loops are refused. null unlinks.'
+		),
+	connector: z
+		.enum(['neck', 'line'])
+		.optional()
+		.describe(
+			'How a connected balloon is joined to its next: neck (default) merges the outlines through a short bridge; line is a thin line.'
 		)
 };
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'a #rrggbb colour');

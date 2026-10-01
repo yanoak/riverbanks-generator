@@ -636,6 +636,33 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].balloons[0]).not.toHaveProperty('anchor');
 	});
 
+	it('connects balloons into a chain, refuses a loop, and unlinks on delete', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Chains' })).text);
+		for (const text of ['THERE WAS FIFTEEN', 'NOT EVEN A LAMP']) {
+			await call('add_balloon', { comicId: id, page: 1, type: 'speech', text });
+		}
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const [a, b] = d.pages[0].balloons;
+		await call('update_balloon', { comicId: id, page: 1, balloonId: a.id, next: b.id });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[0]).toMatchObject({ next: b.id, connector: 'neck' });
+
+		await call('update_balloon', { comicId: id, page: 1, balloonId: a.id, connector: 'line' });
+		const loop = await call('update_balloon', {
+			comicId: id,
+			page: 1,
+			balloonId: b.id,
+			next: a.id
+		});
+		expect(loop).toMatchObject({ isError: true });
+		expect(loop.text).toMatch(/loop/);
+
+		await call('delete_balloon', { comicId: id, page: 1, balloonId: b.id });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[0]).not.toHaveProperty('next');
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

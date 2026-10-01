@@ -1,7 +1,7 @@
 // Balloon outlines as SVG paths in balloon-local coordinates (0,0 = top-left of the box).
 // The tail point is also balloon-local, so a tail moves with its balloon.
 
-import type { BalloonType, Point } from '$lib/model/types';
+import type { BalloonType, Point, Rect } from '$lib/model/types';
 
 export interface BalloonShape {
 	/** Filled and stroked; drawn stroke-first then fill-on-top so overlaps read as one outline. */
@@ -214,4 +214,73 @@ export function textInset(type: BalloonType, roundness?: number): number {
 	// A rounded corner of radius r·w/2 needs ~0.146·r of the width clear; the ellipse ~14.6%.
 	const r = roundnessOf(type, roundness);
 	return r >= 1 ? 0.15 : Math.max(0.06, 0.15 * r);
+}
+
+// --- connectors between balloons ------------------------------------------------------------
+
+/** What a connector needs to know about a balloon. */
+export type Connectable = Rect & { type: BalloonType; roundness?: number };
+
+const outlineRoundness = (b: Connectable) =>
+	b.type === 'speech' || b.type === 'whisper' || b.type === 'caption'
+		? roundnessOf(b.type, b.roundness)
+		: 1;
+
+/** Where each balloon's outline faces the other: the line between their centres, cut by both. */
+export function connectorEnds(a: Connectable, b: Connectable): { from: Point; to: Point } {
+	const centre = (r: Rect) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
+	const end = (s: Connectable, toward: Point) => {
+		const p = outlinePoint(
+			s.w,
+			s.h,
+			outlineRoundness(s),
+			facing(s.w, s.h, { x: toward.x - s.x, y: toward.y - s.y })
+		);
+		return { x: s.x + p.x, y: s.y + p.y };
+	};
+	return { from: end(a, centre(b)), to: end(b, centre(a)) };
+}
+
+/**
+ * A neck joining two balloons into one outline, drawn in two layers: `outline` (stroked and
+ * filled, beneath both balloons; it starts deep inside each, so only the part between them
+ * shows) and `fill` (fill only, above both balloons; slightly narrower, it paints over each
+ * balloon's own outline across the neck's mouth so the joint reads as one shape).
+ */
+export function neckShape(
+	a: Connectable,
+	b: Connectable,
+	stroke = BALLOON_STROKE,
+	ends = connectorEnds(a, b)
+) {
+	const { from, to } = ends;
+	const width = Math.min(0.22 * Math.min(a.h, b.h), 0.5 * Math.min(a.w, b.w));
+	const len = Math.hypot(to.x - from.x, to.y - from.y) || 1;
+	const d = { x: (to.x - from.x) / len, y: (to.y - from.y) / len };
+	const n = { x: -d.y, y: d.x };
+	const at = (p: Point, along: number, side: number) => ({
+		x: p.x + d.x * along + n.x * side,
+		y: p.y + d.y * along + n.y * side
+	});
+	const band = (start: number, end: number, half: number) => {
+		// Sides pinched by 15% of the width at the middle: a quadratic's midpoint is a quarter of
+		// the way to its control point from the chord, so the control sits twice the pinch in.
+		const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+		const pinch = 0.15 * width;
+		const c1 = at(mid, 0, half - 2 * pinch);
+		const c2 = at(mid, 0, -(half - 2 * pinch));
+		const pts = [
+			at(from, -start, half),
+			at(to, end, half),
+			at(to, end, -half),
+			at(from, -start, -half)
+		];
+		const xy = (p: Point) => `${f(p.x)} ${f(p.y)}`;
+		return `M ${xy(pts[0])} Q ${xy(c1)} ${xy(pts[1])} L ${xy(pts[2])} Q ${xy(c2)} ${xy(pts[3])} Z`;
+	};
+	return {
+		width,
+		outline: band(width, width, width / 2),
+		fill: band(2 * stroke, 2 * stroke, width / 2 - stroke / 2)
+	};
 }

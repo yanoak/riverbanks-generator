@@ -22,6 +22,7 @@
 	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
 	import { tick } from 'svelte';
 	import { pointsOf, POINTS_RANGE, roundnessOf } from '$lib/geometry/balloon';
+	import { htmlToPlain } from '$lib/ops/text';
 	import type { Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
 
@@ -33,6 +34,12 @@
 		['bl', 'Bottom-left'],
 		['br', 'Bottom-right']
 	];
+
+	/** A balloon's first words, for menus. */
+	function excerpt(html: string): string {
+		const text = htmlToPlain(html).replace(/[*~]/g, '').replace(/\s+/g, ' ');
+		return text.length > 22 ? `${text.slice(0, 21)}…` : text || '(empty)';
+	}
 
 	/** "3", or "a free panel": how the Inspector names a panel. */
 	function panelNumber(panel: Panel | undefined): string {
@@ -302,6 +309,44 @@
 					A corner of panel {panelNumber(host)}, the one under the balloon.
 				{/if}
 			</p>
+		{/if}
+		{#if b.type !== 'sfx'}
+			<h3 class="sub">Connection</h3>
+			<label class="row gap-2">
+				<span class="shrink-0">Connect to</span>
+				<select
+					class="w-36 min-w-0 rounded border border-stone-300 px-1 py-0.5"
+					data-connect
+					value={b.next ?? ''}
+					onchange={(e) => editor.setNext(e.currentTarget.value || null)}
+				>
+					<option value="">None</option>
+					{#each editor.page.balloons as other, i (other.id)}
+						{#if other.id !== b.id && other.type !== 'sfx'}
+							<option value={other.id}>{i + 1} · {excerpt(other.html)}</option>
+						{/if}
+					{/each}
+				</select>
+			</label>
+			{#if b.next}
+				<div class="row" role="radiogroup" aria-label="Connector">
+					<span>Connector</span>
+					<span class="flex gap-3">
+						{#each [['neck', 'Neck'], ['line', 'Line']] as const as [kind, label] (kind)}
+							<label class="flex items-center gap-1">
+								<input
+									type="radio"
+									name="connector"
+									value={kind}
+									checked={(b.connector ?? 'neck') === kind}
+									onchange={() => editor.setConnector(kind)}
+								/>
+								{label}
+							</label>
+						{/each}
+					</span>
+				</div>
+			{/if}
 		{/if}
 		<div class="mt-3 grid grid-cols-2 gap-2">
 			<button class="btn" onclick={() => editor.reorder('front')} title="]">To front</button>

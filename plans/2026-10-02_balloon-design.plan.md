@@ -148,9 +148,16 @@ Each step is usable on its own.
       `get_comic` reports them
 - [x] Anchors: `anchorBalloon`, `repinAnchors` in the grid ops, the clip in the render, drag to
       detach, the Inspector menu and MCP; tests
-- [ ] Connections: `next`/`connector`, cycle and delete rules, neck and line rendering, the
+- [x] Connections: `next`/`connector`, cycle and delete rules, neck and line rendering, the
       Inspector menu and MCP; tests
-- [ ] Verify in the browser (below); then status `done`
+- [x] Found while verifying: Inspector edits to an anchored balloon's size or roundness
+      re-seat it in its corner; a connector meets a clipped (anchored) balloon where it shows
+      (`pullInside`)
+- [ ] Verify in the browser (below); then status `done`. On 2026-10-02 these passed in Chrome:
+      step 1 (the ellipse unchanged, then a box with its tail attached), step 2 (9 deep
+      spikes), step 4 (anchored flush with the border whole, and letting go), and step 5 (the
+      neck merging at both ends, then the line). Still to check by eye: step 3 (strike; unit
+      tested), step 6 (PNG) and step 7 (MCP live; unit tested)
 
 ## UI mockups (ASCII)
 
@@ -232,13 +239,13 @@ On the canvas, an anchored balloon and a necked pair:
   - it drops the anchor of a balloon whose panel was merged away.
 - [x] `setGrid`, `mergePanels` and `splitPanel` re-pin anchored balloons. Layer: unit,
       `src/lib/model/panels.test.ts`
-- [ ] Connections. Layer: unit, `balloons.test.ts`
+- [x] Connections. Layer: unit, `balloons.test.ts`
   - `connectBalloons` refuses a cycle and a balloon pointing at itself;
   - a delete removes the dangling `next`;
   - the neck geometry starts and ends on the two outlines.
-- [ ] The Y.Doc round-trips `roundness`, `points`, `depth`, `anchor`, `next` and `connector`.
+- [x] The Y.Doc round-trips `roundness`, `points`, `depth`, `anchor`, `next` and `connector`.
       Layer: unit, `src/lib/model/ydoc.test.ts`
-- [ ] MCP covers it all: `update_balloon` sets and clears the new fields, refuses a cycle and an
+- [x] MCP covers it all: `update_balloon` sets and clears the new fields, refuses a cycle and an
       unknown panel or balloon, and `get_comic` reports them. Layer: unit,
       `src/lib/server/mcp/server.test.ts`
 - [x] The editor detaches an anchored balloon when it is dragged, as one undo step, and keeps the
@@ -283,7 +290,11 @@ In the dev server against the local Supabase, on a new board comic:
 ## Open questions
 
 - [ ] Should an anchored balloon's tail be clipped too, when it points out of the panel? The plan
-      clips the whole balloon, which matches the references.
+      clips the whole balloon, which matches the references. In Chrome, a tail whose tip was far
+      outside the panel was cut off by the panel's edge.
+- [ ] A neck between balloons in **different** panels crosses the gutter and paints over both
+      borders. It is drawn faithfully, but it reads badly. Should it be refused, or drawn as a
+      line?
 
 ## Outcome
 

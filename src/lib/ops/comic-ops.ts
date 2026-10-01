@@ -3,7 +3,13 @@
 
 import { fitImage } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
-import { anchorBalloon, createBalloon, repinAnchors } from '$lib/model/balloons';
+import {
+	anchorBalloon,
+	connectBalloons,
+	createBalloon,
+	removeBalloon,
+	repinAnchors
+} from '$lib/model/balloons';
 import {
 	createFreePanel,
 	mergePanels as merge,
@@ -214,6 +220,9 @@ export interface ShapeArgs {
 	depth?: number | null;
 	/** Anchor to a panel corner (cut off flush by its border); null lets go. */
 	anchor?: BalloonAnchor | null;
+	/** Connect to the next balloon in the exchange; null unlinks. */
+	next?: string | null;
+	connector?: 'neck' | 'line';
 }
 
 function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
@@ -227,6 +236,18 @@ function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
 		panelIn(page, args.anchor.panelId);
 		anchorBalloon(page, b.id, args.anchor);
 	} else if (b.anchor) repinAnchors(page); // a new size or roundness changes the overhang
+	if (args.next !== undefined) {
+		try {
+			connectBalloons(page, b.id, args.next);
+		} catch (e) {
+			throw invalid((e as Error).message);
+		}
+	}
+	if (args.connector) {
+		if (!b.next) throw invalid('Only a connected balloon has a connector; set next first.');
+		if (args.connector === 'neck') delete b.connector;
+		else b.connector = args.connector;
+	}
 }
 
 export function addBalloon(
@@ -285,6 +306,6 @@ export function updateBalloon(
 export function deleteBalloon(comic: Comic, args: { page: number; balloonId: string }): string {
 	const page = pageAt(comic, args.page);
 	const b = balloonIn(page, args.balloonId);
-	page.balloons.splice(page.balloons.indexOf(b), 1);
+	removeBalloon(page, b.id);
 	return `Deleted balloon ${b.id}.`;
 }

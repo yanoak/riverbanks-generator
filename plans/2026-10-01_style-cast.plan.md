@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-01_style-cast
-status: active
+status: done
 started: 2026-10-01
-finished:
+finished: 2026-10-01
 issue:
 ---
 
@@ -254,3 +254,21 @@ States:
 4. A Sultan panel attaches no drone or boat.
 5. Edit a panel's chips, regenerate, and confirm the override sticks and "↺ Auto" restores it.
 6. Keyboard pass: navigate the editor with the keyboard only, as described above.
+
+## Outcome
+
+Shipped on 2026-10-01: migration pushed, then deployed. Verified on production over MCP:
+
+- **The style:** "Riverbanks house style" has 2 style references and 17 cast members:
+  - Ismahan at 18, 20 and 42; Ya at 8, 20 and 33;
+  - Dew, the Sultan, the General, the Financier, Jalal and Shapla;
+  - Taro as a kitten and as a cat;
+  - the drone, Jalal's boat and Ya's sailboat.
+
+  Each member's sheet was generated in-style with `generate_cast_portrait`, and they are
+  consistent across ages.
+- **The regenerated panels:** With the style on *Visa for a Hilsa*, panels 2-1, 2-2 and 4-5 were
+  regenerated. Each reported exactly the members it named ("Cast: the drone, Jalal, Jalal's boat"),
+  and the drone and boat now match each other and their sheets.
+- **Balloons:** One balloon tail needed moving after the redraw.
+- **Keyboard path:** It is covered by `e2e/cast.e2e.ts`.

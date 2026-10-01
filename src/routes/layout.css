@@ -1,1 +1,8 @@
 @import 'tailwindcss';
+
+/* Riverbanks is set in Rubik, after Sam's slides; the wordmark in its Microbe cut.
+   Both load from Google Fonts in app.html. */
+@theme {
+	--font-sans: 'Rubik', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Rubik Microbe', 'Rubik', ui-sans-serif, sans-serif;
+}

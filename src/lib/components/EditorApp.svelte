@@ -16,6 +16,7 @@
 	import type { DocumentSource } from '$lib/persistence/source';
 	import { onMount, type Snippet } from 'svelte';
 	import type { StyleSummary } from '$lib/styles/styles';
+	import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 	import type { ModelOption } from '$lib/generation/models';
 
 	/** A cloud comic (`cloud`, synced live through Yjs) or the local one (`source`). */
@@ -47,6 +48,11 @@
 		cloud && sharing && models
 			? { comicId: cloud.id, supabase: sharing.supabase, models }
 			: undefined
+	);
+
+	/** The lettering of this comic's style, or the house default. */
+	const typography = $derived(
+		styles?.find((s) => s.id === editor.comic.styleProfileId)?.typography ?? DEFAULT_TYPOGRAPHY
 	);
 
 	let sharingOpen = $state(false);
@@ -219,14 +225,14 @@
 
 <!-- Offscreen static render of the current page at 1 unit = 1px, for PNG export. -->
 <div class="export-stage" bind:this={stage} aria-hidden="true">
-	{#if loaded}<PageView page={editor.page} scale={1} />{/if}
+	{#if loaded}<PageView page={editor.page} scale={1} {typography} />{/if}
 </div>
 
 <!-- Every page, one per sheet; only visible when printing (Export → PDF). -->
 <div class="print-pages" aria-hidden="true">
 	{#if loaded}
 		{#each editor.comic.pages as page (page.id)}
-			<div class="print-page"><PageView {page} scale={PRINT_SCALE} /></div>
+			<div class="print-page"><PageView {page} scale={PRINT_SCALE} {typography} /></div>
 		{/each}
 	{/if}
 </div>
@@ -251,7 +257,7 @@
 		/>
 	{/if}
 	<div class="flex min-h-0 flex-1">
-		<PageStrip {editor} />
+		<PageStrip {editor} {typography} />
 		<main class="relative min-w-0 flex-1 overflow-auto" {@attach measure}>
 			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 			<div
@@ -268,7 +274,7 @@
 			>
 				<div class="shadow-[0_2px_24px_rgba(0,0,0,0.12)]">
 					{#if loaded}
-						<PageView page={editor.page} {scale} {editor} />
+						<PageView page={editor.page} {scale} {editor} {typography} />
 					{/if}
 				</div>
 			</div>

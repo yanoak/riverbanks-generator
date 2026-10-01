@@ -25,8 +25,8 @@ describe('createBalloon', () => {
 		expect(createBalloon(page, 'caption').z).toBeGreaterThan(a.z);
 	});
 
-	it('uses a display font for sfx', () => {
+	it('leaves the font to the style', () => {
 		const page = createPage();
-		expect(createBalloon(page, 'sfx').font).toMatch(/Bangers/);
+		expect(createBalloon(page, 'sfx').font).toBeUndefined();
 	});
 });

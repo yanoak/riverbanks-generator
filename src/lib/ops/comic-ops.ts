@@ -217,6 +217,7 @@ export function updateBalloon(
 	if (args.rect) Object.assign(b, args.rect);
 	if (args.fontSize) b.fontSize = args.fontSize;
 	if (args.font) b.font = args.font;
+	else if (args.font === '') delete b.font;
 	if (args.fill) b.fill = args.fill;
 	if (args.tailTip === null || !TAILED.includes(b.type)) delete b.tail;
 	else if (args.tailTip) b.tail = { x: args.tailTip.x - b.x, y: args.tailTip.y - b.y };

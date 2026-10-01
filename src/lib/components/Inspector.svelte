@@ -8,20 +8,14 @@
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import AlignCenter from '@lucide/svelte/icons/align-center';
 	import AlignRight from '@lucide/svelte/icons/align-right';
-	import { LETTERING_FONT, SFX_FONT } from '$lib/model/balloons';
+	import { FONTS, fontStack } from '$lib/typography/fonts';
+	import { DEFAULT_TYPOGRAPHY, describeLettering, followsStyle } from '$lib/typography/typography';
 	import type { StyleSummary } from '$lib/styles/styles';
 	import StyleDialog from './StyleDialog.svelte';
 	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
 	import { tick } from 'svelte';
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
-
-	const FONTS: [string, string][] = [
-		['Comic Neue', LETTERING_FONT],
-		['Bangers', SFX_FONT],
-		['Patrick Hand', "'Patrick Hand', cursive"],
-		['Permanent Marker', "'Permanent Marker', cursive"]
-	];
 
 	const align = (a: string) => ({
 		active: (tt: TipTap) => tt.isActive({ textAlign: a }),
@@ -56,6 +50,7 @@
 	let choosingStyle = $state(false);
 	const styleId = $derived(editor.comic.styleProfileId);
 	const style = $derived(styles?.find((s) => s.id === styleId));
+	const typography = $derived(style?.typography ?? DEFAULT_TYPOGRAPHY);
 
 	const panel = $derived(editor.selectedPanels.length === 1 ? editor.selectedPanels[0] : undefined);
 
@@ -75,6 +70,7 @@
 >
 	{#if editor.selectedBalloon}
 		{@const b = editor.selectedBalloon}
+		{@const own = followsStyle(b) ? '' : b.font!}
 		<h2 class="section">Balloon</h2>
 		{#if editor.textEditor}
 			{@const tt = editor.textEditor}
@@ -100,13 +96,18 @@
 		<label class="row">
 			<span>Font</span>
 			<select
-				class="w-32 rounded border border-stone-300 px-1 py-0.5"
-				value={b.font}
-				onchange={(e) => editor.patch('Font', b.id, { font: e.currentTarget.value })}
+				class="w-36 rounded border border-stone-300 px-1 py-0.5"
+				value={own}
+				onchange={(e) => editor.patch('Font', b.id, { font: e.currentTarget.value || undefined })}
 			>
-				{#each FONTS as [label, value] (value)}
-					<option {value}>{label}</option>
+				<option value="">Style — {describeLettering(typography[b.type])}</option>
+				<hr />
+				{#each FONTS as f (f.family)}
+					<option value={fontStack(f.family)}>{f.family}</option>
 				{/each}
+				{#if own && !FONTS.some((f) => fontStack(f.family) === own)}
+					<option value={own}>{own.split(',')[0].replace(/'/g, '')}</option>
+				{/if}
 			</select>
 		</label>
 		<label class="row">

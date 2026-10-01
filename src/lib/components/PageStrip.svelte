@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import PageView from './PageView.svelte';
+	import type { Typography } from '$lib/typography/typography';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Plus from '@lucide/svelte/icons/plus';
 
-	let { editor }: { editor: Editor } = $props();
+	let { editor, typography }: { editor: Editor; typography: Typography } = $props();
 	const THUMB_WIDTH = 88;
 	const peersOn = (pageId: string) =>
 		(editor.presence?.peers ?? []).filter((p) => p.page === pageId);
@@ -33,7 +34,7 @@
 				class:ring-2={i === editor.pageIndex}
 				class:ring-sky-500={i === editor.pageIndex}
 			>
-				<PageView {page} scale={THUMB_WIDTH / page.width} />
+				<PageView {page} scale={THUMB_WIDTH / page.width} {typography} />
 			</div>
 			<span class="flex items-center gap-1">
 				{i + 1}

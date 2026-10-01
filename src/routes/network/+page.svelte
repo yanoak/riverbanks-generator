@@ -88,7 +88,7 @@
 		<AppHeader email={data.user.email ?? ''} />
 	{:else}
 		<header class="flex h-12 items-center gap-4 border-b border-stone-200 bg-white px-4">
-			<span class="font-semibold tracking-tight">Riverbanks</span>
+			<span class="font-display tracking-wide">Riverbanks</span>
 			<div class="flex-1"></div>
 			<a href="/login?redirectTo=/network" class="text-sm text-stone-500 hover:text-stone-900"
 				>Sign in</a

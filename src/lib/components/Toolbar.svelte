@@ -76,10 +76,10 @@
 	class="flex h-12 shrink-0 items-center gap-1 border-b border-stone-200 bg-white px-3 text-sm text-stone-700"
 >
 	{#if nav}{@render nav()}{:else}
-		<span class="mr-2 font-semibold tracking-tight text-stone-900">Riverbanks</span>
+		<span class="mr-2 font-display tracking-wide text-stone-900">Riverbanks</span>
 	{/if}
 	<input
-		class="w-48 rounded px-2 py-1 text-stone-600 hover:bg-stone-100 focus:bg-stone-100 focus:outline-none"
+		class="w-48 min-w-24 shrink rounded px-2 py-1 text-stone-600 hover:bg-stone-100 focus:bg-stone-100 focus:outline-none"
 		aria-label="Comic title"
 		value={editor.comic.title}
 		onchange={(e) => editor.setTitle(e.currentTarget.value)}
@@ -116,23 +116,23 @@
 		disabled={editor.selectedPanels.length < 2}
 		title="Merge selected panels (M)"
 	>
-		<Combine size={16} /> Merge
+		<Combine size={16} /><span class="max-2xl:sr-only">Merge</span>
 	</button>
 	<button class="tool" onclick={() => editor.split()} disabled={!canSplit} title="Split panel (⇧M)">
-		<Split size={16} /> Split
+		<Split size={16} /><span class="max-2xl:sr-only">Split</span>
 	</button>
 
 	<div class="mx-2 h-6 w-px bg-stone-200"></div>
 
 	<button class="tool" onclick={() => editor.addFreePanel()} title="Add a free break-out panel (P)">
-		<SquarePlus size={16} /> Panel
+		<SquarePlus size={16} /><span class="max-2xl:sr-only">Panel</span>
 	</button>
 	<button
 		class="tool"
 		onclick={() => editor.splash()}
 		title="Turn the whole grid into one borderless full-page panel"
 	>
-		<Maximize size={16} /> Full page
+		<Maximize size={16} /><span class="max-2xl:sr-only">Full page</span>
 	</button>
 
 	<div class="mx-2 h-6 w-px bg-stone-200"></div>
@@ -149,10 +149,10 @@
 		<p class="mr-3 text-amber-700" role="status">{editor.status}</p>
 	{/if}
 	<button class="tool" onclick={onexportpng} title="Download this page as PNG (⌘E)">
-		<Download size={16} /> PNG
+		<Download size={16} /><span class="max-2xl:sr-only">PNG</span>
 	</button>
 	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
-		<FileText size={16} /> PDF
+		<FileText size={16} /><span class="max-2xl:sr-only">PDF</span>
 	</button>
 	{#if people.length}
 		<ul class="mr-1 flex -space-x-1" aria-label="Also here">
@@ -172,7 +172,7 @@
 	{/if}
 	{#if onshare}
 		<button class="tool" data-share onclick={onshare} title="Who has access">
-			<Users size={16} /> Share
+			<Users size={16} /><span class="max-2xl:sr-only">Share</span>
 		</button>
 	{/if}
 	<span
@@ -187,6 +187,6 @@
 <style lang="postcss">
 	@reference "../../routes/layout.css";
 	.tool {
-		@apply inline-flex h-8 items-center gap-1.5 rounded px-2 hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-transparent;
+		@apply inline-flex h-8 shrink-0 items-center gap-1.5 rounded px-2 whitespace-nowrap hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-transparent;
 	}
 </style>

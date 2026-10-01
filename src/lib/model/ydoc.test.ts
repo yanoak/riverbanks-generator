@@ -144,6 +144,20 @@ describe('style and prompts', () => {
 	});
 });
 
+describe('balloon fonts', () => {
+	it('a balloon with no font round-trips, and clearing a font deletes it', () => {
+		const comic = createComic('Lettered');
+		comic.pages[0].balloons.push(createBalloon(comic.pages[0], 'speech'));
+		const doc = comicToYDoc(comic);
+		const font = () => projectComic(doc).pages[0].balloons[0];
+		expect(font()).not.toHaveProperty('font');
+		edit(doc, (d) => (d.pages[0].balloons[0].font = "'Bangers', sans-serif"));
+		expect(font().font).toBe("'Bangers', sans-serif");
+		edit(doc, (d) => delete d.pages[0].balloons[0].font);
+		expect(font()).not.toHaveProperty('font');
+	});
+});
+
 describe('applyComic', () => {
 	it('writes nothing when nothing changed', () => {
 		const doc = comicToYDoc(fixture());

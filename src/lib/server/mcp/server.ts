@@ -13,6 +13,7 @@ import { loadComic, mutateComic, OpError } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
 import type { ComicStore } from '$lib/ops/store';
 import { panelBox } from '$lib/geometry/panel';
+import { FONTS } from '$lib/typography/fonts';
 import type { Network } from '$lib/network/canon';
 import type { GenerateInput, GenerateResult } from '$lib/server/generation/generate';
 import {
@@ -880,7 +881,9 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Update balloon',
 			description:
-				'Change a balloon’s text, type, rect, tail (null removes it), font size, font or fill.',
+				'Change a balloon’s text, type, rect, tail (null removes it), font size, font or fill. ' +
+				'A balloon with no font follows its comic style’s lettering for its type; `font` gives it its own ' +
+				`(a CSS font-family; loaded fonts: ${FONTS.map((f) => f.family).join(', ')}) and "" hands it back to the style.`,
 			inputSchema: {
 				comicId: z.string(),
 				page,

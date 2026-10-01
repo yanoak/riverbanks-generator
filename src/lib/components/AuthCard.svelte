@@ -18,7 +18,7 @@
 
 <main class="grid min-h-screen place-items-center bg-stone-100 px-4 text-stone-900">
 	<div class="w-full max-w-sm">
-		<p class="mb-6 text-center text-lg font-semibold tracking-tight">Riverbanks</p>
+		<p class="mb-6 text-center font-display text-lg tracking-wide">Riverbanks</p>
 		<section class="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
 			<h1 class="mb-4 text-xl font-semibold">{title}</h1>
 			{#if error}

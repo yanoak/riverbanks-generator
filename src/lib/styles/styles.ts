@@ -2,6 +2,7 @@
 // (the style_profiles migration). Reference files live at style-refs/<profile id>/<ref id>.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { resolveTypography, type Typography } from '$lib/typography/typography';
 
 export interface PaletteColor {
 	hex: string;
@@ -52,6 +53,8 @@ export interface StyleProfile {
 	avoid: string;
 	/** A key in the model registry; null means the default model. */
 	model: string | null;
+	/** Only the balloon types the creator changed; resolveTypography fills in the rest. */
+	typography: Partial<Typography>;
 	updatedAt: string;
 	refs: StyleRef[];
 	cast: CastMember[];
@@ -60,6 +63,8 @@ export interface StyleProfile {
 /** Enough to pick a style from a list, and to show which of its cast a panel will get. */
 export type StyleSummary = Pick<StyleProfile, 'id' | 'name' | 'palette' | 'model'> & {
 	cast: Pick<CastMember, 'id' | 'kind' | 'name' | 'aliases'>[];
+	/** Resolved: every balloon type, with the house default where the style sets nothing. */
+	typography: Typography;
 };
 
 export const summarize = (p: StyleProfile): StyleSummary => ({
@@ -67,11 +72,12 @@ export const summarize = (p: StyleProfile): StyleSummary => ({
 	name: p.name,
 	palette: p.palette,
 	model: p.model,
-	cast: p.cast.map(({ id, kind, name, aliases }) => ({ id, kind, name, aliases }))
+	cast: p.cast.map(({ id, kind, name, aliases }) => ({ id, kind, name, aliases })),
+	typography: resolveTypography(p.typography)
 });
 
 export type ProfilePatch = Partial<
-	Pick<StyleProfile, 'name' | 'style' | 'palette' | 'avoid' | 'model'>
+	Pick<StyleProfile, 'name' | 'style' | 'palette' | 'avoid' | 'model' | 'typography'>
 >;
 
 export const REFS_BUCKET = 'style-refs';
@@ -79,7 +85,7 @@ export const MAX_REFS = 14;
 export const refPath = (r: Pick<StyleRef, 'profileId' | 'id'>) => `${r.profileId}/${r.id}`;
 
 const COLUMNS =
-	'id, created_by, name, style, palette, avoid, model, updated_at, ' +
+	'id, created_by, name, style, palette, avoid, model, typography, updated_at, ' +
 	'style_refs (id, profile_id, role, label, cast_id, sort, width, height), ' +
 	'style_cast (id, profile_id, kind, name, aliases, description, sort, portrait_id)';
 const REF_COLUMNS = 'id, profile_id, role, label, cast_id, sort, width, height';
@@ -113,6 +119,7 @@ type Row = {
 	palette: PaletteColor[];
 	avoid: string;
 	model: string | null;
+	typography: Partial<Typography> | null;
 	updated_at: string;
 	style_refs: RefRow[];
 	style_cast: CastRow[];
@@ -152,6 +159,7 @@ function toProfile(r: Row, emails: Map<string, string>): StyleProfile {
 		palette: r.palette,
 		avoid: r.avoid,
 		model: r.model,
+		typography: r.typography ?? {},
 		updatedAt: r.updated_at,
 		refs: bySort(r.style_refs).map(toRef),
 		cast: bySort(r.style_cast ?? []).map(toMember)

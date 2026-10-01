@@ -110,6 +110,17 @@ describe('balloon ops', () => {
 		expect(comic.pages[0].balloons).toHaveLength(0);
 	});
 
+	it('sets a balloon’s own font, and an empty font hands it back to the style', () => {
+		const comic = createComic();
+		const { id } = addBalloon(comic, { page: 1, type: 'speech', text: 'x' });
+		const b = comic.pages[0].balloons.find((x) => x.id === id)!;
+		expect(b.font).toBeUndefined();
+		updateBalloon(comic, { page: 1, balloonId: id, font: "'Rubik Dirt', sans-serif" });
+		expect(b.font).toBe("'Rubik Dirt', sans-serif");
+		updateBalloon(comic, { page: 1, balloonId: id, font: '' });
+		expect(b).not.toHaveProperty('font');
+	});
+
 	it('clears the tail for types that have none', () => {
 		const comic = createComic();
 		const { id } = addBalloon(comic, { page: 1, type: 'speech', text: 'x' });

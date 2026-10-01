@@ -6,6 +6,7 @@
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import StyleChoices from '$lib/components/StyleChoices.svelte';
 	import PageView from '$lib/components/PageView.svelte';
+	import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 	import type { Comic } from '$lib/model/types';
 	import { useAssetBackend } from '$lib/persistence/assets.svelte';
 	import { supabaseAssets } from '$lib/persistence/cloud-assets';
@@ -24,6 +25,8 @@
 
 	const mine = $derived(data.comics.filter((c) => !c.sharedBy));
 	const shared = $derived(data.comics.filter((c) => c.sharedBy));
+	const lettering = (styleId: string | null) =>
+		data.styles.find((s) => s.id === styleId)?.typography ?? DEFAULT_TYPOGRAPHY;
 
 	onMount(async () => {
 		// Thumbnails show several comics: find each image's comic by its asset id.
@@ -182,7 +185,11 @@
 				style:width="{THUMB}px"
 			>
 				{#if comic.firstPage}
-					<PageView page={comic.firstPage} scale={THUMB / comic.firstPage.width} />
+					<PageView
+						page={comic.firstPage}
+						scale={THUMB / comic.firstPage.width}
+						typography={lettering(comic.styleProfileId)}
+					/>
 				{/if}
 			</div>
 		</a>

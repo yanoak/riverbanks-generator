@@ -5,6 +5,8 @@
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import CastDialog from '$lib/components/CastDialog.svelte';
+	import TypographyEditor from '$lib/components/TypographyEditor.svelte';
+	import type { Typography } from '$lib/typography/typography';
 	import { DEFAULT_MODEL } from '$lib/generation/models';
 	import { downscale } from '$lib/styles/downscale';
 	import {
@@ -39,6 +41,7 @@
 	let palette = $state<PaletteColor[]>(initial.palette);
 	let avoid = $state(initial.avoid);
 	let model = $state(initial.model ?? '');
+	let typography = $state<Partial<Typography>>(initial.typography);
 	let refs = $state<StyleRef[]>(initial.refs);
 	let cast = $state<CastMember[]>(initial.cast);
 	const styleRefs = $derived(refs.filter((r) => !r.castId));
@@ -590,6 +593,22 @@
 				<p class="mt-1 text-xs text-stone-500">
 					Comics with this style start on this model; anyone can switch per panel.
 				</p>
+			</section>
+
+			<section aria-labelledby="typography-heading">
+				<h2 class="section" id="typography-heading">Typography</h2>
+				<p class="mb-3 text-xs text-stone-500">
+					How each kind of balloon is lettered in comics with this style. A balloon given its own
+					font in the editor keeps it.
+				</p>
+				<TypographyEditor
+					value={typography}
+					{readonly}
+					onchange={(next) => {
+						typography = next;
+						queue({ typography: next });
+					}}
+				/>
 			</section>
 		</fieldset>
 	</main>

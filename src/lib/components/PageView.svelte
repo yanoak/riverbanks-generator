@@ -14,8 +14,14 @@
 	import type { Peer } from '$lib/collab/presence.svelte';
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
+	import { DEFAULT_TYPOGRAPHY, type Typography } from '$lib/typography/typography';
 
-	let { page, scale, editor }: { page: Page; scale: number; editor?: Editor } = $props();
+	let {
+		page,
+		scale,
+		editor,
+		typography = DEFAULT_TYPOGRAPHY
+	}: { page: Page; scale: number; editor?: Editor; typography?: Typography } = $props();
 
 	const shapes = $derived(
 		page.panels
@@ -262,7 +268,7 @@
 				>
 					<div class="contents" role="presentation">
 						{#if editor.editingBalloonId === balloon.id}
-							<BalloonView {balloon}>
+							<BalloonView {balloon} {typography}>
 								{#snippet text()}
 									<div
 										class="rich-text cursor-text"
@@ -271,7 +277,7 @@
 								{/snippet}
 							</BalloonView>
 						{:else}
-							<BalloonView {balloon} />
+							<BalloonView {balloon} {typography} />
 						{/if}
 					</div>
 					{#snippet extra()}
@@ -298,7 +304,7 @@
 					style:width="{balloon.w}px"
 					style:height="{balloon.h}px"
 				>
-					<BalloonView {balloon} />
+					<BalloonView {balloon} {typography} />
 				</div>
 			{/if}
 		{/each}

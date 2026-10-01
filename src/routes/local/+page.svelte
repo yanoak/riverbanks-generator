@@ -9,7 +9,7 @@
 
 <EditorApp source={localSource}>
 	{#snippet nav()}
-		<a href="/" class="mr-2 font-semibold tracking-tight text-stone-900">Riverbanks</a>
+		<a href="/" class="mr-2 font-display tracking-wide text-stone-900">Riverbanks</a>
 		<span
 			class="mr-2 rounded bg-stone-100 px-2 py-0.5 text-xs text-stone-500"
 			title="Saved in this browser only"

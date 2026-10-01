@@ -2,7 +2,7 @@
 
 <main class="grid min-h-screen place-items-center bg-stone-100 px-4 text-stone-900">
 	<div class="max-w-md text-center">
-		<h1 class="mb-3 text-4xl font-semibold tracking-tight">Riverbanks</h1>
+		<h1 class="mb-3 font-display text-4xl tracking-wide">Riverbanks</h1>
 		<p class="mb-8 text-stone-600">
 			Make comic pages: merge a panel grid into any layout, drop in images, and letter speech,
 			thought and caption balloons right on the page. Your AI assistant can build pages with you

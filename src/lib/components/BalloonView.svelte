@@ -3,11 +3,14 @@
 	import type { Snippet } from 'svelte';
 	import { balloonShape, textInset } from '$lib/geometry/balloon';
 	import type { Balloon } from '$lib/model/types';
+	import { letteringFor, type Typography } from '$lib/typography/typography';
 
-	let { balloon, text }: { balloon: Balloon; text?: Snippet } = $props();
+	let { balloon, typography, text }: { balloon: Balloon; typography: Typography; text?: Snippet } =
+		$props();
 
 	const shape = $derived(balloonShape(balloon.type, balloon.w, balloon.h, balloon.tail));
 	const inset = $derived(textInset(balloon.type));
+	const lettering = $derived(letteringFor(balloon, typography));
 	const STROKE = 7;
 </script>
 
@@ -37,7 +40,10 @@
 	class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
 	class:sfx={balloon.type === 'sfx'}
 	style:inset="{balloon.h * inset}px {balloon.w * inset}px"
-	style:font-family={balloon.font}
+	style:font-family={lettering.fontFamily}
+	style:font-weight={lettering.fontWeight}
+	style:font-style={lettering.fontStyle}
+	style:text-transform={lettering.textTransform}
 	style:font-size="{balloon.fontSize}px"
 	style:--sfx-fill={balloon.fill}
 	style:--sfx-stroke={balloon.stroke}

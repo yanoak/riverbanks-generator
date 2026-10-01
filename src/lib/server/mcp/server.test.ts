@@ -18,6 +18,7 @@ const INK: StyleProfile = {
 	palette: [{ hex: '#1d3557', name: 'deep navy' }],
 	avoid: 'gradients',
 	model: null,
+	typography: {},
 	updatedAt: '2026-09-29T00:00:00Z',
 	refs: [
 		{

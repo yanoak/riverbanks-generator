@@ -1,6 +1,8 @@
 import { newId } from './factory';
 import type { Balloon, BalloonType, Page, Rect } from './types';
 
+// What createBalloon stamped on every balloon before lettering came from the style
+// (typography/typography.ts treats these as unset).
 export const LETTERING_FONT = "'Comic Neue', 'Comic Sans MS', cursive";
 export const SFX_FONT = "'Bangers', 'Impact', sans-serif";
 
@@ -34,7 +36,6 @@ export function createBalloon(page: Page, type: BalloonType, box?: Rect): Balloo
 		z,
 		tail: HAS_TAIL.includes(type) ? { x: w * 0.35, y: h + h * 0.6 } : undefined,
 		html: d.html,
-		font: type === 'sfx' ? SFX_FONT : LETTERING_FONT,
 		fontSize: d.fontSize,
 		fill: type === 'caption' ? '#fff4c2' : type === 'sfx' ? '#ffd23f' : '#ffffff',
 		stroke: '#000000'

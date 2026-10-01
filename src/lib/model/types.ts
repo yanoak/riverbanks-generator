@@ -82,7 +82,8 @@ export interface Balloon extends Rect {
 	tail?: Point;
 	/** Rich text from the in-place editor (TipTap), rendered as-is. */
 	html: string;
-	font: string;
+	/** A CSS font-family of the balloon's own; absent means its style's lettering for its type. */
+	font?: string;
 	fontSize: number;
 	fill: string;
 	stroke: string;

@@ -14,6 +14,7 @@ import {
 	removeCastMember,
 	removeRef,
 	saveProfile,
+	summarize,
 	updateCastMember,
 	updateRef
 } from './styles';
@@ -55,7 +56,10 @@ describe.skipIf(!url || !serviceKey)('style profiles and generations (RLS)', () 
 			style: 'Loose brush ink',
 			palette: [{ hex: '#1d3557', name: 'deep navy' }],
 			avoid: 'gradients',
-			model: 'gemini-flash'
+			model: 'gemini-flash',
+			typography: {
+				caption: { family: 'Rubik Dirt', weight: 400, italic: false, uppercase: true }
+			}
 		});
 		const seen = await getProfile(other.client, profileId);
 		expect(seen).toMatchObject({
@@ -64,11 +68,16 @@ describe.skipIf(!url || !serviceKey)('style profiles and generations (RLS)', () 
 			palette: [{ hex: '#1d3557', name: 'deep navy' }],
 			avoid: 'gradients',
 			model: 'gemini-flash',
+			typography: {
+				caption: { family: 'Rubik Dirt', weight: 400, italic: false, uppercase: true }
+			},
 			createdBy: maker.id,
 			creatorEmail: maker.email,
 			refs: []
 		});
-		expect((await listProfiles(other.client)).map((p) => p.id)).toContain(profileId);
+		const listed = (await listProfiles(other.client)).find((p) => p.id === profileId)!;
+		expect(summarize(listed).typography.caption.family).toBe('Rubik Dirt');
+		expect(summarize(listed).typography.speech.family).toBe('Rubik');
 	});
 
 	it('someone else cannot change or delete it', async () => {

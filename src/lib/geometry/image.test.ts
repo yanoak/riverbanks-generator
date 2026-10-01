@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { fitImage, GENERATED_OVERSCAN, panImage, zoomImage } from './image';
+import {
+	fillPercent,
+	fitImage,
+	GENERATED_OVERSCAN,
+	panImage,
+	resizeFromCorner,
+	setFillPercent,
+	zoomImage
+} from './image';
 
 const box = { w: 400, h: 200 };
 const natural = { naturalWidth: 1000, naturalHeight: 1000 };
@@ -65,5 +73,51 @@ describe('overscan', () => {
 
 	it('is 1.08 for generated images', () => {
 		expect(GENERATED_OVERSCAN).toBe(1.08);
+	});
+});
+
+describe('resizeFromCorner', () => {
+	const img = { naturalWidth: 200, naturalHeight: 100 };
+	// The image at scale 1, its top-left at (10, 20) in panel-box coordinates: 200 × 100.
+	const start = { scale: 1, offsetX: 10, offsetY: 20 };
+	const corners = (p: typeof start) => ({
+		tl: { x: p.offsetX, y: p.offsetY },
+		br: { x: p.offsetX + 200 * p.scale, y: p.offsetY + 100 * p.scale }
+	});
+
+	it('grows from the bottom-right, keeping the top-left in place', () => {
+		const out = resizeFromCorner(start, img, 'br', { x: 410, y: 220 });
+		expect(out.scale).toBeCloseTo(2, 9);
+		expect(corners(out).tl.x).toBeCloseTo(10, 9);
+		expect(corners(out).tl.y).toBeCloseTo(20, 9);
+	});
+
+	it('shrinks from the top-left, keeping the bottom-right in place', () => {
+		const out = resizeFromCorner(start, img, 'tl', { x: 110, y: 70 });
+		expect(out.scale).toBeCloseTo(0.5, 9);
+		expect(corners(out).br.x).toBeCloseTo(210, 9);
+		expect(corners(out).br.y).toBeCloseTo(120, 9);
+	});
+
+	it('projects an off-diagonal pointer onto the diagonal', () => {
+		// Straight right of the bottom-right corner by 100: half of that is along the diagonal.
+		const out = resizeFromCorner(start, img, 'br', { x: 310, y: 120 });
+		expect(out.scale).toBeGreaterThan(1);
+		expect(out.scale).toBeLessThan(1.5);
+	});
+});
+
+describe('fill percent', () => {
+	const img = { naturalWidth: 1000, naturalHeight: 500 };
+	const box = { w: 400, h: 400 };
+
+	it('is 100 when the image just fills the panel, and round-trips', () => {
+		const fill = { ...img, ...fitImage(img, box, 'fill') };
+		expect(fillPercent(fill, box)).toBeCloseTo(100, 9);
+		const zoomed = { ...fill, ...setFillPercent(fill, box, 150) };
+		expect(fillPercent(zoomed, box)).toBeCloseTo(150, 9);
+		const back = setFillPercent(zoomed, box, 100);
+		expect(back.scale).toBeCloseTo(fill.scale, 9);
+		expect(back.offsetX).toBeCloseTo(fill.offsetX, 9);
 	});
 });

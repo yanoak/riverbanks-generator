@@ -22,6 +22,8 @@
 	import GeneratePanel, { type GenerationContext } from './GeneratePanel.svelte';
 	import { tick } from 'svelte';
 	import { pointsOf, POINTS_RANGE, roundnessOf } from '$lib/geometry/balloon';
+	import { fillPercent, setFillPercent } from '$lib/geometry/image';
+	import { panelBox } from '$lib/geometry/panel';
 	import { htmlToPlain } from '$lib/ops/text';
 	import { sfxRotation } from '$lib/model/balloons';
 	import type { Band } from '$lib/model/bands';
@@ -54,7 +56,7 @@
 
 	/** A slider's moves while one drag (or key press) lasts are one undo step. */
 	let sliding = $state<string | null>(null);
-	function slide(id: string, description: string, fields: Partial<Balloon>) {
+	function slide(id: string, description: string, fields: Partial<Balloon> | Partial<Panel>) {
 		const key = `${id}:${description}`;
 		editor.patch(description, id, fields, { group: sliding === key });
 		sliding = key;
@@ -411,6 +413,31 @@
 				<button class="btn" onclick={() => editor.enterImageMode()} title="Enter">Crop…</button>
 				<button class="btn" onclick={() => editor.removeImage(panel)}>Remove</button>
 			</div>
+			{@const imgBox = panelBox(editor.page, panel)}
+			{@const size = Math.round(fillPercent(panel.image, imgBox))}
+			<label class="row mb-2 gap-2">
+				<span>Size</span>
+				<span class="flex items-center gap-2">
+					<input
+						class="w-24"
+						type="range"
+						min="25"
+						max="400"
+						value={size}
+						data-image-size
+						aria-valuetext="{size}% of filling the panel"
+						oninput={(e) =>
+							slide(panel.id, 'Image size', {
+								image: {
+									...panel.image!,
+									...setFillPercent(panel.image!, imgBox, +e.currentTarget.value)
+								}
+							})}
+						onchange={endSlide}
+					/>
+					<span class="w-10 text-right tabular-nums">{size}%</span>
+				</span>
+			</label>
 		{:else}
 			<p class="mb-2 text-xs text-stone-500">Drop an image on the panel, paste with ⌘V, or:</p>
 		{/if}

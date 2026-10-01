@@ -60,3 +60,38 @@ export function zoomImage<T extends Placement>(
 export function panImage<T extends Placement>(img: T, { dx, dy }: Delta): T {
 	return { ...img, offsetX: img.offsetX + dx, offsetY: img.offsetY + dy };
 }
+
+/**
+ * Drag one corner of the image (crop mode) to resize it, aspect ratio locked: the opposite
+ * corner stays put, and the pointer (panel-box coordinates) is projected onto the diagonal.
+ */
+export function resizeFromCorner<T extends Placement>(
+	start: T,
+	natural: Natural,
+	corner: 'tl' | 'tr' | 'bl' | 'br',
+	pointer: { x: number; y: number }
+): T {
+	const w = natural.naturalWidth * start.scale;
+	const h = natural.naturalHeight * start.scale;
+	const left = corner[1] === 'l';
+	const top = corner[0] === 't';
+	const anchor = { x: start.offsetX + (left ? w : 0), y: start.offsetY + (top ? h : 0) };
+	const d = { x: left ? -w : w, y: top ? -h : h };
+	const p = { x: pointer.x - anchor.x, y: pointer.y - anchor.y };
+	const t = (p.x * d.x + p.y * d.y) / (d.x * d.x + d.y * d.y);
+	return zoomImage(start, Math.max(t, 0.02), anchor);
+}
+
+/** The image's size as a percentage of the scale that just fills the box (100 = Fill). */
+export function fillPercent(img: Placement & Natural, box: { w: number; h: number }): number {
+	return (img.scale / fitImage(img, box, 'fill').scale) * 100;
+}
+
+/** Resize to `percent` of filling the box, zooming about the box's centre. */
+export function setFillPercent<T extends Placement & Natural>(
+	img: T,
+	box: { w: number; h: number },
+	percent: number
+): T {
+	return zoomImage(img, percent / fillPercent(img, box), { x: box.w / 2, y: box.h / 2 });
+}

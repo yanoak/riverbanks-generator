@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_crop-resize
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -40,9 +40,9 @@ Yan asked on 2026-10-02 for resize controls that keep the aspect ratio fixed.
 
 ## Tasks
 
-- [ ] `resizeFromCorner` and its tests
-- [ ] Corner handles in `ImageOverlay`, and the Inspector Size slider
-- [ ] Verify; `done`
+- [x] `resizeFromCorner` and its tests
+- [x] Corner handles in `ImageOverlay`, and the Inspector Size slider
+- [x] Verify; `done`
 
 ## UI mockups (ASCII)
 
@@ -70,13 +70,13 @@ Yan asked on 2026-10-02 for resize controls that keep the aspect ratio fixed.
 
 ## Test list (TDD)
 
-- [ ] `resizeFromCorner` behaviour. Layer: unit, `src/lib/geometry/image.test.ts`
+- [x] `resizeFromCorner` behaviour. Layer: unit, `src/lib/geometry/image.test.ts`
   - dragging the bottom-right corner outwards grows the image and keeps the top-left where it
     is;
   - dragging the top-left inwards shrinks it and keeps the bottom-right;
   - the aspect ratio is unchanged;
   - an off-diagonal pointer still gives a sensible size, from the projection.
-- [ ] `fillPercent` and `setFillPercent` round-trip, and setting 100% equals Fill. Layer: unit,
+- [x] `fillPercent` and `setFillPercent` round-trip, and setting 100% equals Fill. Layer: unit,
       `image.test.ts`
 
 ## Verification
@@ -89,4 +89,14 @@ Yan asked on 2026-10-02 for resize controls that keep the aspect ratio fixed.
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02.
+
+- **Handles:** crop mode shows four amber corner handles on the ghosted image. Dragging one
+  resizes the image, aspect locked, about the opposite corner.
+- **Slider:** the Inspector's Image section has a Size slider, 25–400% of filling the panel.
+- **Checked in Chrome** with a pasted test image:
+  - the upload read 100%, so no overscan, as intended;
+  - dragging the bottom-right handle grew it to 154% from a fixed top-left corner, with its
+    circle still round;
+  - one ⌘Z returned it to 100%.
+- **Not checked by hand:** the slider's arrow-key steps (it is a standard range input).

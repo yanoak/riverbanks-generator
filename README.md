@@ -38,7 +38,8 @@ The RIVERBOOK Google Doc is canon. The `riverbook-network` Claude Code skill
 3. shows the diff (`./scripts/network-diff.py`);
 4. saves it with the MCP tool `set_story_network`.
 
-Run it after the doc changes. The page updates without a deploy.
+Run it after the doc changes. The page updates without a deploy. How it all fits together, and
+how to update it by hand if needed: [`docs/story-network.md`](docs/story-network.md).
 
 ## Styles and generating images
 

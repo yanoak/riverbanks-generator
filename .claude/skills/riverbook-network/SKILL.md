@@ -5,6 +5,9 @@ description: Sync the story network (the /network page in Riverbanks) from the R
 
 # Sync the story network from RIVERBOOK
 
+Full background (architecture, portraits, crop tuning, how to check the page, gotchas):
+[`docs/story-network.md`](../../../docs/story-network.md). Read it first if anything below is unclear.
+
 The `/network` page in the Riverbanks app shows every character in the canonised stories and how
 they are tied. Its data is one document, saved over the Riverbanks MCP (`set_story_network`) and
 committed to `content/network/riverbook.json` for history. **The Google Doc is canon.** This skill

@@ -226,6 +226,12 @@ describe('header and footer bands (grid top/bottom)', () => {
 		expect(polygonBBox(panelOutline(all, board, page))).toEqual({ x: 20, y: 228, w: 960, h: 960 });
 	});
 
+	it('runs the current board’s grid edge to edge between its 83-unit bands', () => {
+		const all = [...Array(16).keys()];
+		const v2: GridSpec = { rows: 4, cols: 4, gutter: 10, margin: 0, top: 83, bottom: 83 };
+		expect(polygonBBox(panelOutline(all, v2, page))).toEqual({ x: 0, y: 83, w: 1000, h: 1250 });
+	});
+
 	it('treats missing bands as zero', () => {
 		const plain: GridSpec = { rows: 4, cols: 4, gutter: 10, margin: 20 };
 		expect(cellRect(plain, page, 0).y).toBe(20);

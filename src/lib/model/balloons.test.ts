@@ -16,8 +16,8 @@ describe('createBalloon', () => {
 		const board = createComic('t', 'board').pages[0];
 		for (const type of ['caption', 'speech'] as const) {
 			const b = createBalloon(board, type);
-			expect(b.y).toBeGreaterThanOrEqual(208);
-			expect(b.y + b.h).toBeLessThanOrEqual(1416 - 208);
+			expect(b.y).toBeGreaterThanOrEqual(83);
+			expect(b.y + b.h).toBeLessThanOrEqual(1416 - 83);
 		}
 	});
 

@@ -45,9 +45,6 @@
 		linkable?: boolean;
 	} = $props();
 
-	/** The footer QR's side: most of the 208-unit footer, ~95 mm on an A1 board. */
-	const QR_SIZE = 150;
-
 	/** The bands' boxes: a strip above and below the grid, where the page has them. */
 	const top = $derived(page.grid.top ?? 0);
 	const bottom = $derived(page.grid.bottom ?? 0);
@@ -503,54 +500,58 @@
 	</div>
 </div>
 
-<!-- After Sam's slides: the title in Rubik Microbe capitals, the footer in small Rubik caps. -->
+<!-- After Yan's annotated A1 sheet: title and subtitle on one line; footer in small Rubik caps,
+     its right end carrying the QR with its address beside it. Lettering scales with the band. -->
 {#snippet header()}
 	<div
-		class="band header absolute inset-x-0 top-0 flex flex-col items-center justify-center px-8 text-center"
+		class="band header absolute inset-x-0 top-0 flex items-baseline justify-center gap-[0.4em] px-8 text-center"
 		style:height="{top}px"
+		style:--band="{top}px"
+		style:align-content="center"
+		style:flex-wrap="wrap"
 	>
-		{#if bands?.header.title}<div class="title">{bands.header.title}</div>{/if}
-		{#if bands?.header.subtitle}<div class="subtitle">{bands.header.subtitle}</div>{/if}
+		{#if bands?.header.title}<span class="title">{bands.header.title}</span>{/if}
+		{#if bands?.header.subtitle}<span class="subtitle">{bands.header.subtitle}</span>{/if}
 	</div>
 {/snippet}
 
 {#snippet footer()}
 	{@const href = qrHref(bands?.footer.qr ?? '')}
 	{@const qr = href ? qrMatrix(href) : null}
-	{@const side = qr ? QR_SIZE + 48 : 32}
+	{@const qrSide = Math.min(bottom * 0.72, 150)}
 	<div
 		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6"
 		style:height="{bottom}px"
-		style:padding-inline="{side}px"
+		style:--band="{bottom}px"
+		style:padding-inline="{Math.min(bottom * 0.3, 32)}px"
 	>
 		<span class="text-left">{bands?.footer.left}</span>
 		<span class="text-center">{bands?.footer.center}</span>
-		<span class="text-right">{bands?.footer.right}</span>
+		<span class="small flex items-center justify-end gap-[1.2em] text-right whitespace-nowrap">
+			<span>{bands?.footer.right}</span>
+			{#if qr}
+				<!-- A live link in the printed PDF. -->
+				<svelte:element
+					this={linkable ? 'a' : 'div'}
+					href={linkable ? href : undefined}
+					class="qr flex shrink-0 items-center gap-[0.8em]"
+				>
+					<svg
+						width={qrSide}
+						height={qrSide}
+						viewBox="-1 -1 {qr.length + 2} {qr.length + 2}"
+						shape-rendering="crispEdges"
+						aria-label="QR code for {href}"
+						role="img"
+					>
+						<rect x="-1" y="-1" width={qr.length + 2} height={qr.length + 2} fill="white" />
+						<path d={qrPath(qr)} fill="black" />
+					</svg>
+					<span>{href.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+				</svelte:element>
+			{/if}
+		</span>
 	</div>
-	{#if qr}
-		<!-- The QR and its address at the footer's right end; a live link in the printed PDF. -->
-		<svelte:element
-			this={linkable ? 'a' : 'div'}
-			href={linkable ? href : undefined}
-			class="band qr absolute flex flex-col items-center"
-			style:right="32px"
-			style:bottom="{(bottom - QR_SIZE - 26) / 2}px"
-			style:width="{QR_SIZE}px"
-		>
-			<svg
-				width={QR_SIZE}
-				height={QR_SIZE}
-				viewBox="-1 -1 {qr.length + 2} {qr.length + 2}"
-				shape-rendering="crispEdges"
-				aria-label="QR code for {href}"
-				role="img"
-			>
-				<rect x="-1" y="-1" width={qr.length + 2} height={qr.length + 2} fill="white" />
-				<path d={qrPath(qr)} fill="black" />
-			</svg>
-			<span class="qr-label">{href.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
-		</svelte:element>
-	{/if}
 {/snippet}
 
 <!-- Beneath the balloons and free panels (z 1), so text that spills into a band stays on top. -->
@@ -659,30 +660,31 @@
 		line-height: 1;
 	}
 	.header .title {
-		font-size: 72px;
+		font-size: min(calc(var(--band) * 0.66), 72px);
 	}
 	.header .subtitle {
-		font-size: 40px;
-		margin-top: 12px;
+		font-family: 'Rubik', sans-serif;
+		font-weight: 700;
+		font-size: min(calc(var(--band) * 0.3), 40px);
+		letter-spacing: 0.04em;
+		color: #57534e;
 	}
 	.footer {
 		font-family: 'Rubik', sans-serif;
 		font-weight: 600;
-		font-size: 18px;
+		font-size: min(calc(var(--band) * 0.16), 18px);
 		letter-spacing: 0.12em;
+		white-space: nowrap;
 		text-transform: uppercase;
+		color: #57534e;
+	}
+	.footer .small {
+		font-size: min(calc(var(--band) * 0.13), 16px);
+		letter-spacing: 0.08em;
 	}
 	.qr {
 		color: inherit;
 		text-decoration: none;
-	}
-	.qr-label {
-		margin-top: 6px;
-		font-family: 'Rubik', sans-serif;
-		font-weight: 600;
-		font-size: 16px;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 	.panel-ref {
 		padding: 0.1em 0.4em;

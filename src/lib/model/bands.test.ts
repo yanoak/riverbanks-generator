@@ -22,7 +22,12 @@ describe('resolveBands', () => {
 		expect(HOUSE_BANDS.header.title).toBe('{comic}');
 		expect(resolveBands(comic(), 1)).toEqual({
 			header: { title: 'Taming Currents', subtitle: '' },
-			footer: { left: 'RIVERBANKS', center: '2', right: 'SEAPUNK STUDIOS', qr: 'riverbanks.lol' }
+			footer: {
+				left: 'Taming Currents',
+				center: '2 / 3',
+				right: 'RIVERBANKS · SEAPUNK STUDIOS',
+				qr: 'riverbanks.lol'
+			}
 		});
 	});
 
@@ -43,7 +48,12 @@ describe('resolveBands', () => {
 		c.pages[0].bands = { header: { subtitle: 'The Invitation' }, footer: { right: '' } };
 		const b = resolveBands(c, 0);
 		expect(b.header).toEqual({ title: 'Taming Currents', subtitle: 'The Invitation' });
-		expect(b.footer).toEqual({ left: 'RIVERBANKS', center: '1', right: '', qr: 'riverbanks.lol' });
+		expect(b.footer).toEqual({
+			left: 'Taming Currents',
+			center: '1 / 3',
+			right: '',
+			qr: 'riverbanks.lol'
+		});
 	});
 
 	it('leaves other pages on the default', () => {

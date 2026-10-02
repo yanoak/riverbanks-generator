@@ -40,14 +40,14 @@ describe('describeComic', () => {
 		const p = describeComic(comic, { id: 'c', rev: 1, appUrl: '' }).pages[0];
 		expect(p.size).toEqual({ width: 1000, height: 1416 });
 		expect(p.format).toBe('board');
-		expect(p.gridArea).toEqual({ x: 0, y: 208, w: 1000, h: 1000 });
+		expect(p.gridArea).toEqual({ x: 0, y: 83, w: 1000, h: 1250 });
 		expect(p.grid).toEqual({ rows: 4, cols: 4 });
 		expect(p.bands).toEqual({
 			header: { title: 'Taming Currents', subtitle: 'The Invitation' },
 			footer: {
-				left: 'RIVERBANKS',
-				center: '1',
-				right: 'SEAPUNK STUDIOS',
+				left: 'Taming Currents',
+				center: '1 / 1',
+				right: 'RIVERBANKS · SEAPUNK STUDIOS',
 				qr: 'riverbanks.lol'
 			},
 			overrides: { header: { subtitle: 'The Invitation' } }

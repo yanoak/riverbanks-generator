@@ -46,12 +46,18 @@ describe('createComic', () => {
 });
 
 describe('page formats', () => {
-	it('makes an A1 board: a square grid between a header and a footer', () => {
+	it('makes an A1 board: a 5:4 comic, edge to edge, between a header and a footer', () => {
 		const page = createComic('Taming Currents', 'board').pages[0];
-		expect(page.width / page.height).toBeCloseTo(1684 / 2384, 3);
-		expect(page.grid).toMatchObject({ rows: 4, cols: 4, top: 208, bottom: 208 });
-		expect(page.height - page.grid.top! - page.grid.bottom!).toBe(page.width);
+		expect(page.width / page.height).toBeCloseTo(594 / 841, 3);
+		expect(page.grid).toMatchObject({ rows: 4, cols: 4, margin: 0, top: 83, bottom: 83 });
+		expect(page.height - page.grid.top! - page.grid.bottom!).toBe((page.width * 5) / 4);
 		expect(page.panels).toHaveLength(16);
+		expect(formatOf(page)).toBe('board');
+	});
+
+	it('still calls a board made with the old 208-unit bands a board', () => {
+		const page = createComic('Old board', 'board').pages[0];
+		page.grid = { ...page.grid, margin: 12, top: 208, bottom: 208 };
 		expect(formatOf(page)).toBe('board');
 	});
 

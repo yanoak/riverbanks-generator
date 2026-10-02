@@ -13,15 +13,16 @@ export type PageFormat = 'board' | 'comic';
  * The page shapes a comic can be made in. A page stores its own size and grid, so a format is
  * only where a new comic starts; later pages copy the page they follow.
  *
- * - board: an A1 exhibition board, after Sam's "RIVERBANKS Paneling" slides (1684 × 2384 pt).
- *   A 1000 × 1000 square of comic sits between a 208-unit header and footer (350 pt on A1).
+ * - board: an A1 exhibition board (594 × 841 mm), after Yan's annotated sheet
+ *   (riverbanks/moodboard/Red annotated comic page dimensions.png). A 1000 × 1250 comic (5:4,
+ *   594 × 742.5 mm) runs edge to edge between an 83-unit header and footer (49.25 mm each).
  * - comic: US comic trim, 6.625" × 10.25", at ~151 units per inch.
  */
 export const PAGE_FORMATS: Record<PageFormat, { label: string; size: Size; grid: GridSpec }> = {
 	board: {
 		label: 'A1 board (594 × 841 mm)',
 		size: { width: 1000, height: 1416 },
-		grid: { rows: 4, cols: 4, gutter: 10, margin: 12, top: 208, bottom: 208 }
+		grid: { rows: 4, cols: 4, gutter: 10, margin: 0, top: 83, bottom: 83 }
 	},
 	comic: {
 		label: 'Comic page',
@@ -40,14 +41,13 @@ export const DEFAULT_GRID: GridSpec = PAGE_FORMATS.comic.grid;
 
 export const newId = (): string => crypto.randomUUID();
 
-/** Which format a page was made in, or null if someone has since changed its shape. */
+/**
+ * Which format a page was made in, by its size, or null if someone has since resized it. Boards
+ * made before the bands were thinned (208 units) are still boards.
+ */
 export function formatOf(page: Page): PageFormat | null {
 	const entry = Object.entries(PAGE_FORMATS).find(
-		([, f]) =>
-			f.size.width === page.width &&
-			f.size.height === page.height &&
-			(f.grid.top ?? 0) === (page.grid.top ?? 0) &&
-			(f.grid.bottom ?? 0) === (page.grid.bottom ?? 0)
+		([, f]) => f.size.width === page.width && f.size.height === page.height
 	);
 	return entry ? (entry[0] as PageFormat) : null;
 }

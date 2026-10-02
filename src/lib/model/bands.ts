@@ -6,10 +6,15 @@ import type { BandOverrides, Bands, Comic, Page } from './types';
 export type Band = keyof Bands;
 export const BANDS: Band[] = ['header', 'footer'];
 
-/** After the slide master of Sam's "RIVERBANKS Paneling" deck. */
+/** After Yan's annotated A1 sheet (riverbanks/moodboard/Red annotated comic page dimensions.png). */
 export const HOUSE_BANDS: Bands = {
 	header: { title: '{comic}', subtitle: '' },
-	footer: { left: 'RIVERBANKS', center: '{page}', right: 'SEAPUNK STUDIOS', qr: 'riverbanks.lol' }
+	footer: {
+		left: '{comic}',
+		center: '{page} / {pages}',
+		right: 'RIVERBANKS · SEAPUNK STUDIOS',
+		qr: 'riverbanks.lol'
+	}
 };
 
 /** What a footer QR code encodes and links to: a bare host is taken to be https. */

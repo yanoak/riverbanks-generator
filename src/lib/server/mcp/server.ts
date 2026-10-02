@@ -233,7 +233,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		{ name: 'riverbanks', version: '1.0.0' },
 		{
 			instructions:
-				'Riverbanks makes comic pages, by default A1 exhibition boards: a header band, a square ' +
+				'Riverbanks makes comic pages, by default A1 exhibition boards: a header band, a 5:4 ' +
 				'grid (4 rows × 4 cols, cells numbered 0.. row-major) and a footer band. Grid cells ' +
 				'merge into panels; free panels float above; balloons (speech, thought, whisper, shout, ' +
 				'caption, sfx) sit on the page and may cross panel borders and the bands, as in a comic. ' +
@@ -288,7 +288,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: WRITE,
 			title: 'Create comic',
 			description:
-				'Create a comic with one page. Returns its id. The default format, board, is an A1 exhibition board: a 4×4 grid in a 1000 × 1000 square between a header band (title, subtitle) and a footer band (left, center, right); set their text with set_header_footer. "comic" is a portrait comic page with a 3×4 grid and no bands. Later pages copy the page they follow.',
+				'Create a comic with one page. Returns its id. The default format, board, is an A1 exhibition board: a 4×4 grid in a 1000 × 1250 area, edge to edge, between a header band (title, subtitle) and a footer band (left, center, right); set their text with set_header_footer. "comic" is a portrait comic page with a 3×4 grid and no bands. Later pages copy the page they follow.',
 			inputSchema: {
 				title: z.string().min(1).max(200),
 				format: z.enum(['board', 'comic']).optional().describe('Default: board')

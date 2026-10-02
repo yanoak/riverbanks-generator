@@ -42,7 +42,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 		rev: meta.rev,
 		refs: 'Each panel has a ref, CODE:page:panel in reading order (e.g. TC:2:3), usable wherever a panelId is asked for. Refs are positional: they change when pages move or panels merge.',
 		units:
-			'Page units, x/y from the top-left. Each page gives its size: an A1 board is 1000 × 1416, with the grid in the 1000 × 1000 square (gridArea) between a header and a footer band; a comic page is 1000 × 1545. Balloons and free panels may sit anywhere on the page, across panel borders and into the bands.',
+			'Page units, x/y from the top-left. Each page gives its size: an A1 board is 1000 × 1416, with the grid in a 1000 × 1250 area (gridArea, edge to edge) between an 83-unit header and footer band; a comic page is 1000 × 1545. Balloons and free panels may sit anywhere on the page, across panel borders and into the bands.',
 		pages: comic.pages.map((page, i) => ({
 			number: i + 1,
 			id: page.id,

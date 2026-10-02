@@ -71,7 +71,7 @@ The hall fills with fishers, farmers, Indigenous delegates and activists. Ismaha
 ### Panel 2.4 (cells 12–13)
 Between sessions, on a garden pontoon: Ismahan shares a meal with an older Thai woman (Dew, never named). The river seems to rise out of the bowl.
 ! CAPTION: Princess Ismahan warmed up to the delegates who shared their meals and stories and struggles with her.
-! OLDER WOMAN (speech): Taste this kaa. It's made with the best herbs from the Ping valley. The whole river is in this bowl.
+! OLDER WOMAN (speech): Taste this, kha. It's made with the best herbs from the Ping valley. The whole river is in this bowl.
 ### Panel 2.5 (cell 14)
 Ismahan laughs, her shoes kicked off.
 ! ISMAHAN (speech): You talk about food the way I talk about mudskippers!

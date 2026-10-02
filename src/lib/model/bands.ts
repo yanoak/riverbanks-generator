@@ -6,14 +6,17 @@ import type { BandOverrides, Bands, Comic, Page } from './types';
 export type Band = keyof Bands;
 export const BANDS: Band[] = ['header', 'footer'];
 
-/** After Yan's annotated A1 sheet (riverbanks/moodboard/Red annotated comic page dimensions.png). */
+/**
+ * The header after Yan's annotated A1 sheet; the footer after Yan's 2026-10-02 mock-up: the two
+ * names at either end in Rubik Pixels, the site between them, no page number, title or QR.
+ */
 export const HOUSE_BANDS: Bands = {
 	header: { title: '{comic}', subtitle: '' },
 	footer: {
-		left: '{comic}',
-		center: '{page} / {pages}',
-		right: 'RIVERBANKS · SEAPUNK STUDIOS',
-		qr: 'riverbanks.lol'
+		left: 'RIVERBANKS',
+		center: 'riverbanks.lol',
+		right: 'SEAPUNK STUDIOS',
+		qr: ''
 	}
 };
 

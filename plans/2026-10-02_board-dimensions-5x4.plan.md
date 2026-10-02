@@ -72,7 +72,16 @@ PDF export match the editor, and MCP describes the new geometry.
   - Every page checked by eye. One fix: panel 6.2 panned (focus x 0.44) so the fisher speaking
     is back in view.
   - Sam inserted a blank page 2 during the run, so the old pages 2–7 are now 3–8.
-- [ ] Deploy, so production letters the bands at their new height. Until then, production shows
+- [x] New house footer, from Yan's 2026-10-02 mock-up: **RIVERBANKS**, `riverbanks.lol` and
+      **SEAPUNK STUDIOS**, in Rubik Pixels. The outer names are large (0.3 × the band) and the
+      address is small (0.14 ×).
+  - Dropped: the page number, the story title and the QR. The QR slot still exists, but it is
+    empty by default.
+  - Sizes are capped, so older 208-unit footers don't overflow.
+  - *The Youngest Delegate*'s and *The Year It Snowed*'s footer defaults were set to match over
+    MCP.
+  - Checked in the dev server against the mock-up.
+- [x] Deploy, so production letters the bands at their new height. Until then, production shows
       the old 208-unit lettering crammed into 83 units.
 - [ ] Verify (below), then `done`. Step 1 passed on 2026-10-02 in `/local`, which matched the
       sheet. Steps 2–3 (PNG, PDF) are still to do. Step 4 couldn't be done in the browser,

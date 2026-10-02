@@ -45,10 +45,10 @@ describe('describeComic', () => {
 		expect(p.bands).toEqual({
 			header: { title: 'Taming Currents', subtitle: 'The Invitation' },
 			footer: {
-				left: 'Taming Currents',
-				center: '1 / 1',
-				right: 'RIVERBANKS · SEAPUNK STUDIOS',
-				qr: 'riverbanks.lol'
+				left: 'RIVERBANKS',
+				center: 'riverbanks.lol',
+				right: 'SEAPUNK STUDIOS',
+				qr: ''
 			},
 			overrides: { header: { subtitle: 'The Invitation' } }
 		});

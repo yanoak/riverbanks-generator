@@ -25,10 +25,10 @@ describe('resolveBands', () => {
 		expect(resolveBands(comic(), 1)).toEqual({
 			header: { title: 'Taming Currents', subtitle: '' },
 			footer: {
-				left: 'Taming Currents',
-				center: '2 / 3',
-				right: 'RIVERBANKS · SEAPUNK STUDIOS',
-				qr: 'riverbanks.lol'
+				left: 'RIVERBANKS',
+				center: 'riverbanks.lol',
+				right: 'SEAPUNK STUDIOS',
+				qr: ''
 			}
 		});
 	});
@@ -41,7 +41,7 @@ describe('resolveBands', () => {
 		};
 		expect(resolveBands(c, 2)).toEqual({
 			header: { title: 'ACT TWO', subtitle: 'Taming Currents' },
-			footer: { left: '', center: '3 / 3', right: '', qr: 'riverbanks.lol' }
+			footer: { left: '', center: '3 / 3', right: '', qr: '' }
 		});
 	});
 
@@ -51,10 +51,10 @@ describe('resolveBands', () => {
 		const b = resolveBands(c, 0);
 		expect(b.header).toEqual({ title: 'Taming Currents', subtitle: 'The Invitation' });
 		expect(b.footer).toEqual({
-			left: 'Taming Currents',
-			center: '1 / 3',
+			left: 'RIVERBANKS',
+			center: 'riverbanks.lol',
 			right: '',
-			qr: 'riverbanks.lol'
+			qr: ''
 		});
 	});
 
@@ -138,11 +138,11 @@ describe('editing bands', () => {
 });
 
 describe('footer QR link', () => {
-	it('defaults to riverbanks.lol, and a page can change or blank it', () => {
+	it('has no QR by default, and a page can add one', () => {
 		const c = comic();
-		expect(resolveBands(c, 0).footer.qr).toBe('riverbanks.lol');
-		setPageBands(c.pages[1], { footer: { qr: '' } });
-		expect(resolveBands(c, 1).footer.qr).toBe('');
+		expect(resolveBands(c, 0).footer.qr).toBe('');
+		setPageBands(c.pages[1], { footer: { qr: 'riverbanks.lol' } });
+		expect(resolveBands(c, 1).footer.qr).toBe('riverbanks.lol');
 		setPageBands(c.pages[2], { footer: { qr: 'example.org/{page}' } });
 		expect(resolveBands(c, 2).footer.qr).toBe('example.org/3');
 	});
@@ -153,7 +153,7 @@ describe('footer QR link', () => {
 			header: { title: 'ACT TWO', subtitle: '' },
 			footer: { left: '', center: '{page}', right: '' }
 		} as Comic['bands'];
-		expect(resolveBands(c, 0).footer.qr).toBe('riverbanks.lol');
+		expect(resolveBands(c, 0).footer.qr).toBe('');
 	});
 
 	it('links a bare host over https and keeps an explicit scheme', () => {

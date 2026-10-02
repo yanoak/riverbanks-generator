@@ -454,7 +454,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 						qr: slot
 							.optional()
 							.describe(
-								'The address the footer’s QR code encodes and links to (default riverbanks.lol; a bare host is https); "" hides the QR.'
+								'The address the footer’s QR code encodes and links to (a bare host is https); "", the default, shows no QR.'
 							)
 					})
 					.optional(),

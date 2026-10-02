@@ -503,8 +503,9 @@
 	</div>
 </div>
 
-<!-- After Yan's annotated A1 sheet: title and subtitle on one line; footer in small Rubik caps,
-     its right end carrying the QR with its address beside it. Lettering scales with the band. -->
+<!-- After Yan's annotated A1 sheet: title and subtitle on one line. The footer after Yan's
+     mock-up: the outer slots large in Rubik Pixels, the centre small; a QR, if set, at the right
+     end with its address beside it. Lettering scales with the band. -->
 {#snippet header()}
 	<div
 		class="band header absolute inset-x-0 top-0 flex items-baseline justify-center gap-[0.4em] px-8 text-center"
@@ -526,11 +527,11 @@
 		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6"
 		style:height="{bottom}px"
 		style:--band="{bottom}px"
-		style:padding-inline="{Math.min(bottom * 0.3, 32)}px"
+		style:padding-inline="{Math.min(bottom * 0.47, 48)}px"
 	>
 		<span class="text-left">{bands?.footer.left}</span>
-		<span class="text-center">{bands?.footer.center}</span>
-		<span class="small flex items-center justify-end gap-[1.2em] text-right whitespace-nowrap">
+		<span class="small text-center">{bands?.footer.center}</span>
+		<span class="flex items-center justify-end gap-[0.6em] text-right">
 			<span>{bands?.footer.right}</span>
 			{#if qr}
 				<!-- A live link in the printed PDF. -->
@@ -550,7 +551,7 @@
 						<rect x="-1" y="-1" width={qr.length + 2} height={qr.length + 2} fill="white" />
 						<path d={qrPath(qr)} fill="black" />
 					</svg>
-					<span>{href.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+					<span class="small">{href.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
 				</svelte:element>
 			{/if}
 		</span>
@@ -673,17 +674,14 @@
 		color: #57534e;
 	}
 	.footer {
-		font-family: 'Rubik', sans-serif;
-		font-weight: 600;
-		font-size: min(calc(var(--band) * 0.16), 18px);
-		letter-spacing: 0.12em;
+		font-family: 'Rubik Pixels', 'Rubik', sans-serif;
+		font-size: min(calc(var(--band) * 0.3), 25px);
+		line-height: 1;
 		white-space: nowrap;
-		text-transform: uppercase;
-		color: #57534e;
 	}
-	.footer .small {
-		font-size: min(calc(var(--band) * 0.13), 16px);
-		letter-spacing: 0.08em;
+	.footer .small,
+	.qr .small {
+		font-size: min(calc(var(--band) * 0.14), 12px);
 	}
 	.qr {
 		color: inherit;

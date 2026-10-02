@@ -680,6 +680,9 @@
 		font-size: min(calc(var(--band) * 0.31), 26px);
 		line-height: 1;
 		white-space: nowrap;
+		/* Rubik Pixels has no bold, and a synthesised one fills the pixel gaps; a thin stroke
+		   thickens the letters and keeps the texture (0.03em already fills it in). */
+		-webkit-text-stroke: 0.02em currentColor;
 	}
 	.footer .small,
 	.qr .small {

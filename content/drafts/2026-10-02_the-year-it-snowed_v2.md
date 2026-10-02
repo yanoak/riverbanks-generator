@@ -8,7 +8,7 @@
 Sam's feedback (2 Oct 2026, relayed by Yan): a visitor who reads only this comic should come away understanding how the Pluriverse thinks about food. In Version 1 the Gross Delish Index was little more than a name. Sam asked for four things, and this is where each one lands.
 
 1. How the GDI pyramid changed people's relationship with food: flavour is a health report on the ecosystem behind the dish. The napkin panel (2.4) teaches the five tiers; the floodplain (3.2) shows farmers and cooks living by them, and the land and its people both doing better for it.
-2. The GDI is one indicator among many, where today GDP rules alone: the landing's board of many indices (2.1), Mua's mudskipper count and the Financier who trusted one number (3.3).
+2. The GDI is one indicator among many, where today GDP rules alone: the landing's board of many indices (2.1), Muar's mudskipper count and the Financier who trusted one number (3.3).
 3. Food policy is driven by the GDI: the score is a weakest link, so help goes to the weakest tier first, ahead of need (2.4).
 4. Ya grows from a provincial outlook into a researcher: "never this far from her hometown" (1.1), the board she never read (2.1), the napkin (2.4), the notebook (3.4), reading the board at home (4.1), and the last caption, which points to Act Five.
 
@@ -160,7 +160,7 @@ Ismahan and Ya, small in the foreground and seen from behind, stand on the mudfl
 ### Panel 3.3 (cells 12–13)
 
 Dusk. The two sit side by side on the deck's edge, legs dangling over the mud, the fruit bowl between them. Mudskippers flick past below.
-! ISMAHAN (speech): In Mua we count mudskippers. My brother the Financier counted only money.
+! ISMAHAN (speech): In Muar we count mudskippers. My brother the Financier counted only money.
 ! YA (speech): Grandma used to say a number's only as good as the tongue that checks it.
 
 ### Panel 3.4 (cells 14–15)
@@ -245,7 +245,7 @@ The Sunda Summit, 2028, as in The Youngest Delegate's panel 2.4: on a garden pon
 
 The two women kneel by the shrine.
 ! ISMAHAN (speech): She taught me that food ties everything together: everything it comes from, not just us.
-! ISMAHAN (speech, joined to the last): I took that home to Mua.
+! ISMAHAN (speech, joined to the last): I took that home to Muar.
 ! YA (speech): …She taught me too.
 
 ### Panel 5.4 (cells 12–15), wide strip
@@ -257,7 +257,7 @@ Dawn, under a pale dawn sky. Ya stands on the restaurant deck, her notebook open
 ## Inventions (approved by Yan, 2 Oct 2026)
 
 These are not in Edited Drafts or Jules's material.
-The landing's board of many indices: the GDI, the PROSPER river-richness index, and local counts (fireflies on the bend, children who swim, Mua's mudskippers).
+The landing's board of many indices: the GDI, the PROSPER river-richness index, and local counts (fireflies on the bend, children who swim, Muar's mudskippers).
 "Help goes to the weakest tier first, ahead of need": Jules's weakest-link score plus PREMISE's motto.
 Ya has never been this far from Chiang Mai, and never read the board by her own door.
 The Financier line, which refers to The Youngest Delegate's 2029 crisis.

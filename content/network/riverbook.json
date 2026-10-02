@@ -90,14 +90,14 @@
 		},
 		{
 			"id": "the-general",
-			"name": "The General",
+			"name": "Tengku Hamzah",
 			"kind": "person",
-			"aliases": ["the elder prince"],
+			"aliases": ["the General", "the elder prince"],
 			"born": null,
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate"],
-			"summary": "Elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled.",
+			"summary": "The General: elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled.",
 			"portraits": [
 				{
 					"cast": "the General",
@@ -107,14 +107,14 @@
 		},
 		{
 			"id": "the-financier",
-			"name": "The Financier",
+			"name": "Tengku Faris",
 			"kind": "person",
-			"aliases": ["the second prince"],
+			"aliases": ["the Financier", "the second prince"],
 			"born": null,
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate"],
-			"summary": "Second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled.",
+			"summary": "The Financier: second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled.",
 			"portraits": [
 				{
 					"cast": "the Financier",

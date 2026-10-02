@@ -525,9 +525,9 @@ Drafts is canon.
 | Character | Story | Who they are |
 |---|---|---|
 | **Ismahan** (b. 2010) | Delegate, Snow | The Sultan's youngest. Youngest delegate at the 2028 Summit; first leader of Mua's kinship councils from 2030; Ya's boatmate in 2052; Teja's grandmother |
-| **Sultan Ibrahim** | Delegate | Ageing Sultan of Mua; signs the Confluence Accord (2030) |
-| **The General** | Delegate | Elder prince and military commander; humbled |
-| **The Financier** | Delegate | Second prince, ex–Wall Street; humbled |
+| **Sultan Ibrahim** | Delegate | Ageing Sultan of Mua; signs the Confluence Accord (2030); always a short grey beard |
+| **Tengku Hamzah, the General** | Delegate | Elder prince and military commander; clean-shaven, black crew cut, shirt tucked in and belted; humbled |
+| **Tengku Faris, the Financier** | Delegate | Second prince, ex–Wall Street; black suit; humbled |
 | **Dew** (1965–2041) | Delegate, Snow | Ya's grandmother; runs the stilt restaurant on the Ping; inspired Ismahan at the Summit; her shrine is under the restaurant |
 | **Ya** (b. 2032) | Snow, Hilsa | From a Chinese immigrant family on the Ping; cook turned food-ecosystem researcher with the Bengal Passage Cooperative; recruits Jalal |
 | **Taro** | Snow, Hilsa | Ya's grey tabby: a kitten in 2052, a teenage cat in 2065 |
@@ -538,19 +538,33 @@ Drafts is canon.
 
 ## Production state (2026-10-02)
 
-- **Riverbanks app comics:** four pages each, in the house style, built from the script tabs.
-  - *The Youngest Delegate* (`902742e1-d082-4633-98bd-c0f872372397`)
-  - *The Year It Snowed* (`7212d126-974b-4bcc-b977-5a855acc6746`)
-  - *Visa for a Hilsa* (`77a92493-ebe2-41b9-a6c0-eb0b3d9b60c5`)
+- **Riverbanks app comics:**
+  - ***The Youngest Delegate*, A1 version** (`5a2cdb4a-c822-4fb3-bb5e-5f7d2656a420`, code `YD`). This is
+    the current one: 7 A1 boards and 38 panels, under the header "Act Two / Taming Currents". It was
+    built on 2026-10-02 from the v2 script, and Yan edited the lettering live. The *Script: The
+    Youngest Delegate* tab (v2) matches its lettering.
+  - **Art-style tests,** four pages each on the old 3 × 4 portrait format. They are superseded, or
+    will be once each story is rebuilt on A1:
+    - *The Youngest Delegate* (`902742e1-d082-4633-98bd-c0f872372397`);
+    - *The Year It Snowed* (`7212d126-974b-4bcc-b977-5a855acc6746`);
+    - *Visa for a Hilsa* (`77a92493-ebe2-41b9-a6c0-eb0b3d9b60c5`).
 
-  Sample pages are at the end of each script tab.
+    Sample pages are at the end of each script tab.
+  - **Next:** *The Year It Snowed* and *Visa for a Hilsa* get A1 rebuilds from their v2 drafts in
+    `content/drafts/`.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
   claire on cream, with teal, mangrove green and silt brown, and an ochre or brick-red accent.
-  - Its cast has an in-style sheet for each of: Ismahan at 18, 20 and 42; Ya at 8, 20 and 33; Dew;
-    the Sultan; the General; the Financier; Jalal; Shapla; Taro as kitten and cat; the drone;
-    Jalal's boat; Ya's sailboat.
-  - So far, only *Visa for a Hilsa* uses it, and three of its panels were regenerated with the
-    cast. The other two comics predate the cast and drift in places (Ismahan's hair, Ya's jacket).
+  - **Characters and props:** its cast has an in-style sheet for each of Ismahan at 18, 20 and 42;
+    Ya at 8, 20 and 33; Dew; the Sultan; Tengku Hamzah (the General); Tengku Faris (the Financier);
+    Jalal; Shapla; Taro as kitten and cat; the drone; Jalal's boat; and Ya's sailboat.
+  - **Places:** since 2026-10-02 it also has *the flotel*, drawn from Sam's slide 6, and *the throne
+    room of Mua*, the recurring set for *The Youngest Delegate*.
+  - **Pinned looks.** Cast descriptions now fix the details that drifted between panels:
+    - **Sultan Ibrahim** always has a short white-grey beard and moustache, a black songkok and a
+      cream baju Melayu.
+    - **Tengku Hamzah** is clean-shaven with a black crew cut. His green uniform shirt is always
+      tucked in, with a brown belt, sleeves down.
+    - **Tengku Faris** wears a black suit, with slicked-back black hair.
 - **Story network:** [riverbanks-generator.vercel.app/network](https://riverbanks-generator.vercel.app/network)
   shows 14 characters and 21 ties, with portraits.
   - The canon file is `content/network/riverbook.json`.
@@ -574,6 +588,28 @@ Drafts is canon.
    the "Singapore & Johor" flood can both stand as they are.
 6. **The prologue's banker is a woman, unnamed.**
 7. **Birth years were invented where canon had none:** Jalal 2031 and Shapla 2033.
+8. **Monsoon Hilsa coinages are canon,** following Sam's feedback (decided 2026-10-02):
+   - the Passage Covenant;
+   - the NeurOtolith tag;
+   - "custodial origin unresolved";
+   - "one season is weather, three seasons is migration";
+   - the Bengal Passage Cooperative's origins in fishers' co-ops;
+   - migratory "schools".
+
+   The tab's "World River Bank" is not. The v2 scripts that use them, with the reasons for
+   revising, are in `content/drafts/2026-10-02_*_v2.md`. They have yet to be written into Edited
+   Drafts.
+9. ***The Youngest Delegate* is entirely in Act Two, "Taming Currents"** (Yan, 2026-10-02).
+   Edited Drafts still files it under "Prologue and Act One". Its v2 script is in the
+   *Script: The Youngest Delegate* tab, above v1: seven A1 boards and 38 panels, with
+   dialogue and captions (added 2026-10-02).
+10. **The flotel looks as it does in Sam's slides 5–6, not like a ship** (Yan, 2026-10-02). It is
+    a floating city of rounded hexagonal pontoon islands around an arched Convention Hall between
+    two towers; inside, the hall is a curved amphitheatre. The reference images are in
+    `riverbanks/paneling-slides/`. The art-style test comics wrongly show it as a boat.
+11. **The princes are Tengku Hamzah (the General) and Tengku Faris (the Financier)** (Yan,
+    2026-10-02). The names are invented; the real Johor princes' names were avoided on purpose. The
+    General is clean-shaven, with no moustache.
 
 **Still open:**
 

@@ -66,7 +66,19 @@ Also:
 - The left sidebar adds, reorders and deletes pages.
 - "PNG" (Cmd+E) downloads the current page, and "PDF" prints the whole comic.
 
+STYLES AND GENERATING IMAGES
 
+A style is a set of reference images plus a short description, a palette and things to avoid.
+Make one under "Styles": upload references, mark characters and objects with a name (like
+"Mae"), and press "Describe from references" to have it draft the text for you.
+
+Pick a style when you create a comic, or later in the right-hand panel. Then select a panel,
+press G, describe what happens in it, and press Cmd+Enter: a quick draft comes back in the
+style, shaped to the panel. Every take is kept, so you can switch back. When you're happy with
+one, "Print version (4K)" redraws it at print resolution, unchanged.
+
+For free quick roughs, ask Claude (connected as below) to "sketch panel 2 as SVG": it draws the
+panel itself as line art in the comic's style, and it costs nothing beyond your Claude plan.
 
 WORKING TOGETHER
 
@@ -99,7 +111,8 @@ your own.
 
 Claude can list, create, rename and delete comics; add, move and delete pages; change the grid;
 merge and split panels; add free panels; place images from a URL; and add, edit and delete
-balloons. It can't draw or generate images itself yet.
+balloons. It can also list styles, set a comic's style, generate a panel's image in it, and draw
+a panel itself as an SVG sketch, which costs nothing extra.
 
 Any problems or wishes, send them my way.
 

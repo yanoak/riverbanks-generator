@@ -45,3 +45,16 @@ describe('strikethrough', () => {
 		expect(fragmentToHtml(fragment)).toContain('<s>gone</s>');
 	});
 });
+
+describe('accent', () => {
+	it('turns ==text== into <mark> and back', () => {
+		expect(markdownToHtml('==IF== WE HAD')).toBe('<p><mark>IF</mark> WE HAD</p>');
+		expect(htmlToPlain('<p><mark>IF</mark> WE HAD</p>')).toBe('==IF== WE HAD');
+	});
+
+	it('survives the editor schema', () => {
+		const fragment = new Y.Doc().getXmlFragment('t');
+		htmlToFragment('<p>RUN THE <mark>RIVERS</mark></p>', fragment);
+		expect(fragmentToHtml(fragment)).toContain('<mark>RIVERS</mark>');
+	});
+});

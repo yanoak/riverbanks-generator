@@ -4,7 +4,7 @@
 const escape = (s: string) =>
 	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Lines → paragraphs; **bold**, *italic*, ~~struck through~~. */
+/** Lines → paragraphs; **bold**, *italic*, ~~struck through~~, ==accent== (a title's second colour). */
 export function markdownToHtml(text: string): string {
 	return text
 		.split('\n')
@@ -12,7 +12,8 @@ export function markdownToHtml(text: string): string {
 			const html = escape(line)
 				.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 				.replace(/\*(.+?)\*/g, '<em>$1</em>')
-				.replace(/~~(.+?)~~/g, '<s>$1</s>');
+				.replace(/~~(.+?)~~/g, '<s>$1</s>')
+				.replace(/==(.+?)==/g, '<mark>$1</mark>');
 			return `<p>${html}</p>`;
 		})
 		.join('');
@@ -26,6 +27,7 @@ export function htmlToPlain(html: string): string {
 		.replace(/<\/?strong>/g, '**')
 		.replace(/<\/?em>/g, '*')
 		.replace(/<\/?s>/g, '~~')
+		.replace(/<\/?mark[^>]*>/g, '==')
 		.replace(/<[^>]+>/g, '')
 		.replace(/&lt;/g, '<')
 		.replace(/&gt;/g, '>')

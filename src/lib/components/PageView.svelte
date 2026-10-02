@@ -24,6 +24,7 @@
 	import { richText } from '$lib/editor/rich-text';
 	import { DEFAULT_TYPOGRAPHY, type Typography } from '$lib/typography/typography';
 	import { bandShown, qrHref, type Band } from '$lib/model/bands';
+	import { bandInk } from '$lib/model/page';
 	import { qrMatrix, qrPath } from '$lib/geometry/qr';
 	import type { Bands } from '$lib/model/types';
 
@@ -214,7 +215,9 @@
 
 <div class="relative" style:width="{page.width * scale}px" style:height="{page.height * scale}px">
 	<div
-		class="page absolute top-0 left-0 bg-white"
+		class="page absolute top-0 left-0"
+		style:background={page.background ?? '#ffffff'}
+		style:--band-ink={bandInk(page.background)}
 		style:width="{page.width}px"
 		style:height="{page.height}px"
 		style:transform="scale({scale})"
@@ -657,7 +660,7 @@
 		z-index: 20;
 	}
 	.band {
-		color: #1c1917;
+		color: var(--band-ink, #1c1917);
 		pointer-events: none;
 	}
 	.header {
@@ -673,7 +676,7 @@
 		font-weight: 700;
 		font-size: min(calc(var(--band) * 0.3), 40px);
 		letter-spacing: 0.04em;
-		color: #57534e;
+		color: color-mix(in srgb, var(--band-ink, #1c1917) 75%, transparent);
 	}
 	.footer {
 		font-family: 'Rubik Pixels', 'Rubik', sans-serif;

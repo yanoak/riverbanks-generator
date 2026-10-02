@@ -95,8 +95,10 @@ const rect = z
 	);
 const point = z.object({ x: z.number(), y: z.number() }).describe('Point in page units');
 const balloonType = z
-	.enum(['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'])
-	.describe('speech/thought/whisper/shout have tails; caption is a box; sfx is display lettering');
+	.enum(['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx', 'title'])
+	.describe(
+		'speech/thought/whisper/shout have tails; caption is a box; sfx is tilted, outlined sound lettering; title is plain display lettering (no box, outline or tilt) in its fill colour, with ==accent== words in its stroke colour, for title boards and posters'
+	);
 const border = z.enum(['solid', 'none']);
 const shapeArgs = {
 	roundness: z
@@ -435,6 +437,22 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	);
 
 	const slot = z.string().max(200);
+	server.registerTool(
+		'set_page',
+		{
+			annotations: UPDATE,
+			title: 'Set page look',
+			description:
+				'Set a page’s background colour, edge to edge under its panels, header and footer (whose lettering turns white on dark colours). null returns the page to white. For a title board or poster, pair it with title lettering, and switch the bands off with set_header_footer show if the page needs none.',
+			inputSchema: {
+				comicId: z.string(),
+				page,
+				background: color.nullable().optional()
+			}
+		},
+		async ({ comicId, ...args }) => edit(comicId, (c) => ops.setPage(c, args))
+	);
+
 	server.registerTool(
 		'set_header_footer',
 		{
@@ -1047,7 +1065,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		.string()
 		.max(2000)
 		.describe(
-			'Balloon text. New lines are separate lines; **bold**, *italic* and ~~strikethrough~~ are supported.'
+			'Balloon text. New lines are separate lines; **bold**, *italic* and ~~strikethrough~~ are supported, and ==accent== on title lettering (its second colour).'
 		);
 
 	server.registerTool(
@@ -1090,7 +1108,10 @@ export function createMcpServer(ctx: McpContext): McpServer {
 				tailTip: point.nullable().optional(),
 				fontSize: z.number().min(8).max(200).optional(),
 				font: z.string().max(200).optional(),
-				fill: color.optional(),
+				fill: color.optional().describe('A title’s letter colour; other balloons’ fill'),
+				accent: color
+					.optional()
+					.describe('Title only: the colour of its ==accent== words (default a bright yellow)'),
 				...shapeArgs
 			}
 		},

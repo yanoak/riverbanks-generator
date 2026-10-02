@@ -183,6 +183,7 @@ export function balloonShape(
 	const none: BalloonShape = { paths: [], circles: [], dashed: false };
 	switch (type) {
 		case 'sfx':
+		case 'title':
 			return none;
 		case 'caption':
 			return { ...none, paths: [roundedPath(w, h, roundnessOf(type, opts.roundness))] };
@@ -208,6 +209,7 @@ export function balloonShape(
 
 /** Fraction of width/height to pad text so it sits inside the shape. */
 export function textInset(type: BalloonType, roundness?: number): number {
+	if (type === 'title') return 0;
 	if (type === 'sfx') return 0.06;
 	if (type === 'shout') return 0.2;
 	if (type === 'thought') return 0.15;

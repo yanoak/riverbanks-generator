@@ -21,6 +21,13 @@ describe('createBalloon', () => {
 		}
 	});
 
+	it('makes a title: no tail, white letters with a yellow accent', () => {
+		const t = createBalloon(createComic('t', 'board').pages[0], 'title');
+		expect(t.tail).toBeUndefined();
+		expect(t.fill).toBe('#ffffff');
+		expect(t.stroke).toBe('#eeff41');
+	});
+
 	it('centres the balloon in the given box', () => {
 		const page = createPage();
 		const b = createBalloon(page, 'speech', { x: 100, y: 100, w: 400, h: 400 });

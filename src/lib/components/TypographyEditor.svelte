@@ -31,7 +31,8 @@
 		whisper: 'Whisper',
 		shout: 'Shout',
 		caption: 'Caption',
-		sfx: 'SFX'
+		sfx: 'SFX',
+		title: 'Title'
 	};
 	const SAMPLES: Record<BalloonType, string> = {
 		speech: 'What a day!',
@@ -39,7 +40,8 @@
 		whisper: 'psst… over here',
 		shout: 'Look out!',
 		caption: 'Meanwhile, by the river…',
-		sfx: 'KRAK!'
+		sfx: 'KRAK!',
+		title: 'Act One'
 	};
 
 	const resolved = $derived(resolveTypography(value));

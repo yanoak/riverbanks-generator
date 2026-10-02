@@ -5,7 +5,7 @@
 //
 //   comic: Y.Map        id, title, docVersion, styleProfileId?, code?, bands?, pages
 //     pages: Y.Map<pageId, Y.Map>     order is a number per page (midpoints on insert/move)
-//       id, width, height, order, bands?   (bands are plain JSON values, last writer wins)
+//       id, width, height, order, bands?, background?   (bands: plain JSON, last writer wins)
 //       grid: Y.Map                   rows, cols, gutter, margin, top?, bottom?
 //       cells: Y.Map<"r,c", panelId>  grid ownership: one entry per cell, see derivePanels
 //       panels: Y.Map<id, Y.Map>      every Panel field except cells
@@ -77,6 +77,7 @@ function writePage(pages: YMap, page: Page) {
 	m.set('width', page.width);
 	m.set('height', page.height);
 	if (page.bands) m.set('bands', clone(page.bands));
+	if (page.background) m.set('background', page.background);
 	patch(child(m, 'grid'), {}, page.grid);
 	const cells = child(m, 'cells');
 	const panels = child(m, 'panels');
@@ -337,6 +338,7 @@ function projectPage(m: YMap): Page {
 		.sort((a, b) => a.z - b.z || a.id.localeCompare(b.id));
 
 	const bands = clone(m.get('bands') as Page['bands']);
+	const background = m.get('background') as string | undefined;
 	return {
 		id: m.get('id') as string,
 		width: m.get('width') as number,
@@ -344,7 +346,8 @@ function projectPage(m: YMap): Page {
 		grid,
 		panels: [...grids, ...frees],
 		balloons: texts,
-		...(bands && { bands })
+		...(bands && { bands }),
+		...(background && { background })
 	};
 }
 

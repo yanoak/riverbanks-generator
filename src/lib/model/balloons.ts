@@ -15,7 +15,8 @@ const DEFAULTS: Record<BalloonType, { w: number; h: number; html: string; fontSi
 	thought: { w: 280, h: 170, html: '<p>I wonder…</p>', fontSize: 26 },
 	shout: { w: 300, h: 190, html: '<p><strong>LOOK OUT!</strong></p>', fontSize: 32 },
 	caption: { w: 320, h: 90, html: '<p>Meanwhile, by the river…</p>', fontSize: 24 },
-	sfx: { w: 300, h: 130, html: '<p>KRAK!</p>', fontSize: 84 }
+	sfx: { w: 300, h: 130, html: '<p>KRAK!</p>', fontSize: 84 },
+	title: { w: 700, h: 200, html: '<p>ACT <mark>ONE</mark></p>', fontSize: 96 }
 };
 
 const HAS_TAIL: BalloonType[] = ['speech', 'whisper', 'thought', 'shout'];
@@ -41,7 +42,8 @@ export function createBalloon(page: Page, type: BalloonType, box?: Rect): Balloo
 		html: d.html,
 		fontSize: d.fontSize,
 		fill: type === 'caption' ? '#fff4c2' : type === 'sfx' ? '#ffd23f' : '#ffffff',
-		stroke: '#000000'
+		// A title has no outline: its stroke is the accent colour, the posters' yellow.
+		stroke: type === 'title' ? '#eeff41' : '#000000'
 	};
 }
 

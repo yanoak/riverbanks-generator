@@ -75,7 +75,8 @@ export interface FreePanel extends PanelBase, Rect {
 
 export type Panel = GridPanel | FreePanel;
 
-export type BalloonType = 'caption' | 'speech' | 'thought' | 'whisper' | 'shout' | 'sfx';
+/** title: plain display lettering in the fill colour, with ==accent== words in the stroke colour. */
+export type BalloonType = 'caption' | 'speech' | 'thought' | 'whisper' | 'shout' | 'sfx' | 'title';
 
 /** Text on the page. Lives on the page, not in a panel, because balloons cross borders. */
 export interface Balloon extends Rect {
@@ -156,6 +157,8 @@ export interface Page extends Size {
 	panels: Panel[];
 	balloons: Balloon[];
 	bands?: BandOverrides;
+	/** The page's colour (#rrggbb), edge to edge under panels and bands; absent is white. */
+	background?: string;
 }
 
 export interface Comic {

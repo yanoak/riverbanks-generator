@@ -3,6 +3,7 @@
 // @tiptap/html's server build supplies a DOM on Node, so none of this needs a browser.
 
 import { getSchema } from '@tiptap/core';
+import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import { generateHTML, generateJSON } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
@@ -26,7 +27,9 @@ export const balloonExtensions = [
 		// Undo is the comic-wide Y.UndoManager (see history/yhistory.svelte.ts).
 		undoRedo: false
 	}),
-	TextAlign.configure({ types: ['paragraph'], defaultAlignment: 'center' })
+	TextAlign.configure({ types: ['paragraph'], defaultAlignment: 'center' }),
+	// <mark>: a title's accent words, lettered in its stroke colour (see BalloonView).
+	Highlight
 ];
 
 export const balloonSchema = getSchema(balloonExtensions);

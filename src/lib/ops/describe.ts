@@ -51,6 +51,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 			size: { width: page.width, height: page.height },
 			gridArea: gridArea(page.grid, page),
 			grid: { rows: page.grid.rows, cols: page.grid.cols },
+			...(page.background && { background: page.background }),
 			...(page.grid.top || page.grid.bottom
 				? { bands: { ...resolveBands(comic, i), overrides: page.bands ?? {} } }
 				: {}),

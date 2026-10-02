@@ -11,12 +11,39 @@ import {
 	movePage,
 	removePanelImage,
 	setBands,
+	setPage,
 	setGrid,
 	setPanelImage,
 	splitPanel,
 	updateBalloon,
 	updatePanel
 } from './comic-ops';
+
+describe('setPage', () => {
+	it('sets and clears a page background, and refuses anything but #rrggbb', () => {
+		const comic = createComic('Titles', 'board');
+		expect(setPage(comic, { page: 1, background: '#6b7866' })).toMatch(/#6b7866/);
+		expect(comic.pages[0].background).toBe('#6b7866');
+		setPage(comic, { page: 1, background: null });
+		expect(comic.pages[0]).not.toHaveProperty('background');
+		expect(() => setPage(comic, { page: 1, background: 'green' })).toThrow(/colour/);
+	});
+});
+
+describe('title lettering', () => {
+	it('letters ==accent== words and sets the accent colour, on titles only', () => {
+		const comic = createComic('Titles', 'board');
+		const { id } = addBalloon(comic, { page: 1, type: 'title', text: '==IF== WE HAD' });
+		const t = comic.pages[0].balloons.find((b) => b.id === id)!;
+		expect(t.html).toBe('<p><mark>IF</mark> WE HAD</p>');
+		updateBalloon(comic, { page: 1, balloonId: id, fill: '#000000', accent: '#ff0000' });
+		expect(t).toMatchObject({ fill: '#000000', stroke: '#ff0000' });
+		const speech = addBalloon(comic, { page: 1, type: 'speech', text: 'Hi' }).id;
+		expect(() => updateBalloon(comic, { page: 1, balloonId: speech, accent: '#ff0000' })).toThrow(
+			/title/
+		);
+	});
+});
 
 describe('page ops', () => {
 	it('adds after a given page (default: at the end), deletes (never the last) and moves', () => {

@@ -17,6 +17,13 @@ describe('resolveTypography', () => {
 		expect(resolveTypography(undefined)).toEqual(DEFAULT_TYPOGRAPHY);
 	});
 
+	it('letters titles in Rubik Microbe capitals, also for styles stored before titles', () => {
+		expect(DEFAULT_TYPOGRAPHY.title).toMatchObject({ family: 'Rubik Microbe', uppercase: true });
+		expect(resolveTypography({ speech: DEFAULT_TYPOGRAPHY.speech }).title).toEqual(
+			DEFAULT_TYPOGRAPHY.title
+		);
+	});
+
 	it('overrides only the types it names', () => {
 		const t = resolveTypography({
 			caption: { family: 'Rubik Dirt', weight: 400, italic: false, uppercase: true }

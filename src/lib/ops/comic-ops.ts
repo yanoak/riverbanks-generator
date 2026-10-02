@@ -27,6 +27,7 @@ import {
 	type BandsPatch
 } from '$lib/model/bands';
 import { createPage } from '$lib/model/factory';
+import { isColour } from '$lib/model/page';
 import { gridPanels } from '$lib/model/invariants';
 import { REASONS } from '$lib/model/reasons';
 import type {
@@ -110,6 +111,17 @@ export function movePage(comic: Comic, args: { page: number; to: number }): stri
  * Header and footer text: the comic's defaults when `page` is omitted, else that page's
  * overrides. `reset` first returns the page to the defaults.
  */
+/** A page's own look; for now its background colour (null returns it to white). */
+export function setPage(comic: Comic, args: { page: number; background?: string | null }): string {
+	const page = pageAt(comic, args.page);
+	if (args.background === null) delete page.background;
+	else if (args.background !== undefined) {
+		if (!isColour(args.background)) throw invalid('The background must be a colour, #rrggbb.');
+		page.background = args.background.toLowerCase();
+	}
+	return `Page ${args.page} background: ${page.background ?? 'white'}.`;
+}
+
 export function setBands(
 	comic: Comic,
 	args: BandsPatch & {
@@ -327,10 +339,14 @@ export function updateBalloon(
 		fontSize?: number;
 		font?: string;
 		fill?: string;
+		/** A title's accent colour, for its ==marked== words (kept in stroke). */
+		accent?: string;
 	} & ShapeArgs
 ): string {
 	const page = pageAt(comic, args.page);
 	const b = balloonIn(page, args.balloonId);
+	if (args.accent && (args.type ?? b.type) !== 'title')
+		throw invalid('Only title lettering has an accent colour.');
 	if (args.text !== undefined) b.html = markdownToHtml(args.text);
 	if (args.type) b.type = args.type;
 	if (args.rect) Object.assign(b, args.rect);
@@ -338,6 +354,7 @@ export function updateBalloon(
 	if (args.font) b.font = args.font;
 	else if (args.font === '') delete b.font;
 	if (args.fill) b.fill = args.fill;
+	if (args.accent) b.stroke = args.accent;
 	if (args.tailTip === null || !TAILED.includes(b.type)) delete b.tail;
 	else if (args.tailTip) b.tail = { x: args.tailTip.x - b.x, y: args.tailTip.y - b.y };
 	applyShape(page, b, args);

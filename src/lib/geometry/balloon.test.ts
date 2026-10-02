@@ -199,3 +199,10 @@ describe('connectors', () => {
 		expect(neck.width).toBeCloseTo(22, 6); // 22% of the smaller height
 	});
 });
+
+describe('title lettering', () => {
+	it('has no shape and sits on its box with a small inset', () => {
+		expect(balloonShape('title', 400, 200)).toEqual({ paths: [], circles: [], dashed: false });
+		expect(textInset('title')).toBe(0);
+	});
+});

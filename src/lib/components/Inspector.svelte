@@ -194,7 +194,7 @@
 							(TAILED.includes(e.currentTarget.value) ? { x: b.w * 0.35, y: b.h * 1.6 } : undefined)
 					})}
 			>
-				{#each ['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx'] as t (t)}
+				{#each ['speech', 'thought', 'whisper', 'shout', 'caption', 'sfx', 'title'] as t (t)}
 					<option value={t}>{t}</option>
 				{/each}
 			</select>
@@ -212,13 +212,24 @@
 			/>
 		</label>
 		<label class="row">
-			<span>Fill</span>
+			<span>{b.type === 'title' ? 'Colour' : 'Fill'}</span>
 			<input
 				type="color"
 				value={b.fill}
 				onchange={(e) => editor.patch('Balloon fill', b.id, { fill: e.currentTarget.value })}
 			/>
 		</label>
+		{#if b.type === 'title'}
+			<label class="row" title="Words marked as accent (⌘⇧H while typing) take this colour">
+				<span>Accent</span>
+				<input
+					type="color"
+					data-title-accent
+					value={b.stroke}
+					onchange={(e) => editor.patch('Accent colour', b.id, { stroke: e.currentTarget.value })}
+				/>
+			</label>
+		{/if}
 		<label class="row">
 			<span>Tail</span>
 			<input
@@ -321,7 +332,7 @@
 				/>
 			</label>
 		{/if}
-		{#if b.type !== 'sfx'}
+		{#if b.type !== 'sfx' && b.type !== 'title'}
 			{@const host = editor.anchorPanel()}
 			<h3 class="sub">Placement</h3>
 			<label class="row gap-2">
@@ -347,7 +358,7 @@
 				{/if}
 			</p>
 		{/if}
-		{#if b.type !== 'sfx'}
+		{#if b.type !== 'sfx' && b.type !== 'title'}
 			<h3 class="sub">Connection</h3>
 			<label class="row gap-2">
 				<span class="shrink-0">Connect to</span>
@@ -359,7 +370,7 @@
 				>
 					<option value="">None</option>
 					{#each editor.page.balloons as other, i (other.id)}
-						{#if other.id !== b.id && other.type !== 'sfx'}
+						{#if other.id !== b.id && other.type !== 'sfx' && other.type !== 'title'}
 							<option value={other.id}>{i + 1} · {excerpt(other.html)}</option>
 						{/if}
 					{/each}
@@ -594,6 +605,25 @@
 		<div class="row">
 			<span>Format</span>
 			<span data-page-format>{formatLabel(editor.page)}</span>
+		</div>
+		<div class="row">
+			<span>Background</span>
+			<span class="flex items-center gap-2">
+				<input
+					type="color"
+					data-page-background
+					value={editor.page.background ?? '#ffffff'}
+					onchange={(e) => editor.setPageBackground(e.currentTarget.value)}
+				/>
+				<button
+					class="rounded border border-stone-300 px-1.5 text-xs hover:bg-stone-50 disabled:opacity-40"
+					data-page-background-clear
+					disabled={!editor.page.background}
+					title="Back to white"
+					aria-label="Reset background to white"
+					onclick={() => editor.setPageBackground(null)}>×</button
+				>
+			</span>
 		</div>
 		{#each BANDS.filter((b) => hasBand(editor.page, b)) as band (band)}
 			<label class="row" title="Off leaves the strip blank on this page; its text is kept">

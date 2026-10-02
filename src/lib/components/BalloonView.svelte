@@ -56,6 +56,7 @@
 	<div
 		class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
 		class:sfx={balloon.type === 'sfx'}
+		class:title={balloon.type === 'title'}
 		style:inset="{balloon.h * inset}px {balloon.w * inset}px"
 		style:font-family={lettering.fontFamily}
 		style:font-weight={lettering.fontWeight}
@@ -83,6 +84,15 @@
 	}
 	.balloon-text :global(p) {
 		margin: 0;
+	}
+	/* Plain display lettering: the fill is the ink, <mark> words take the stroke as accent. */
+	.balloon-text.title {
+		color: var(--sfx-fill);
+		line-height: 1.05;
+	}
+	.balloon-text.title :global(mark) {
+		background: none;
+		color: var(--sfx-stroke);
 	}
 	.balloon-text.sfx {
 		color: var(--sfx-fill);

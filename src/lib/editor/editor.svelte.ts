@@ -343,6 +343,14 @@ export class Editor {
 		this.say(`Every page now shows this ${band}, unless it has its own.`);
 	}
 
+	/** The current page's background colour; null returns it to white. */
+	setPageBackground(colour: string | null): void {
+		this.change('Page background', (_d, page) => {
+			if (colour) page.background = colour;
+			else delete page.background;
+		});
+	}
+
 	/** Switch this page's header or footer on or off; off leaves its strip blank. */
 	setBandShown(band: Band, shown: boolean): void {
 		const name = band === 'header' ? 'Header' : 'Footer';

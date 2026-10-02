@@ -193,6 +193,7 @@ describe('Riverbanks MCP server', () => {
 				'rename_comic',
 				'set_grid',
 				'set_header_footer',
+				'set_page',
 				'set_panel_image',
 				'list_style_profiles',
 				'create_style_profile',

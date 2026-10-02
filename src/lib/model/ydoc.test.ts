@@ -237,6 +237,17 @@ describe('board format and bands', () => {
 		expect(projectComic(doc).pages[0]).not.toHaveProperty('bands');
 	});
 
+	it('round-trips, sets and clears a page background', () => {
+		const comic = createComic('Titles', 'board');
+		comic.pages[0].background = '#6b7866';
+		const doc = comicToYDoc(comic);
+		expect(projectComic(doc).pages[0].background).toBe('#6b7866');
+		edit(doc, (d) => (d.pages[0].background = '#c4553d'));
+		expect(projectComic(doc).pages[0].background).toBe('#c4553d');
+		edit(doc, (d) => delete d.pages[0].background);
+		expect(projectComic(doc).pages[0]).not.toHaveProperty('background');
+	});
+
 	it('a comic from before bands projects without them', () => {
 		const projected = projectComic(comicToYDoc(createComic('Old')));
 		expect(projected).not.toHaveProperty('bands');

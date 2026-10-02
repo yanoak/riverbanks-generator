@@ -570,7 +570,8 @@ Drafts is canon.
   - The canon file is `content/network/riverbook.json`.
   - It is synced with the `riverbook-network` skill. See `docs/story-network.md`.
   - It does not yet include Sam's prologue banker or the Epilogue material.
-- **Process for comics:** script first, house style, then check every page by eye.
+- **Process for comics:** follow `docs/comic-playbook.md`, the step-by-step that took *The Youngest
+  Delegate* from a rough draft to a finished A1 comic.
 
 ## Decisions and open questions
 

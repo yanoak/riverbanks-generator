@@ -504,8 +504,9 @@
 </div>
 
 <!-- After Yan's annotated A1 sheet: title and subtitle on one line. The footer after Yan's
-     mock-up: the outer slots large in Rubik Pixels, the centre small; a QR, if set, at the right
-     end with its address beside it. Lettering scales with the band. -->
+     mock-ups: the outer slots large in Rubik Pixels, the centre small, all on one baseline set
+     close to the page's bottom and side edges; a QR, if set, at the right end with its address
+     beside it. Lettering scales with the band. -->
 {#snippet header()}
 	<div
 		class="band header absolute inset-x-0 top-0 flex items-baseline justify-center gap-[0.4em] px-8 text-center"
@@ -524,14 +525,15 @@
 	{@const qr = href ? qrMatrix(href) : null}
 	{@const qrSide = Math.min(bottom * 0.72, 150)}
 	<div
-		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] items-center gap-6"
+		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] content-end items-baseline gap-6"
 		style:height="{bottom}px"
 		style:--band="{bottom}px"
-		style:padding-inline="{Math.min(bottom * 0.47, 48)}px"
+		style:padding-inline="{Math.min(bottom * 0.07, 6)}px"
+		style:padding-bottom="{Math.min(bottom * 0.09, 8)}px"
 	>
 		<span class="text-left">{bands?.footer.left}</span>
 		<span class="small text-center">{bands?.footer.center}</span>
-		<span class="flex items-center justify-end gap-[0.6em] text-right">
+		<span class="flex items-baseline justify-end gap-[0.6em] text-right">
 			<span>{bands?.footer.right}</span>
 			{#if qr}
 				<!-- A live link in the printed PDF. -->
@@ -675,13 +677,13 @@
 	}
 	.footer {
 		font-family: 'Rubik Pixels', 'Rubik', sans-serif;
-		font-size: min(calc(var(--band) * 0.3), 25px);
+		font-size: min(calc(var(--band) * 0.31), 26px);
 		line-height: 1;
 		white-space: nowrap;
 	}
 	.footer .small,
 	.qr .small {
-		font-size: min(calc(var(--band) * 0.14), 12px);
+		font-size: min(calc(var(--band) * 0.17), 14px);
 	}
 	.qr {
 		color: inherit;

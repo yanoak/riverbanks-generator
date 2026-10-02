@@ -37,7 +37,7 @@ export const DEFAULT_TYPOGRAPHY: Typography = {
 	whisper: rubik(400),
 	shout: rubik(800, false, true),
 	caption: rubik(600, true, true),
-	sfx: { family: 'Rubik Microbe', weight: 400, italic: false, uppercase: false }
+	sfx: { family: 'Rubik Dirt', weight: 400, italic: false, uppercase: false }
 };
 
 function valid(value: unknown, fallback: Lettering): Lettering {

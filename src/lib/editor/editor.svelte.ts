@@ -15,6 +15,7 @@ import {
 	hasBand,
 	resetPageBands,
 	resolveBands,
+	setBandShown,
 	setPageBands,
 	useOnEveryPage,
 	type Band
@@ -340,6 +341,15 @@ export class Editor {
 	useBandOnEveryPage(band: Band): void {
 		this.change(`Use ${band} on every page`, (d) => useOnEveryPage(d, this.pageIndex, band));
 		this.say(`Every page now shows this ${band}, unless it has its own.`);
+	}
+
+	/** Switch this page's header or footer on or off; off leaves its strip blank. */
+	setBandShown(band: Band, shown: boolean): void {
+		const name = band === 'header' ? 'Header' : 'Footer';
+		this.change(`${name} ${shown ? 'on' : 'off'}`, (_d, page) => setBandShown(page, band, shown));
+		if (!shown && this.selection.kind === 'band' && this.selection.band === band)
+			this.select({ kind: 'none' });
+		this.say(`${name} ${shown ? 'shown' : 'hidden'} on this page.`);
 	}
 
 	resetBand(band: Band): void {

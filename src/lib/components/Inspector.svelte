@@ -27,7 +27,7 @@
 	import { htmlToPlain } from '$lib/ops/text';
 	import { comicCode } from '$lib/model/refs';
 	import { sfxRotation } from '$lib/model/balloons';
-	import type { Band } from '$lib/model/bands';
+	import { bandShown, BANDS, hasBand, type Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
 
 	const TAILED: string[] = ['speech', 'thought', 'whisper', 'shout'];
@@ -595,6 +595,17 @@
 			<span>Format</span>
 			<span data-page-format>{formatLabel(editor.page)}</span>
 		</div>
+		{#each BANDS.filter((b) => hasBand(editor.page, b)) as band (band)}
+			<label class="row" title="Off leaves the strip blank on this page; its text is kept">
+				<span>{band === 'header' ? 'Header' : 'Footer'}</span>
+				<input
+					type="checkbox"
+					data-band-shown={band}
+					checked={bandShown(editor.page, band)}
+					onchange={(e) => editor.setBandShown(band, e.currentTarget.checked)}
+				/>
+			</label>
+		{/each}
 		<p class="mt-4 text-xs leading-relaxed text-stone-500">
 			Click a panel, ⇧-click or ⇧+arrow to add neighbours, then <kbd>M</kbd> to merge.
 		</p>

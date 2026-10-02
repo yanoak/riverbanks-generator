@@ -441,7 +441,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 			annotations: UPDATE,
 			title: 'Set header and footer',
 			description:
-				'Set the text in an A1 board’s header (a large title over a smaller subtitle) and footer (left, center, right, and qr: a QR code with its address at the right end). Without a page, it sets the comic’s defaults, which every page shows; with a page, it overrides slots on that page only. Give only the slots to change; "" blanks a slot. {comic}, {page} and {pages} are replaced by the title, the page number and the page count. reset: true first returns the page to the defaults.',
+				'Set the text in an A1 board’s header (a large title over a smaller subtitle) and footer (left, center, right, and qr: a QR code with its address at the right end). Without a page, it sets the comic’s defaults, which every page shows; with a page, it overrides slots on that page only. Give only the slots to change; "" blanks a slot. {comic}, {page} and {pages} are replaced by the title, the page number and the page count. reset: true first returns the page to the defaults. show (with a page) switches the page’s header or footer off or back on: off leaves the strip blank and keeps its text.',
 			inputSchema: {
 				comicId: z.string(),
 				page: page.optional(),
@@ -458,7 +458,10 @@ export function createMcpServer(ctx: McpContext): McpServer {
 							)
 					})
 					.optional(),
-				reset: z.boolean().optional()
+				reset: z.boolean().optional(),
+				show: z
+					.object({ header: z.boolean().optional(), footer: z.boolean().optional() })
+					.optional()
 			}
 		},
 		async ({ comicId, ...args }) => edit(comicId, (c) => ops.setBands(c, args))

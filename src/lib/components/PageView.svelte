@@ -23,7 +23,7 @@
 	import BalloonView from './BalloonView.svelte';
 	import { richText } from '$lib/editor/rich-text';
 	import { DEFAULT_TYPOGRAPHY, type Typography } from '$lib/typography/typography';
-	import { qrHref, type Band } from '$lib/model/bands';
+	import { bandShown, qrHref, type Band } from '$lib/model/bands';
 	import { qrMatrix, qrPath } from '$lib/geometry/qr';
 	import type { Bands } from '$lib/model/types';
 
@@ -48,6 +48,9 @@
 	/** The bands' boxes: a strip above and below the grid, where the page has them. */
 	const top = $derived(page.grid.top ?? 0);
 	const bottom = $derived(page.grid.bottom ?? 0);
+	/** A band switched off on this page leaves its strip blank. */
+	const showHeader = $derived(bandShown(page, 'header'));
+	const showFooter = $derived(bandShown(page, 'footer'));
 	const bandBox = (band: Band) =>
 		band === 'header' ? { y: 0, h: top } : { y: page.height - bottom, h: bottom };
 	const selectedBand = $derived(editor?.selection.kind === 'band' ? editor.selection.band : null);
@@ -217,9 +220,9 @@
 		style:transform="scale({scale})"
 		style:transform-origin="top left"
 	>
-		{#if top > 0}{@render header()}{/if}
-		{#if bottom > 0}{@render footer()}{/if}
-		{#if editor && top > 0}{@render bandHit('header')}{/if}
+		{#if showHeader}{@render header()}{/if}
+		{#if showFooter}{@render footer()}{/if}
+		{#if editor && showHeader}{@render bandHit('header')}{/if}
 
 		{#each shapes as { panel, bbox, clip } (panel.id)}
 			<div
@@ -443,7 +446,7 @@
 			{/each}
 		{/if}
 
-		{#if editor && bottom > 0}{@render bandHit('footer')}{/if}
+		{#if editor && showFooter}{@render bandHit('footer')}{/if}
 
 		{#if peersHere.length}
 			<svg

@@ -33,6 +33,18 @@ export const comicBands = (comic: Comic): Bands => comic.bands ?? HOUSE_BANDS;
 export const hasBand = (page: Page, band: Band): boolean =>
 	((band === 'header' ? page.grid.top : page.grid.bottom) ?? 0) > 0;
 
+/** Whether the page draws this band: it has room for it and hasn't switched it off. */
+export const bandShown = (page: Page, band: Band): boolean =>
+	hasBand(page, band) && !page.bands?.hidden?.includes(band);
+
+/** Switch a band on or off on one page, keeping its text for when it comes back. */
+export function setBandShown(page: Page, band: Band, shown: boolean): void {
+	const hidden = (page.bands?.hidden ?? []).filter((b) => b !== band);
+	if (!shown) hidden.push(band);
+	const next: BandOverrides = { ...page.bands, hidden };
+	tidy(page, next);
+}
+
 /** What resolving needs to know about the comic; the comics list has no more than this. */
 export interface BandContext {
 	title: string;
@@ -140,6 +152,7 @@ function defined<T extends object>(slots: T | undefined): Partial<T> {
 
 function tidy(page: Page, next: BandOverrides) {
 	for (const band of BANDS) if (next[band] && !Object.keys(next[band]!).length) delete next[band];
+	if (next.hidden && !next.hidden.length) delete next.hidden;
 	if (Object.keys(next).length) page.bands = next;
 	else delete page.bands;
 }

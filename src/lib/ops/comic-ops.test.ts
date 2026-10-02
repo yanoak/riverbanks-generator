@@ -155,6 +155,17 @@ describe('board pages and bands', () => {
 		expect(comic.pages[1]).not.toHaveProperty('bands');
 	});
 
+	it('turns a page’s bands off and on', () => {
+		const comic = createComic('Taming Currents', 'board');
+		addPage(comic, {});
+		expect(setBands(comic, { page: 2, show: { footer: false } })).toMatch(/footer \(off\)/);
+		expect(comic.pages[1].bands).toEqual({ hidden: ['footer'] });
+		expect(comic.pages[0].bands).toBeUndefined();
+		setBands(comic, { page: 2, show: { footer: true } });
+		expect(comic.pages[1]).not.toHaveProperty('bands');
+		expect(() => setBands(comic, { show: { header: false } })).toThrow(/page/);
+	});
+
 	it('refuses bands on a page without them', () => {
 		const comic = createComic('Old');
 		expect(() => setBands(comic, { page: 1, header: { title: 'x' } })).toThrow(/no header/);

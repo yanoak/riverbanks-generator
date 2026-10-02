@@ -50,7 +50,10 @@ export function handleShortcut(editor: Editor, e: KeyboardEvent, fit: number): b
 		return true;
 	}
 
-	if (isTyping(e.target) && key !== 'Escape') return false;
+	// A focused checkbox takes plain keys (Space toggles it) but not ⌘-shortcuts: ⌘Z right after
+	// a toggle should undo it.
+	const toggle = (e.target as HTMLInputElement | null)?.type === 'checkbox';
+	if (isTyping(e.target) && key !== 'Escape' && !(toggle && mod)) return false;
 
 	if (mod && key.toLowerCase() === 'z') {
 		if (e.shiftKey) editor.redo();

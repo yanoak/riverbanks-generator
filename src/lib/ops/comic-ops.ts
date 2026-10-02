@@ -17,8 +17,11 @@ import {
 	splitPanel as split
 } from '$lib/model/panels';
 import {
+	bandShown,
+	hasBand,
 	resetPageBands,
 	resolveBands,
+	setBandShown,
 	setDefaultBands,
 	setPageBands,
 	type BandsPatch
@@ -109,9 +112,14 @@ export function movePage(comic: Comic, args: { page: number; to: number }): stri
  */
 export function setBands(
 	comic: Comic,
-	args: BandsPatch & { page?: number; reset?: boolean }
+	args: BandsPatch & {
+		page?: number;
+		reset?: boolean;
+		show?: { header?: boolean; footer?: boolean };
+	}
 ): string {
-	const { page: n, reset, ...patch } = args;
+	const { page: n, reset, show, ...patch } = args;
+	if (show && n === undefined) throw invalid('Give a page to switch its bands on or off.');
 	if (n === undefined) {
 		setDefaultBands(comic, patch);
 		const b = comic.bands!;
@@ -124,8 +132,14 @@ export function setBands(
 	}
 	if (reset) resetPageBands(page);
 	setPageBands(page, patch);
+	for (const band of ['header', 'footer'] as const) {
+		if (show?.[band] === undefined) continue;
+		if (!hasBand(page, band)) throw invalid(`Page ${n} has no ${band} band.`);
+		setBandShown(page, band, show[band]);
+	}
 	const { header, footer } = resolveBands(comic, n - 1);
-	return `Page ${n} header: “${header.title} / ${header.subtitle}”; footer: “${footer.left} · ${footer.center} · ${footer.right}”.`;
+	const state = (band: 'header' | 'footer') => (bandShown(page, band) ? '' : ' (off)');
+	return `Page ${n} header${state('header')}: “${header.title} / ${header.subtitle}”; footer${state('footer')}: “${footer.left} · ${footer.center} · ${footer.right}”.`;
 }
 
 export function setGrid(comic: Comic, args: { page: number } & Partial<GridSpec>): string {

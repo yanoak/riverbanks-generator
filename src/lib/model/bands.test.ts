@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { createComic } from './factory';
 import {
+	bandShown,
 	HOUSE_BANDS,
 	qrHref,
 	resetPageBands,
 	resolveBands,
 	setDefaultBands,
+	setBandShown,
 	setPageBands,
 	useOnEveryPage
 } from './bands';
@@ -60,6 +62,41 @@ describe('resolveBands', () => {
 		const c = comic();
 		c.pages[0].bands = { header: { title: 'Only here' } };
 		expect(resolveBands(c, 1).header.title).toBe('Taming Currents');
+	});
+});
+
+describe('turning bands on and off', () => {
+	it('shows a band only where the page has room for it and it isn’t hidden', () => {
+		const c = comic();
+		expect(bandShown(c.pages[0], 'header')).toBe(true);
+		c.pages[0].bands = { hidden: ['header'] };
+		expect(bandShown(c.pages[0], 'header')).toBe(false);
+		expect(bandShown(c.pages[0], 'footer')).toBe(true);
+		expect(bandShown(createComic('Old').pages[0], 'footer')).toBe(false);
+	});
+
+	it('hides and shows one band, keeping the page’s text', () => {
+		const c = comic();
+		setPageBands(c.pages[0], { footer: { left: 'Mine' } });
+		setBandShown(c.pages[0], 'footer', false);
+		setBandShown(c.pages[0], 'footer', false);
+		expect(c.pages[0].bands).toEqual({ footer: { left: 'Mine' }, hidden: ['footer'] });
+		setBandShown(c.pages[0], 'footer', true);
+		expect(c.pages[0].bands).toEqual({ footer: { left: 'Mine' } });
+	});
+
+	it('leaves no bands behind once everything is back to the default', () => {
+		const c = comic();
+		setBandShown(c.pages[0], 'header', false);
+		setBandShown(c.pages[0], 'header', true);
+		expect(c.pages[0]).not.toHaveProperty('bands');
+	});
+
+	it('keeps a hidden band hidden when its text is reset', () => {
+		const c = comic();
+		c.pages[0].bands = { header: { title: 'A' }, hidden: ['header'] };
+		resetPageBands(c.pages[0], 'header');
+		expect(c.pages[0].bands).toEqual({ hidden: ['header'] });
 	});
 });
 

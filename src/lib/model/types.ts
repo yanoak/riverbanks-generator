@@ -146,6 +146,8 @@ export interface Bands {
 export interface BandOverrides {
 	header?: Partial<HeaderText>;
 	footer?: Partial<FooterText>;
+	/** Bands switched off on this page: their strip stays, blank, and their text is kept. */
+	hidden?: ('header' | 'footer')[];
 }
 
 export interface Page extends Size {

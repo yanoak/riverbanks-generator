@@ -406,6 +406,15 @@ describe('Editor header and footer bands', () => {
 		expect(editor.page.bands).toBeUndefined();
 	});
 
+	it('turns this page’s footer off and on as one undo step', () => {
+		const editor = boards();
+		editor.setBandShown('footer', false);
+		expect(editor.page.bands).toEqual({ hidden: ['footer'] });
+		expect(editor.comic.pages[1].bands).toBeUndefined();
+		editor.undo();
+		expect(editor.page.bands).toBeUndefined();
+	});
+
 	it('uses a page’s band on every page, and resets a page to the default', () => {
 		const editor = boards();
 		editor.setBandText('header', 'title', 'ACT TWO');

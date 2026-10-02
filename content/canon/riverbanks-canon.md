@@ -553,6 +553,13 @@ Drafts is canon.
   - ***The Year It Snowed*, A1 version** (`cfdcd0d6-0844-4f40-a7a3-f53006896247`, code `YIS`): 5 A1
     boards and 22 panels under "Act Four / The Year It Snowed", built on 2026-10-02 from the v2
     script in the *Script: The Year It Snowed* tab. Awaiting Yan's review.
+  - ***Prologue and Act One*, A1 version** (`81f32223-022c-4e29-b0d9-b288632326c8`, code `PAO`): 5
+    A1 boards and 23 panels, one per Sam slide (3, 5, 6, 7, 8), redrawn in the house style on
+    2026-10-02. All of Sam's text is lettered, verbatim except two slips fixed on board 5
+    ("improvingecosystem"; "opting-intos *of* the Pluriversal Covenant"). Board 5's PROSPER box
+    uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
+    *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
+    elder, teal stole). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
   - **Next:** *Visa for a Hilsa* gets an A1 rebuild from its v2 draft in `content/drafts/`, after
     the same playbook polish.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne

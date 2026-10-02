@@ -46,9 +46,11 @@ Who does what: **Yan** decides and reviews. **The agent** (Claude Code with the 
    - Use H2 for pages, H3 for panels, bold for lettering, and monospace for the grids.
    - Keep a local copy at `content/drafts/YYYY-MM-DD_<story>_v2.md`.
 
-   The `gws docs documents batchUpdate` requests are built from the markdown by the scripts in
-   this session: `!` lines are bold, `##`/`###` are headings, and fenced blocks are monospace.
-   Before overwriting the v2 section, check it against the local copy, so no one's edits are lost.
+   `./scripts/script-to-doc.py <draft.md> <tab id> --below "Version 1: …"` builds the
+   `gws docs documents batchUpdate` requests from the markdown and inserts them under the tab's
+   title: `!` lines are bold, `##`/`###` are headings, and fenced blocks are monospace. Use
+   `--dry-run` first. It only inserts; before replacing an existing v2 section, check it against
+   the local copy, so no one's edits are lost.
 
 ## 2. Prepare the cast
 

@@ -235,7 +235,7 @@ pages and the dialogue tagged by balloon type.
 
 #### Cast
 
-Sultan Nuh of Muar: ageing ruler, weary of foreign initiatives
+Sultan Nuh of Muara: ageing ruler, weary of foreign initiatives
 
 The General (elder prince): commands the kingdom's military, and believes force and readiness are enough
 
@@ -246,7 +246,7 @@ Princess Ismahan: the youngest, just turned 18
 
 #### Scene 1: The Invitation (late 2027)
 
-The kingdom of Muar has barely survived another flood. An invitation arrives for the Sultan to attend a new Sunda Summit.
+The kingdom of Muara has barely survived another flood. An invitation arrives for the Sultan to attend a new Sunda Summit.
 
 **SULTAN:** Another Western scheme. Another colonial project. It will be just like the SDGs. What is the point in going?
 
@@ -324,7 +324,7 @@ Ya: born 2032, 20 in the frame story. A middle-class girl from a Chinese immigra
 
 Dew: Ya's grandmother (1964/65–2041). Runs the family restaurant in Chiang Mai, built on stilts on the Ping, and attended the 2028 Sunda Summit with the Ping river valley delegation. Her family's cooking heritage already lived by the principles of the Gross Delish Index long before it became the accepted way to measure quality of life beyond money.
 
-Princess Ismahan: 42 in 2052, leader of Muar's kinship councils (from 'The Youngest Delegate'). She knows nature, rivers and ecology through a learned, academic upbringing, but she has never had to cook for herself from scratch. She can't cook, but she understands the GDI in technical detail. She also met Dew at the Sunda Summit and was inspired by her.
+Princess Ismahan: 42 in 2052, leader of Muara's kinship councils (from 'The Youngest Delegate'). She knows nature, rivers and ecology through a learned, academic upbringing, but she has never had to cook for herself from scratch. She can't cook, but she understands the GDI in technical detail. She also met Dew at the Sunda Summit and was inspired by her.
 
 Taro, Ya's kitten: a tiny kitten Ya looks after on the boat. Nobody remarks on it; from time to time, in the panels, Ya feeds it little morsels.
 
@@ -365,7 +365,7 @@ Then Ismahan explains the seed commons and how the Seed score is calculated. Ya 
 
 #### Scene 2: Mudskippers (Air)
 
-At a mudflat stop, Ismahan spots mudskippers and lights up. As a girl in Muar she spent her days in the mangroves playing with them. They sit on the mudflat sharing fermented fruit, an Air food made by wild microbes nobody controls. Ya watches the princess she knows from the news turn back into that girl, and her guard comes down.
+At a mudflat stop, Ismahan spots mudskippers and lights up. As a girl in Muara she spent her days in the mangroves playing with them. They sit on the mudflat sharing fermented fruit, an Air food made by wild microbes nobody controls. Ya watches the princess she knows from the news turn back into that girl, and her guard comes down.
 
 The talk turns personal. Ismahan talks about her brothers and how the kingdom changed; Ya talks about her immigrant family and her fluid sense of home. More and more, Ya says 'my grandma used to say…', which sets up the reveal at the shrine.
 
@@ -381,7 +381,7 @@ The sailabout ends in Chiang Mai, at the family restaurant on stilts on the Ping
 
 Dew's shrine can only be reached when the waters recede, so in a way she is at one with the river. The two women go down to it. The moment Ismahan sees Dew's digital avatar, she recognises her from the Sunda Summit.
 
-Ismahan tells Ya what Dew taught her there when she was 18: food ties everything together. Food is not just about the humans eating it. It is about embracing the richness and biodiversity of everything it comes from. This was one of the lessons she carried home to Muar, and it inspired her to usher in the pluriversal matriarchy.
+Ismahan tells Ya what Dew taught her there when she was 18: food ties everything together. Food is not just about the humans eating it. It is about embracing the richness and biodiversity of everything it comes from. This was one of the lessons she carried home to Muara, and it inspired her to usher in the pluriversal matriarchy.
 
 [End]
 
@@ -524,8 +524,8 @@ Drafts is canon.
 
 | Character | Story | Who they are |
 |---|---|---|
-| **Ismahan** (b. 2010) | Delegate, Snow | The Sultan's youngest. Youngest delegate at the 2028 Summit; first leader of Muar's kinship councils from 2030; Ya's boatmate in 2052; Teja's grandmother |
-| **Sultan Nuh** | Delegate | Ageing Sultan of Muar; signs the Confluence Accord (2030); always a short grey beard |
+| **Ismahan** (b. 2010) | Delegate, Snow | The Sultan's youngest. Youngest delegate at the 2028 Summit; first leader of Muara's kinship councils from 2030; Ya's boatmate in 2052; Teja's grandmother |
+| **Sultan Nuh** | Delegate | Ageing Sultan of Muara; signs the Confluence Accord (2030); always a short grey beard |
 | **Tengku Hamzah, the General** | Delegate | Elder prince and military commander; clean-shaven, black crew cut, shirt tucked in and belted; humbled |
 | **Tengku Faris, the Financier** | Delegate | Second prince, ex–Wall Street; black suit; humbled |
 | **Dew** (1965–2041) | Delegate, Snow | Ya's grandmother; runs the stilt restaurant on the Ping; inspired Ismahan at the Summit; her shrine is under the restaurant |
@@ -568,7 +568,7 @@ Drafts is canon.
     Ya at 8, 20 and 33; Dew; the Sultan; Tengku Hamzah (the General); Tengku Faris (the Financier);
     Jalal; Shapla; Taro as kitten and cat; the drone; Jalal's boat; and Ya's sailboat.
   - **Places:** since 2026-10-02 it also has *the flotel*, drawn from Sam's slide 6, and *the throne
-    room of Muar*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
+    room of Muara*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
     Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*.
   - **Solarpunk props** (Yan, 2026-10-02: the 2040s–50s are rooted in tradition but high tech):
     *the GDI screen* (public displays replace chalkboards; icons and bars only, numbers are
@@ -601,9 +601,9 @@ Drafts is canon.
    wording is the one to use.
 3. ***The Year It Snowed* replaces Act Four, "Happy Meals".**
 4. **The "Second half of Kar" note is still in development.** Ignore it.
-5. **The sultanate is Muar, not Mua, and its ruler is Sultan Nuh, not Ibrahim** (Yan, 2026-10-02). Yan's YD page-1 caption glosses it: *muar*
-   means "mouth", the mouth of a different, not yet drowned river. Muar and Johor otherwise stay
-   vague on purpose: don't state that Muar is Johor. The 1914 Johor line and the "Singapore &
+5. **The sultanate is Muara (earlier Mua, then Muar), and its ruler is Sultan Nuh, not Ibrahim** (Yan, 2026-10-02). Yan's YD page-1 caption glosses it: *muara*
+   means a river mouth or estuary, the mouth of a different, not yet drowned river. Muara and Johor otherwise stay
+   vague on purpose: don't state that Muara is Johor. The 1914 Johor line and the "Singapore &
    Johor" flood can both stand as they are.
 6. **The prologue's banker is a woman, unnamed.**
 7. **Birth years were invented where canon had none:** Jalal 2031 and Shapla 2033.

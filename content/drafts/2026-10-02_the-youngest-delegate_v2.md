@@ -1,7 +1,7 @@
 ! Version 2 (2 Oct 2026): seven A1 boards, one per Edited Drafts scene, 38 panels. This replaces the four-page art-style test, which is kept below as Version 1. The lettering matches the built comic (riverbanks-generator.vercel.app/comics/5a2cdb4a-c822-4fb3-bb5e-5f7d2656a420) as of 2 Oct 2026, including Yan's edits.
 ! Format: each A1 board is a header band, a square 4 × 4 grid (cells 0–15, numbered left to right and top to bottom) and a footer band. Lettering is kept short for standing readers; dialogue lines start from Edited Drafts and were refined while the comic was built. Concepts go in caption boxes on the large panels, so visitors learn the world as they read.
 ! Header (every page): ACT TWO / TAMING CURRENTS, with the page title below. The whole story sits in Act Two (Yan, 2 Oct 2026).
-! Art style: the house ligne claire, with character designs as in Version 1 below. Teal (⨁) is the network's colour: it first appears on the invitation's seal and spreads through Muar page by page.
+! Art style: the house ligne claire, with character designs as in Version 1 below. Teal (⨁) is the network's colour: it first appears on the invitation's seal and spreads through Muara page by page.
 ## The flotel
 Draw it as Sam's slides show it (slide 6, and the hall interior in slide 5). It is not a ship. It is a floating city of interlocking, rounded hexagonal pontoon islands.
 At its centre is the Summit Plaza and Convention Hall: a tall, pointed parabolic arch between two slender towers.
@@ -26,10 +26,10 @@ Dew, unnamed on page 2, must be drawn recognisably, because Act Four's shrine sc
 └─────┴─────┴─────┴─────┘
 ```
 ### Panel 1.1 (cells 0–3), wide strip
-The coast of Muar after the flood: tide lines on the palace walls, mangroves battered, villagers shovelling mud out of houses. A caption ties it to the Prologue's six disasters of November 2027.
-! CAPTION: Sultanate of Muar, late 2027. Six disasters in one week broke the world's insurers. Muar survived another flood. Barely.
+The coast of Muara after the flood: tide lines on the palace walls, mangroves battered, villagers shovelling mud out of houses. A caption ties it to the Prologue's six disasters of November 2027.
+! CAPTION: Sultanate of Muara, late 2027. Six disasters in one week broke the world's insurers. Muara survived another flood. Barely.
 ### Panel 1.2 (cells 4–11), large
-The throne room (the recurring camera). The Sultan sits on the throne holding the invitation, with the General on one side and the Financier on the other. Ismahan, 18, is small in the far doorway, with mud on her feet. Small name captions introduce each of them: Sultan Nuh of Muar · Tengku Hamzah, the General · Tengku Faris, the Financier · Princess Ismahan, 18.
+The throne room (the recurring camera). The Sultan sits on the throne holding the invitation, with the General on one side and the Financier on the other. Ismahan, 18, is small in the far doorway, with mud on her feet. Small name captions introduce each of them: Sultan Nuh of Muara · Tengku Hamzah, the General · Tengku Faris, the Financier · Princess Ismahan, 18.
 ! LABELS: SULTAN IBRAHIM OF MUA · TENGKU HAMZAH, THE GENERAL · TENGKU FARIS, THE FINANCIER · PRINCESS ISMAHAN, 18
 ! SULTAN (speech): Look, my sons and daughter. What have we here? Another summit, I see?
 ! SULTAN (speech, joined to the last): Another Western scheme. Another colonial project. Just like the SDGs.
@@ -108,7 +108,7 @@ A village signs its ecosystem service agreement.
 An adaptation squad trains with local people.
 ! CAPTION: KAN, the Kinetic Adaptation Network, turns foresight into work on the ground.
 ### Panel 3.6 (cells 12–15), wide strip
-Teal lines link rivers, villages and mountains across a map of Muar. In a palace window, small, the princes aren't watching.
+Teal lines link rivers, villages and mountains across a map of Muara. In a palace window, small, the princes aren't watching.
 ! CAPTION: The people already tending the rivers, the land and the mangroves found themselves, more and more, empowered.
 ## Page 4: The Second Crisis (2029)
 ```
@@ -221,6 +221,6 @@ The Sultan signs the Great Confluence Accord outdoors, on the riverbank, among f
 The empty throne, the crown set aside.
 ! CAPTION: The sultanate gives way to a pluriversal matriarchy.
 ### Panel 7.3 (cells 14–15)
-Ismahan, now 20, sits in a circle of the kinship council, not on a throne. A caption: the first leader of Muar's consensus-based kinship councils.
-! CAPTION: Ismahan, twenty, becomes the first leader of Muar's kinship councils, where decisions are made by consensus.
+Ismahan, now 20, sits in a circle of the kinship council, not on a throne. A caption: the first leader of Muara's consensus-based kinship councils.
+! CAPTION: Ismahan, twenty, becomes the first leader of Muara's kinship councils, where decisions are made by consensus.
 ## Version 1: art-style test (4 pages, 1 Oct 2026)

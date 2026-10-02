@@ -58,7 +58,7 @@ The style is "Riverbanks house style" (`b5f76d95…`). A panel prompt that names
 by name or alias, gets that member's starred sheet attached.
 
 1. **Every recurring set becomes a cast *place*.** Examples: *the flotel*, *the throne room of
-   Muar*. Without one, the room is redrawn differently in every panel.
+   Muara*. Without one, the room is redrawn differently in every panel.
    - **To base one on existing art**, e.g. Sam's slides: pass the image's live Slides
      `contentUrl` to `add_style_reference` with the member's name. Base64 is too large to paste.
      Then run `generate_cast_portrait` to redraw it in the house style.

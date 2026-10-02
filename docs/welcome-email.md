@@ -13,9 +13,8 @@ Share, and a working MCP server.
    `test1234`: until the person changes it, anyone who knows a shared password can sign in as
    them.
 3. **Fill the placeholders:** `{{NAME}}`, `{{EMAIL}}`, `{{TEMP_PASSWORD}}`.
-4. **Check the capability lines match what is live.** Once style profiles and image generation
-   are deployed ([plan](../plans/2026-09-29_style-profiles-generation.plan.md)), replace the
-   last line of the Claude section and add the **Styles and generating images** section below.
+4. **Check the capability lines match what is live.** Revised 2026-10-02: A1 boards are the
+   default format, and the styles and image-generation section is in.
 
 **Subject:** Riverbanks comic maker: how to sign in, make comics, and use it with Claude
 
@@ -41,7 +40,7 @@ MAKING A COMIC
 
 Click "+ New comic" (or press N). Everything saves automatically, and the toolbar shows "Saved".
 
-Panels. A page starts as a 3 × 4 grid.
+Panels. A new comic starts as an A1 exhibition board: a header, a 4 × 4 grid and a footer.
 
 - Click a panel, then Shift-click (or Shift + arrow keys) to add neighbours, then press M to
   merge them. L and U shapes work.
@@ -66,6 +65,8 @@ Also:
 - Cmd+Z undoes anything, including just your own changes when others are editing too.
 - The left sidebar adds, reorders and deletes pages.
 - "PNG" (Cmd+E) downloads the current page, and "PDF" prints the whole comic.
+
+
 
 WORKING TOGETHER
 
@@ -105,25 +106,3 @@ Any problems or wishes, send them my way.
 Yan
 
 ---
-
-## Styles and generating images (add once deployed)
-
-```
-STYLES AND GENERATING IMAGES
-
-A style is a set of reference images plus a short description, a palette and things to avoid.
-Make one under "Styles": upload references, mark characters and objects with a name (like
-"Mae"), and press "Describe from references" to have it draft the text for you.
-
-Pick a style when you create a comic, or later in the right-hand panel. Then select a panel,
-press G, describe what happens in it, and press Cmd+Enter: a quick draft comes back in the
-style, shaped to the panel. Every take is kept, so you can switch back. When you're happy with
-one, "Print version (4K)" redraws it at print resolution, unchanged.
-
-For free quick roughs, ask Claude (connected as below) to "sketch panel 2 as SVG": it draws the
-panel itself as line art in the comic's style, and it costs nothing beyond your Claude plan.
-```
-
-And in the Claude section, replace "It can't draw or generate images itself yet." with:
-"It can also list styles, set a comic's style, generate a panel's image in it, and draw a panel
-itself as an SVG sketch, which costs nothing extra."

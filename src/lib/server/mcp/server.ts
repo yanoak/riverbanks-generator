@@ -4,6 +4,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { createComic, DEFAULT_FORMAT } from '$lib/model/factory';
+import { cleanCode, comicCode, isPanelRef, resolvePanelRef } from '$lib/model/refs';
 import { letteringRoom } from '$lib/generation/room';
 import { GENERATED_OVERSCAN } from '$lib/geometry/image';
 import type { Comic } from '$lib/model/types';
@@ -192,6 +193,41 @@ async function guard(body: () => Promise<Result>): Promise<Result> {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Handler = (...args: any[]) => unknown;
+
+/**
+ * Swap panel refs (TC:2:3) in a tool's arguments for panel ids: `panelId`, `panelIds` and
+ * `anchor.panelId`. A tool's own `page` must agree with the refs. Returns the reason on failure.
+ */
+async function resolvePanelRefs(
+	store: ComicStore,
+	args: Record<string, unknown>
+): Promise<Record<string, unknown> | string> {
+	const anchor = args.anchor as { panelId?: unknown } | null | undefined;
+	const refs = [args.panelId, ...((args.panelIds as unknown[]) ?? []), anchor?.panelId];
+	if (typeof args.comicId !== 'string' || !refs.some(isPanelRef)) return args;
+	const loaded = await loadComic(store, args.comicId).catch(() => null);
+	if (!loaded) return args; // the tool reports the missing comic itself
+	const { comic } = loaded;
+	try {
+		const resolve = (v: unknown) => {
+			if (!isPanelRef(v)) return v;
+			const { page, panelId } = resolvePanelRef(comic, v);
+			if (typeof args.page === 'number' && args.page !== page)
+				throw new Error(`${v.toUpperCase()} is on page ${page}, not page ${args.page}.`);
+			return panelId;
+		};
+		const out: Record<string, unknown> = { ...args };
+		if ('panelId' in args) out.panelId = resolve(args.panelId);
+		if (Array.isArray(args.panelIds)) out.panelIds = args.panelIds.map(resolve);
+		if (anchor?.panelId !== undefined) out.anchor = { ...anchor, panelId: resolve(anchor.panelId) };
+		return out;
+	} catch (e) {
+		return (e as Error).message;
+	}
+}
+
 export function createMcpServer(ctx: McpContext): McpServer {
 	const server = new McpServer(
 		{ name: 'riverbanks', version: '1.0.0' },
@@ -209,6 +245,23 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		}
 	);
 	const { store } = ctx;
+
+	// Every tool that takes a panel id also takes a panel ref (CODE:page:panel, model/refs.ts):
+	// refs are swapped for ids here, once, before any tool sees its arguments.
+	const register = server.registerTool.bind(server);
+	server.registerTool = ((name: string, config: { inputSchema?: unknown }, handler: Handler) =>
+		register(
+			name,
+			config as never,
+			(config.inputSchema
+				? async (args: Record<string, unknown>, extra: unknown) => {
+						const resolved = await resolvePanelRefs(store, args);
+						if (typeof resolved === 'string')
+							return { ...text(`invalid: ${resolved}`), isError: true };
+						return handler(resolved, extra);
+					}
+				: handler) as never
+		)) as typeof server.registerTool;
 
 	/** Edit a comic and reply with the summary line plus the new rev. */
 	const edit = (id: string, change: (comic: Comic) => string) =>
@@ -282,12 +335,30 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		{
 			annotations: UPDATE,
 			title: 'Rename comic',
-			inputSchema: { comicId: z.string(), title: z.string().min(1).max(200) }
+			description:
+				'Change a comic’s title and/or its code: the short prefix of its panel refs (CODE:page:panel), 2–8 letters or digits; "" goes back to the title’s initials.',
+			inputSchema: {
+				comicId: z.string(),
+				title: z.string().min(1).max(200).optional(),
+				code: z.string().max(20).optional()
+			}
 		},
-		async ({ comicId, title }) =>
+		async ({ comicId, title, code }) =>
 			edit(comicId, (comic) => {
-				comic.title = title;
-				return `Renamed to “${title}”.`;
+				if (title === undefined && code === undefined)
+					throw new OpError('invalid', 'Give a title, a code, or both.');
+				const said: string[] = [];
+				if (title !== undefined) {
+					comic.title = title;
+					said.push(`Renamed to “${title}”.`);
+				}
+				if (code !== undefined) {
+					const clean = cleanCode(code);
+					if (clean) comic.code = clean;
+					else delete comic.code;
+					said.push(`Panel refs now start ${comicCode(comic)}:.`);
+				}
+				return said.join(' ');
 			})
 	);
 

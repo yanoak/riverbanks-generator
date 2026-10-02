@@ -6,6 +6,7 @@ import { panelOutline } from '$lib/geometry/grid';
 import { insidePolygon as inside } from '$lib/geometry/panel';
 import type { Balloon, Comic, Page, Panel } from '$lib/model/types';
 import { htmlToPlain } from './text';
+import { panelRef, readingOrder as orderedPanels } from '$lib/model/refs';
 
 const plain = (b: Balloon) => htmlToPlain(b.html).replace(/\*+/g, '').replace(/\n+/g, ' / ');
 
@@ -14,15 +15,6 @@ function cellsLabel(cells: number[]): string {
 	if (sorted.length === 1) return `cell ${sorted[0]}`;
 	const consecutive = sorted.every((c, i) => i === 0 || c === sorted[i - 1] + 1);
 	return consecutive ? `cells ${sorted[0]}–${sorted.at(-1)}` : `cells ${sorted.join(', ')}`;
-}
-
-/** Panels in reading order: grid panels by first cell, then free panels bottom to top. */
-function orderedPanels(page: Page): Panel[] {
-	const grid = page.panels
-		.filter((p) => p.kind === 'grid')
-		.sort((a, b) => Math.min(...a.cells) - Math.min(...b.cells));
-	const free = page.panels.filter((p) => p.kind === 'free').sort((a, b) => a.z - b.z);
-	return [...grid, ...free];
 }
 
 /** Even-odd ray casting; outlines are simple polygons (canMerge rules out holes). */
@@ -55,17 +47,17 @@ export function comicScript(comic: Comic, meta: { id: string; appUrl: string }):
 			const panel = panelFor(page, b);
 			byPanel.set(panel, [...(byPanel.get(panel) ?? []), b]);
 		}
-		orderedPanels(page).forEach((panel, j) => {
+		orderedPanels(page).forEach((panel) => {
 			const label = panel.kind === 'grid' ? cellsLabel(panel.cells) : 'free panel';
 			const balloons = byPanel.get(panel) ?? [];
 			const image = panel.image ? ' [image]' : '';
 			if (!balloons.length) {
 				lines.push(
-					`  Panel ${j + 1} (${label})${image}: ${panel.image ? '(image only)' : '(empty)'}`
+					`  Panel ${panelRef(comic, i, panel.id)} (${label})${image}: ${panel.image ? '(image only)' : '(empty)'}`
 				);
 				return;
 			}
-			lines.push(`  Panel ${j + 1} (${label})${image}:`);
+			lines.push(`  Panel ${panelRef(comic, i, panel.id)} (${label})${image}:`);
 			for (const b of balloons) lines.push(`    ${b.type}: ${plain(b)}`);
 		});
 		const loose = byPanel.get(null) ?? [];

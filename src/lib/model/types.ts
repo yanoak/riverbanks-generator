@@ -161,6 +161,8 @@ export interface Comic {
 	title: string;
 	/** The style profile every generation in this comic follows (a live link, by id). */
 	styleProfileId?: Id;
+	/** Short code for panel refs (CODE:page:panel, model/refs.ts); absent is the title's initials. */
+	code?: string;
 	/** The header and footer every page shows unless it overrides them; absent is HOUSE_BANDS. */
 	bands?: Bands;
 	pages: Page[];

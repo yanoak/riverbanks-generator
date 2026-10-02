@@ -745,6 +745,50 @@ describe('Riverbanks MCP server', () => {
 		expect(refused.isError).toBe(true);
 	});
 
+	it('names panels by ref (CODE:page:panel) and accepts refs wherever a panel id goes', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Taming Currents' })).text);
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.code).toBe('TC');
+		expect(d.pages[0].panels.map((p: { ref: string }) => p.ref).slice(0, 3)).toEqual([
+			'TC:1:1',
+			'TC:1:2',
+			'TC:1:3'
+		]);
+		const third = d.pages[0].panels[2];
+
+		const res = await call('update_panel', {
+			comicId: id,
+			page: 1,
+			panelId: 'tc:1:3',
+			fill: '#123456'
+		});
+		expect(res.isError).toBe(false);
+		expect(res.text).toContain(third.id);
+
+		const wrongPage = await call('update_panel', {
+			comicId: id,
+			page: 2,
+			panelId: 'TC:1:3',
+			fill: '#123456'
+		});
+		expect(wrongPage.isError).toBe(true);
+		expect(wrongPage.text).toMatch(/page 1/);
+
+		const merged = await call('merge_panels', {
+			comicId: id,
+			page: 1,
+			panelIds: ['TC:1:1', 'TC:1:2']
+		});
+		expect(merged.isError).toBe(false);
+
+		await call('rename_comic', { comicId: id, code: 'act2' });
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.code).toBe('ACT2');
+		expect(d.title).toBe('Taming Currents');
+		expect(d.pages[0].panels[0].ref).toBe('ACT2:1:1');
+	});
+
 	it('returns the editor’s refusal as a readable tool error', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'X' })).text);

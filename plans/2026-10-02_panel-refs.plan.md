@@ -68,8 +68,8 @@ is how the scripts and conversations already talk.
 
 ## Tasks
 
-- [ ] `model/refs.ts`, `Comic.code` (Y.Doc), and tests
-- [ ] MCP: ref resolution wrapper, `ref` and `code` in `get_comic`, the script, `rename_comic`
+- [x] `model/refs.ts`, `Comic.code` (Y.Doc), and tests
+- [x] MCP: ref resolution wrapper, `ref` and `code` in `get_comic`, the script, `rename_comic`
       code; tests
 - [ ] Editor: Inspector ref, copy and Code field; the canvas IDs toggle
 - [ ] Verify; `done`
@@ -97,21 +97,21 @@ Canvas, IDs on:                           Inspector, a panel selected:
 
 ## Test list (TDD)
 
-- [ ] `defaultCode` gives "TC", "VH", "YD", and something sensible for a one-word or empty
+- [x] `defaultCode` gives "TC", "VH", "YD", and something sensible for a one-word or empty
       title. Layer: unit, `src/lib/model/refs.test.ts`
-- [ ] `panelRef` numbers panels in reading order: grid panels by first cell, then free panels.
+- [x] `panelRef` numbers panels in reading order: grid panels by first cell, then free panels.
       Layer: unit, `refs.test.ts`
-- [ ] `resolvePanelRef` round-trips a ref, ignores case, and refuses a wrong code, a missing page
+- [x] `resolvePanelRef` round-trips a ref, ignores case, and refuses a wrong code, a missing page
       and a missing panel with readable reasons. Layer: unit, `refs.test.ts`
-- [ ] `Comic.code` round-trips through the Y.Doc and can be cleared. Layer: unit,
+- [x] `Comic.code` round-trips through the Y.Doc and can be cleared. Layer: unit,
       `src/lib/model/ydoc.test.ts`
-- [ ] MCP behaviour. Layer: unit, `src/lib/server/mcp/server.test.ts`
+- [x] MCP behaviour. Layer: unit, `src/lib/server/mcp/server.test.ts`
   - `get_comic` reports `code` and each panel's `ref`;
   - `update_panel` with `panelId: "TC:1:3"` acts on that panel;
   - a page that disagrees with the ref is refused;
   - `merge_panels` accepts refs in `panelIds`;
   - `rename_comic` sets the code.
-- [ ] The `fetch` script labels panels by ref. Layer: unit, `src/lib/ops/script.test.ts`
+- [x] The `fetch` script labels panels by ref. Layer: unit, `src/lib/ops/script.test.ts`
 
 ## Verification
 

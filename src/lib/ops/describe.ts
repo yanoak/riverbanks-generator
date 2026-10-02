@@ -4,6 +4,7 @@ import { gridArea } from '$lib/geometry/grid';
 import { fillPercent, imageFocus } from '$lib/geometry/image';
 import { panelBox } from '$lib/geometry/panel';
 import { resolveBands } from '$lib/model/bands';
+import { comicCode, panelRef } from '$lib/model/refs';
 import { sfxRotation } from '$lib/model/balloons';
 import { formatOf } from '$lib/model/factory';
 import type { Balloon, Comic, PanelImage, Rect } from '$lib/model/types';
@@ -37,7 +38,9 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 	return {
 		id: meta.id,
 		title: comic.title,
+		code: comicCode(comic),
 		rev: meta.rev,
+		refs: 'Each panel has a ref, CODE:page:panel in reading order (e.g. TC:2:3), usable wherever a panelId is asked for. Refs are positional: they change when pages move or panels merge.',
 		units:
 			'Page units, x/y from the top-left. Each page gives its size: an A1 board is 1000 × 1416, with the grid in the 1000 × 1000 square (gridArea) between a header and a footer band; a comic page is 1000 × 1545. Balloons and free panels may sit anywhere on the page, across panel borders and into the bands.',
 		pages: comic.pages.map((page, i) => ({
@@ -54,6 +57,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 			panels: page.panels
 				.map((p) => ({
 					id: p.id,
+					ref: panelRef(comic, i, p.id),
 					kind: p.kind,
 					...(p.kind === 'grid' ? { cells: [...p.cells].sort((a, b) => a - b) } : { z: p.z }),
 					bbox: round(panelBox(page, p)),

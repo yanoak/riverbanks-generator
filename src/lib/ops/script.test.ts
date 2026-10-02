@@ -46,13 +46,13 @@ describe('comicScript', () => {
 		expect(caption).toBeGreaterThan(p1);
 		expect(speech).toBeGreaterThan(caption);
 		expect(speech).toBeLessThan(p2);
-		expect(text).toContain('Panel 1 (cells 0–3)');
+		expect(text).toContain('Panel SED:1:1 (cells 0–3)');
 		expect(text).toContain('thought: Where did the Hilsa go?');
 	});
 
 	it('says so when a panel has no text or image', () => {
 		const text = comicScript(createComic('Empty'), { id: 'e', appUrl: '' });
-		expect(text).toContain('Panel 12 (cell 11): (empty)');
+		expect(text).toContain('Panel EMP:1:12 (cell 11): (empty)');
 	});
 });
 

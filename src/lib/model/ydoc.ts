@@ -3,7 +3,7 @@
 // writes an edited draft back as the smallest set of Y changes, addressed by id, so edits made
 // concurrently by different people touch different keys and merge.
 //
-//   comic: Y.Map        id, title, docVersion, styleProfileId?, bands?, pages
+//   comic: Y.Map        id, title, docVersion, styleProfileId?, code?, bands?, pages
 //     pages: Y.Map<pageId, Y.Map>     order is a number per page (midpoints on insert/move)
 //       id, width, height, order, bands?   (bands are plain JSON values, last writer wins)
 //       grid: Y.Map                   rows, cols, gutter, margin, top?, bottom?
@@ -97,6 +97,7 @@ export function comicToYDoc(comic: Comic, doc = new Y.Doc()): Y.Doc {
 		root.set('docVersion', DOC_VERSION);
 		if (comic.styleProfileId) root.set('styleProfileId', comic.styleProfileId);
 		if (comic.bands) root.set('bands', clone(comic.bands));
+		if (comic.code) root.set('code', comic.code);
 		const pages = child(root, 'pages');
 		comic.pages.forEach((page, i) => {
 			writePage(pages, page);
@@ -218,6 +219,10 @@ export function applyComic(doc: Y.Doc, before: Comic, after: Comic, origin: unkn
 		if (before.styleProfileId !== after.styleProfileId) {
 			if (after.styleProfileId) root.set('styleProfileId', after.styleProfileId);
 			else root.delete('styleProfileId');
+		}
+		if (before.code !== after.code) {
+			if (after.code) root.set('code', after.code);
+			else root.delete('code');
 		}
 		if (!same(before.bands, after.bands)) {
 			if (after.bands) root.set('bands', clone(after.bands));
@@ -357,11 +362,13 @@ export function projectComic(doc: Y.Doc): Comic {
 		.map(projectPage);
 	const styleProfileId = root.get('styleProfileId') as string | undefined;
 	const bands = clone(root.get('bands') as Comic['bands']);
+	const code = root.get('code') as string | undefined;
 	return {
 		id: root.get('id') as string,
 		title: root.get('title') as string,
 		...(styleProfileId && { styleProfileId }),
 		...(bands && { bands }),
+		...(code && { code }),
 		pages,
 		docVersion: DOC_VERSION
 	};

@@ -158,6 +158,16 @@ describe('balloon fonts', () => {
 	});
 });
 
+describe('comic code', () => {
+	it('sets, changes and clears the code', () => {
+		const doc = comicToYDoc(createComic('Taming Currents', 'board'));
+		edit(doc, (d) => (d.code = 'ACT2'));
+		expect(projectComic(doc).code).toBe('ACT2');
+		edit(doc, (d) => delete d.code);
+		expect(projectComic(doc)).not.toHaveProperty('code');
+	});
+});
+
 describe('balloon design fields', () => {
 	it('round-trips shape, anchor and connection, and clears them', () => {
 		const comic = createComic('Design', 'board');

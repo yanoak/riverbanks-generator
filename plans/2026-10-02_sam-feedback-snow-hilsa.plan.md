@@ -84,7 +84,7 @@ tabs, and the two comics are rebuilt from them on A1 boards and checked page by 
 - [x] *Snow* v2 written into the *Script: The Year It Snowed* tab, above Version 1 (2026-10-02)
 - [ ] Write the approved scripts into the Edited Drafts script tabs, and the story prose changes into Edited Drafts
 - [ ] Refresh `content/canon/riverbanks-canon.md`
-- [ ] Rebuild *The Year It Snowed* on A1 boards, page by page, with the visual check
+- [x] Rebuild *The Year It Snowed* on A1 boards, page by page, with the visual check (comic `cfdcd0d6…`, code `YIS`, 5 boards, 22 panels; awaiting Yan's review)
 - [ ] Rebuild *Visa for a Hilsa* on A1 boards, page by page, with the visual check
 
 ## Verification

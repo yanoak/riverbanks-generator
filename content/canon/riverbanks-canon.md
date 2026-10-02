@@ -550,15 +550,19 @@ Drafts is canon.
     - *Visa for a Hilsa* (`77a92493-ebe2-41b9-a6c0-eb0b3d9b60c5`).
 
     Sample pages are at the end of each script tab.
-  - **Next:** *The Year It Snowed* and *Visa for a Hilsa* get A1 rebuilds from their v2 drafts in
-    `content/drafts/`.
+  - ***The Year It Snowed*, A1 version** (`cfdcd0d6-0844-4f40-a7a3-f53006896247`, code `YIS`): 5 A1
+    boards and 22 panels under "Act Four / The Year It Snowed", built on 2026-10-02 from the v2
+    script in the *Script: The Year It Snowed* tab. Awaiting Yan's review.
+  - **Next:** *Visa for a Hilsa* gets an A1 rebuild from its v2 draft in `content/drafts/`, after
+    the same playbook polish.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
   claire on cream, with teal, mangrove green and silt brown, and an ochre or brick-red accent.
   - **Characters and props:** its cast has an in-style sheet for each of Ismahan at 18, 20 and 42;
     Ya at 8, 20 and 33; Dew; the Sultan; Tengku Hamzah (the General); Tengku Faris (the Financier);
     Jalal; Shapla; Taro as kitten and cat; the drone; Jalal's boat; and Ya's sailboat.
   - **Places:** since 2026-10-02 it also has *the flotel*, drawn from Sam's slide 6, and *the throne
-    room of Mua*, the recurring set for *The Youngest Delegate*.
+    room of Mua*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
+    Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*.
   - **Pinned looks.** Cast descriptions now fix the details that drifted between panels:
     - **Sultan Ibrahim** always has a short white-grey beard and moustache, a black songkok and a
       cream baju Melayu.

@@ -63,6 +63,17 @@ PDF export match the editor, and MCP describes the new geometry.
 - [x] Plan
 - [x] Preset, `formatOf`, house footer, MCP and describe text; tests
 - [x] `PageView` band lettering and QR at the new height
+- [x] Convert *The Youngest Delegate* (Yan's call, 2026-10-02). No images were regenerated.
+      Snapshot of the old layout: `content/snapshots/2026-10-02_youngest-delegate_pre-5x4.json`
+  - Grid: margin 0, 83-unit bands on every page.
+  - Images: each re-fitted at 108% with the same focus.
+  - Balloons: kept in place relative to their panel.
+  - Tails: follow the art, scaled by how much each image grew.
+  - Every page checked by eye. One fix: panel 6.2 panned (focus x 0.44) so the fisher speaking
+    is back in view.
+  - Sam inserted a blank page 2 during the run, so the old pages 2–7 are now 3–8.
+- [ ] Deploy, so production letters the bands at their new height. Until then, production shows
+      the old 208-unit lettering crammed into 83 units.
 - [ ] Verify (below), then `done`. Step 1 passed on 2026-10-02 in `/local`, which matched the
       sheet. Steps 2–3 (PNG, PDF) are still to do. Step 4 couldn't be done in the browser,
       because the dev database doesn't hold that comic. By the CSS, its 208-unit bands hit the

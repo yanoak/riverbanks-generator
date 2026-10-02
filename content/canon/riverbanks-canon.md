@@ -563,6 +563,11 @@ Drafts is canon.
   - **Places:** since 2026-10-02 it also has *the flotel*, drawn from Sam's slide 6, and *the throne
     room of Muar*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
     Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*.
+  - **Solarpunk props** (Yan, 2026-10-02: the 2040s–50s are rooted in tradition but high tech):
+    *the GDI screen* (public displays replace chalkboards; icons and bars only, numbers are
+    lettered), *the solar lantern*, *Ismahan's hydrofoil*, *Ya's notebook* (e-paper), and *Ya's
+    sailboat* redrawn with an induction galley and an electric outboard. Dew's avatar is a
+    projected hologram.
   - **Pinned looks.** Cast descriptions now fix the details that drifted between panels:
     - **Sultan Nuh** always has a short white-grey beard and moustache, a black songkok and a
       cream baju Melayu.

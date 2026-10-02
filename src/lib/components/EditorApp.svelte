@@ -348,6 +348,10 @@
 		}
 		.print-page {
 			overflow: hidden;
+			/* Print colours as drawn. By default Chrome drops background colours and greys out
+			   light lettering, so coloured boards came out white with grey text. */
+			print-color-adjust: exact;
+			-webkit-print-color-adjust: exact;
 		}
 		.print-page:not(:last-child) {
 			break-after: page;

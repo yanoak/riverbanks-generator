@@ -221,7 +221,7 @@ Dew's script says "1964/65"; the sheet's 1965 is canon.
 
 - The line runs Ismahan → her daughter **Soraya** → **Teja**.
 - **Kandaria**, from the older Moving House drafts, is removed.
-- Sultan Ibrahim is Ismahan's father.
+- Sultan Nuh is Ismahan's father.
 
 ## The stories (Edited Drafts; text as in the doc)
 
@@ -235,7 +235,7 @@ pages and the dialogue tagged by balloon type.
 
 #### Cast
 
-Sultan Ibrahim of Muar: ageing ruler, weary of foreign initiatives
+Sultan Nuh of Muar: ageing ruler, weary of foreign initiatives
 
 The General (elder prince): commands the kingdom's military, and believes force and readiness are enough
 
@@ -308,7 +308,7 @@ The Sultan has to admit that the succession struggle no longer matters. The sult
 
 #### Scene 7: The Confluence Accord (2030)
 
-Sultan Ibrahim signs the Great Confluence Accord. It dissolves the failing top-down system and hands sovereignty to the land, the rivers and the people who tend them. The sultanate gives way to a pluriversal matriarchy: Ismahan, now 20, becomes the first leader of the new consensus-based kinship councils. Her brothers stand among the witnesses.
+Sultan Nuh signs the Great Confluence Accord. It dissolves the failing top-down system and hands sovereignty to the land, the rivers and the people who tend them. The sultanate gives way to a pluriversal matriarchy: Ismahan, now 20, becomes the first leader of the new consensus-based kinship councils. Her brothers stand among the witnesses.
 
 [End]
 
@@ -525,7 +525,7 @@ Drafts is canon.
 | Character | Story | Who they are |
 |---|---|---|
 | **Ismahan** (b. 2010) | Delegate, Snow | The Sultan's youngest. Youngest delegate at the 2028 Summit; first leader of Muar's kinship councils from 2030; Ya's boatmate in 2052; Teja's grandmother |
-| **Sultan Ibrahim** | Delegate | Ageing Sultan of Muar; signs the Confluence Accord (2030); always a short grey beard |
+| **Sultan Nuh** | Delegate | Ageing Sultan of Muar; signs the Confluence Accord (2030); always a short grey beard |
 | **Tengku Hamzah, the General** | Delegate | Elder prince and military commander; clean-shaven, black crew cut, shirt tucked in and belted; humbled |
 | **Tengku Faris, the Financier** | Delegate | Second prince, ex–Wall Street; black suit; humbled |
 | **Dew** (1965–2041) | Delegate, Snow | Ya's grandmother; runs the stilt restaurant on the Ping; inspired Ismahan at the Summit; her shrine is under the restaurant |
@@ -564,7 +564,7 @@ Drafts is canon.
     room of Muar*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
     Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*.
   - **Pinned looks.** Cast descriptions now fix the details that drifted between panels:
-    - **Sultan Ibrahim** always has a short white-grey beard and moustache, a black songkok and a
+    - **Sultan Nuh** always has a short white-grey beard and moustache, a black songkok and a
       cream baju Melayu.
     - **Tengku Hamzah** is clean-shaven with a black crew cut. His green uniform shirt is always
       tucked in, with a brown belt, sleeves down.
@@ -589,7 +589,7 @@ Drafts is canon.
    wording is the one to use.
 3. ***The Year It Snowed* replaces Act Four, "Happy Meals".**
 4. **The "Second half of Kar" note is still in development.** Ignore it.
-5. **The sultanate is Muar, not Mua** (Yan, 2026-10-02). Yan's YD page-1 caption glosses it: *muar*
+5. **The sultanate is Muar, not Mua, and its ruler is Sultan Nuh, not Ibrahim** (Yan, 2026-10-02). Yan's YD page-1 caption glosses it: *muar*
    means "mouth", the mouth of a different, not yet drowned river. Muar and Johor otherwise stay
    vague on purpose: don't state that Muar is Johor. The 1914 Johor line and the "Singapore &
    Johor" flood can both stand as they are.

@@ -12,7 +12,7 @@ Reference images: riverbanks/paneling-slides/slide06_img1.png and slide05_img1.p
 ## Through-lines
 The throne room is the same set on pages 1, 4 and 6, while the power shifts. On page 1 Ismahan watches from the doorway; on page 4 she is absent, out in the villages; on page 6 she stands at the centre and the brothers are pushed to the edges.
 Ismahan's muddy feet: she is the mangrove kid from her first panel on. This sets up the mudskippers scene in The Year It Snowed.
-Character consistency (pinned in the house style's cast): Sultan Ibrahim always has a short white-grey beard and moustache, a black songkok and a cream baju Melayu. Tengku Hamzah, the General, is clean-shaven with a black crew cut; his green uniform shirt is always tucked in, with a brown leather belt, sleeves down. Tengku Faris, the Financier, always wears a black suit, with slicked-back black hair.
+Character consistency (pinned in the house style's cast): Sultan Nuh always has a short white-grey beard and moustache, a black songkok and a cream baju Melayu. Tengku Hamzah, the General, is clean-shaven with a black crew cut; his green uniform shirt is always tucked in, with a brown leather belt, sleeves down. Tengku Faris, the Financier, always wears a black suit, with slicked-back black hair.
 Dew, unnamed on page 2, must be drawn recognisably, because Act Four's shrine scene depends on Ismahan recognising her.
 ## Page 1: The Invitation (late 2027)
 ```
@@ -29,7 +29,7 @@ Dew, unnamed on page 2, must be drawn recognisably, because Act Four's shrine sc
 The coast of Muar after the flood: tide lines on the palace walls, mangroves battered, villagers shovelling mud out of houses. A caption ties it to the Prologue's six disasters of November 2027.
 ! CAPTION: Sultanate of Muar, late 2027. Six disasters in one week broke the world's insurers. Muar survived another flood. Barely.
 ### Panel 1.2 (cells 4–11), large
-The throne room (the recurring camera). The Sultan sits on the throne holding the invitation, with the General on one side and the Financier on the other. Ismahan, 18, is small in the far doorway, with mud on her feet. Small name captions introduce each of them: Sultan Ibrahim of Muar · Tengku Hamzah, the General · Tengku Faris, the Financier · Princess Ismahan, 18.
+The throne room (the recurring camera). The Sultan sits on the throne holding the invitation, with the General on one side and the Financier on the other. Ismahan, 18, is small in the far doorway, with mud on her feet. Small name captions introduce each of them: Sultan Nuh of Muar · Tengku Hamzah, the General · Tengku Faris, the Financier · Princess Ismahan, 18.
 ! LABELS: SULTAN IBRAHIM OF MUA · TENGKU HAMZAH, THE GENERAL · TENGKU FARIS, THE FINANCIER · PRINCESS ISMAHAN, 18
 ! SULTAN (speech): Look, my sons and daughter. What have we here? Another summit, I see?
 ! SULTAN (speech, joined to the last): Another Western scheme. Another colonial project. Just like the SDGs.
@@ -215,7 +215,7 @@ The river outside the window; the princes humbled.
 ```
 ### Panel 7.1 (cells 0–11), splash
 The Sultan signs the Great Confluence Accord outdoors, on the riverbank, among fishers, villagers and mountain people. The brothers stand among the witnesses. A caption explains the Accord: it dissolves the failing top-down system and hands sovereignty to the land, the rivers and the people who tend them.
-! CAPTION: 2030. Sultan Ibrahim signs the Great Confluence Accord.
+! CAPTION: 2030. Sultan Nuh signs the Great Confluence Accord.
 ! CAPTION: It dissolves the failing top-down system and hands sovereignty to the land, the rivers and the people who tend them.
 ### Panel 7.2 (cells 12–13)
 The empty throne, the crown set aside.

@@ -55,7 +55,7 @@
 			"died": null,
 			"home": "Mua",
 			"stories": ["delegate", "snow"],
-			"summary": "Youngest child of Sultan Ibrahim of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja.",
+			"summary": "Youngest child of Sultan Nuh of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja.",
 			"portraits": [
 				{
 					"cast": "Ismahan at 18",
@@ -73,7 +73,7 @@
 		},
 		{
 			"id": "sultan-ibrahim",
-			"name": "Sultan Ibrahim",
+			"name": "Sultan Nuh",
 			"kind": "person",
 			"aliases": ["the Sultan"],
 			"born": null,
@@ -83,7 +83,7 @@
 			"summary": "Ageing Sultan of Mua (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord.",
 			"portraits": [
 				{
-					"cast": "Sultan Ibrahim",
+					"cast": "Sultan Nuh",
 					"from": null
 				}
 			]

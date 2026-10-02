@@ -44,6 +44,8 @@ misalignment.
 
 ## Approach
 
+- **Band ink:** white on anything but pale backgrounds (luminance above 0.4). Pure contrast
+  would put black on Sam's brown Act Four; the slides use white.
 - **Page background:** an optional `Page.background` (CSS colour), drawn edge to edge under the
   panels and bands.
   - It is a plain key on the page's Y.Map, which `diffPage` already patches.
@@ -68,10 +70,11 @@ misalignment.
 
 ## Tasks
 
-- [ ] Plan
-- [ ] Page background: model, Y.Doc, ink, PageView, Inspector, editor, MCP `set_page`; tests
-- [ ] Title lettering: type, typography, shape, render, accent (Highlight and `==`), Inspector,
-      MCP; tests
+- [x] Plan
+- [x] Page background: model, Y.Doc, ink, PageView, Inspector, editor, MCP `set_page`; tests
+- [x] Title lettering: type, typography, shape, render, accent (Highlight and `==`), Inspector,
+      MCP; tests. The browser check was blocked: Chrome kept falling back to a blank tab on the
+      local dev server, so it is checked on production while building the comic instead
 - [ ] Build the comic over MCP and check each board against the PDF
 - [ ] Verify (below), then `done`
 
@@ -101,20 +104,20 @@ Inspector, a title selected: the type menu gains **Title**. Below it are **Colou
 
 ## Test list (TDD)
 
-- [ ] `bandInk` is dark on white and the yellow, and white on the five dark colours. Layer:
+- [x] `bandInk` is dark on white and the yellow, and white on the five dark colours. Layer:
       unit, `src/lib/model/page.test.ts`
-- [ ] `Page.background` survives `comicToYDoc` → `projectComic`, and `applyComic` writes and
+- [x] `Page.background` survives `comicToYDoc` → `projectComic`, and `applyComic` writes and
       clears it. Layer: unit, `ydoc.test.ts`
-- [ ] The `setPage` op sets and clears a background and rejects a non-colour. Layer: unit,
+- [x] The `setPage` op sets and clears a background and rejects a non-colour. Layer: unit,
       `comic-ops.test.ts`
-- [ ] `markdownToHtml` turns `==x==` into `<mark>x</mark>`, and `htmlToPlain` turns it back.
+- [x] `markdownToHtml` turns `==x==` into `<mark>x</mark>`, and `htmlToPlain` turns it back.
       Layer: unit, `src/lib/ops/text.test.ts`
-- [ ] `<mark>` survives the shared schema (`htmlToFragment` → `fragmentToHtml`). Layer: unit,
+- [x] `<mark>` survives the shared schema (`htmlToFragment` → `fragmentToHtml`). Layer: unit,
       `src/lib/model/text.test.ts`
-- [ ] `createBalloon(page, 'title')` has no tail, white fill and Microbe lettering. Layer: unit,
+- [x] `createBalloon(page, 'title')` has no tail, white fill and Microbe lettering. Layer: unit,
       `balloons.test.ts`
-- [ ] A title has no shape paths. Layer: unit, `geometry/balloon.test.ts`
-- [ ] Stored typography without `title` resolves to the default. Layer: unit, `typography.test.ts`
+- [x] A title has no shape paths. Layer: unit, `geometry/balloon.test.ts`
+- [x] Stored typography without `title` resolves to the default. Layer: unit, `typography.test.ts`
 
 ## Verification
 

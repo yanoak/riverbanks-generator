@@ -14,11 +14,13 @@ const RUBIK_WEIGHTS = [300, 400, 500, 600, 700, 800, 900];
 /** Rubik and its display cuts (Sam's slides), then the original comic fonts. */
 export const FONTS: Font[] = [
 	{ family: 'Rubik', weights: RUBIK_WEIGHTS, fallback: 'ui-sans-serif, system-ui, sans-serif' },
-	...['Microbe', 'Dirt', 'Vinyl', 'Wet Paint', 'Pixels', 'Burned'].map((cut) => ({
-		family: `Rubik ${cut}`,
-		weights: [400],
-		fallback: "'Rubik', sans-serif"
-	})),
+	...['Microbe', 'Dirt', 'Vinyl', 'Wet Paint', 'Pixels', 'Burned', 'Distressed', 'Glitch'].map(
+		(cut) => ({
+			family: `Rubik ${cut}`,
+			weights: [400],
+			fallback: "'Rubik', sans-serif"
+		})
+	),
 	{ family: 'Comic Neue', weights: [400, 700], fallback: 'cursive' },
 	{ family: 'Bangers', weights: [400], fallback: 'sans-serif' },
 	{ family: 'Patrick Hand', weights: [400], fallback: 'cursive' },

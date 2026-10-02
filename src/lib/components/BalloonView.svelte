@@ -88,7 +88,7 @@
 	/* Plain display lettering: the fill is the ink, <mark> words take the stroke as accent. */
 	.balloon-text.title {
 		color: var(--sfx-fill);
-		line-height: 1.05;
+		line-height: 0.9;
 	}
 	.balloon-text.title :global(mark) {
 		background: none;

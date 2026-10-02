@@ -117,5 +117,3 @@ a panel itself as an SVG sketch, which costs nothing extra.
 Any problems or wishes, send them my way.
 
 Yan
-
----

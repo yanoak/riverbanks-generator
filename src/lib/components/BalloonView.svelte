@@ -57,6 +57,7 @@
 		class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
 		class:sfx={balloon.type === 'sfx'}
 		class:title={balloon.type === 'title'}
+		class:solid={balloon.type === 'title' && lettering.fontFamily.includes('Distressed')}
 		style:inset="{balloon.h * inset}px {balloon.w * inset}px"
 		style:font-family={lettering.fontFamily}
 		style:font-weight={lettering.fontWeight}
@@ -93,6 +94,13 @@
 	.balloon-text.title :global(mark) {
 		background: none;
 		color: var(--sfx-stroke);
+	}
+	/* Rubik Distressed as Sam's slides draw it: its erosion filled in by a thin outline in the
+	   letter's own colour, leaving the torn edges and a few specks. */
+	.balloon-text.title.solid,
+	.balloon-text.title.solid :global(mark) {
+		-webkit-text-stroke: 0.03em currentColor;
+		paint-order: stroke fill;
 	}
 	.balloon-text.sfx {
 		color: var(--sfx-fill);

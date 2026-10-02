@@ -25,6 +25,7 @@
 	import { fillPercent, setFillPercent } from '$lib/geometry/image';
 	import { panelBox } from '$lib/geometry/panel';
 	import { htmlToPlain } from '$lib/ops/text';
+	import { comicCode } from '$lib/model/refs';
 	import { sfxRotation } from '$lib/model/balloons';
 	import type { Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
@@ -392,7 +393,20 @@
 			Delete balloon
 		</button>
 	{:else if panel}
-		<h2 class="section">Panel</h2>
+		{@const ref = editor.refOf(panel.id)}
+		<h2 class="section flex items-center justify-between">
+			<span
+				>Panel <span class="font-mono text-stone-700 normal-case" data-panel-ref>{ref}</span></span
+			>
+			<button
+				class="rounded border border-stone-300 px-2 py-0.5 text-[11px] font-normal tracking-normal text-stone-600 normal-case hover:bg-stone-50"
+				title="Copy this panel's ref"
+				onclick={async () => {
+					await navigator.clipboard?.writeText(ref).catch(() => {});
+					editor.say(`Copied ${ref}`);
+				}}>Copy</button
+			>
+		</h2>
 		<p class="mb-3 text-stone-500">
 			{panel.kind === 'grid'
 				? `${panel.cells.length} cell${panel.cells.length > 1 ? 's' : ''}`
@@ -533,8 +547,18 @@
 		<h2 class="section">{editor.selectedPanels.length} panels</h2>
 		<button class="btn" onclick={() => editor.merge()}>Merge panels</button>
 	{:else}
+		<h2 class="section">Comic</h2>
+		<label class="row gap-2">
+			<span title="The start of every panel ref, CODE:page:panel">Code</span>
+			<input
+				class="w-24 rounded border border-stone-300 px-2 py-0.5 font-mono uppercase"
+				data-comic-code
+				maxlength="8"
+				value={comicCode(editor.comic)}
+				onchange={(e) => editor.setCode(e.currentTarget.value)}
+			/>
+		</label>
 		{#if styles}
-			<h2 class="section">Comic</h2>
 			<div class="row mb-3">
 				<span>Style</span>
 				<span class="flex min-w-0 items-center gap-2">

@@ -11,7 +11,7 @@
 		polygonBBox,
 		pullInside
 	} from '$lib/geometry/grid';
-	import { panelPolygon } from '$lib/geometry/panel';
+	import { panelBox, panelPolygon } from '$lib/geometry/panel';
 	import { BALLOON_STROKE, connectorEnds, neckShape } from '$lib/geometry/balloon';
 	import type { Editor } from '$lib/editor/editor.svelte';
 	import type { FreePanel, GridPanel, Page } from '$lib/model/types';
@@ -431,6 +431,21 @@
 			</svg>
 		{/if}
 
+		{#if editor?.showRefs}
+			<!-- Panel refs, for naming panels in conversation and to agents. -->
+			{#each page.panels as panel (panel.id)}
+				{@const at = panelBox(page, panel)}
+				<span
+					class="panel-ref pointer-events-none absolute"
+					data-ref-label
+					style:left="{at.x + 6 / scale}px"
+					style:top="{at.y + 6 / scale}px"
+					style:font-size="{12 / scale}px"
+					style:z-index="9000">{editor.refOf(panel.id)}</span
+				>
+			{/each}
+		{/if}
+
 		{#if editor && bottom > 0}{@render bandHit('footer')}{/if}
 
 		{#if peersHere.length}
@@ -668,6 +683,15 @@
 		font-size: 16px;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
+	}
+	.panel-ref {
+		padding: 0.1em 0.4em;
+		border-radius: 0.3em;
+		background: rgb(12 74 110 / 0.85);
+		color: white;
+		font:
+			600 1em/1.3 ui-monospace,
+			monospace;
 	}
 	.band-hit:hover {
 		background: color-mix(in oklab, var(--color-sky-500) 6%, transparent);

@@ -310,6 +310,14 @@
 				<span class="w-10 text-center tabular-nums">{Math.round(scale * 100)}%</span>
 				<button class="zoom" aria-label="Zoom in" onclick={() => editor.zoomBy(1.2, fit)}>+</button>
 				<button class="zoom px-2" onclick={() => (editor.zoom = null)}>Fit</button>
+				<button
+					class="zoom px-2"
+					class:text-sky-700={editor.showRefs}
+					aria-pressed={editor.showRefs}
+					title="Show every panel's ref (CODE:page:panel)"
+					data-show-refs
+					onclick={() => (editor.showRefs = !editor.showRefs)}>IDs</button
+				>
 			</div>
 		</main>
 		<Inspector {editor} {styles} {gen} />

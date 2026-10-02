@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-02_panel-refs
-status: active
+status: done
 started: 2026-10-02
-finished:
+finished: 2026-10-02
 issue:
 ---
 
@@ -71,8 +71,8 @@ is how the scripts and conversations already talk.
 - [x] `model/refs.ts`, `Comic.code` (Y.Doc), and tests
 - [x] MCP: ref resolution wrapper, `ref` and `code` in `get_comic`, the script, `rename_comic`
       code; tests
-- [ ] Editor: Inspector ref, copy and Code field; the canvas IDs toggle
-- [ ] Verify; `done`
+- [x] Editor: Inspector ref, copy and Code field; the canvas IDs toggle
+- [x] Verify; `done`
 
 ## UI mockups (ASCII)
 
@@ -122,4 +122,15 @@ Canvas, IDs on:                           Inspector, a panel selected:
 
 ## Outcome
 
-_Filled in when this goes to `done` or `abandoned`._
+Done on 2026-10-02.
+
+- **The refs:** panels have positional refs, CODE:page:panel, from a comic code that defaults to
+  the title's initials.
+- **MCP:** `get_comic` reports them (and the code), the `fetch` script uses them, `rename_comic`
+  sets the code, and every MCP tool that takes a panel id takes a ref, through one wrapper.
+- **Checked in Chrome** on *Taming Currents*:
+  - IDs labels every panel TC:1:1 … TC:1:16;
+  - selecting a panel shows "Panel TC:1:11" with Copy;
+  - typing "act2" in Code relabels everything as ACT2:1:….
+- **Not checked by hand:** the Copy button writing to the clipboard, and the renumbering after a
+  merge in the browser (unit tested).

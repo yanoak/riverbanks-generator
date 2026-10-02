@@ -21,6 +21,7 @@ import {
 } from '$lib/model/bands';
 import { anchorBalloon, connectBalloons, removeBalloon, repinAnchors } from '$lib/model/balloons';
 import { createComic, createPage } from '$lib/model/factory';
+import { cleanCode, panelRef } from '$lib/model/refs';
 import { panelNear } from '$lib/geometry/panel';
 import { createBalloon } from '$lib/model/balloons';
 import { clone } from '$lib/model/clone';
@@ -62,6 +63,8 @@ export class Editor {
 	comic = $state<Comic>(projectComic(this.doc));
 	pageIndex = $state(0);
 	selection = $state<Selection>({ kind: 'none' });
+	/** Label every panel on the canvas with its ref (CODE:page:panel). */
+	showRefs = $state(false);
 	mode = $state<Mode>('select');
 	/** null = fit the page to the viewport. */
 	zoom = $state<number | null>(null);
@@ -287,6 +290,23 @@ export class Editor {
 		if (this.imagePanelId && !page.panels.some((p) => p.id === this.imagePanelId)) {
 			this.exitImageMode();
 		}
+	}
+
+	// --- panel refs ------------------------------------------------------------------------
+
+	/** A panel's ref on the current page, e.g. TC:2:3. */
+	refOf(panelId: string): string {
+		return panelRef(this.comic, this.pageIndex, panelId);
+	}
+
+	/** The comic's code for panel refs; '' goes back to the title's initials. */
+	setCode(code: string): void {
+		const clean = cleanCode(code);
+		if (clean === (this.comic.code ?? '')) return;
+		this.change('Comic code', (d) => {
+			if (clean) d.code = clean;
+			else delete d.code;
+		});
 	}
 
 	// --- header and footer bands -----------------------------------------------------------

@@ -75,7 +75,18 @@ misalignment.
 - [x] Title lettering: type, typography, shape, render, accent (Highlight and `==`), Inspector,
       MCP; tests. The browser check was blocked: Chrome kept falling back to a blank tab on the
       local dev server, so it is checked on production while building the comic instead
-- [ ] Build the comic over MCP and check each board against the PDF
+- [x] Build the comic over MCP and check each board against the PDF.
+      *Riverbanks: Title Boards* (`91f9a6f0-9c54-42f2-aa3e-43d9752d2c11`), done on 2026-10-02.
+  - **Each page:** one merged, borderless panel filled with the page colour.
+  - **Headers:** off on every page. "ACT n" is title lettering, which needs to be bigger than
+    the 83-unit band allows.
+  - **Posters:** footers off. A full-page free panel holds `content/boards/whirlpool-dark.jpg`,
+    loaded from its raw GitHub URL.
+  - **Fonts, by eye against the PDF:** the act lettering and the quote poster are Rubik
+    Distressed, not Microbe. The premiere poster mixes Pixels, Glitch, Distressed and Wet Paint,
+    and Distressed and Glitch were added to the font list for it.
+  - **Fixes after the first look:** the Rubik cuts run wider than the Slides fonts, so three
+    premiere lines were shrunk to stop them wrapping.
 - [ ] Verify (below), then `done`
 
 ## UI mockups (ASCII)

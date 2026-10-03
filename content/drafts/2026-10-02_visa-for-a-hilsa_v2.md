@@ -1,4 +1,4 @@
-! Version 2 (3 Oct 2026): nine A1 boards, 46 panels: a two-page prologue (Edited Drafts' "Scene 0: Story of the Wife") and one board per Edited Drafts scene. Revised the same day after Khai's notes (see below). This replaces the four-page art-style test, which is kept below as Version 1. The story was approved by Yan on 2 Oct 2026 and polished against the comic playbook (docs/comic-playbook.md) on 3 Oct.
+! Version 2 (3 Oct 2026): nine A1 boards, 47 panels: a two-page prologue (Edited Drafts' "Scene 0: Story of the Wife") and one board per Edited Drafts scene. Revised the same day after Khai's notes (see below). This replaces the four-page art-style test, which is kept below as Version 1. The story was approved by Yan on 2 Oct 2026 and polished against the comic playbook (docs/comic-playbook.md) on 3 Oct.
 ! Format: each A1 board is a header band, a 4 × 4 grid (cells 0–15, numbered left to right and top to bottom) and a footer band. Lettering is kept short for standing readers; dialogue lines start from Edited Drafts. Concepts go in caption boxes on the large panels, so visitors learn the world as they read.
 ! Header (every page): ACT FIVE / A VISA FOR A HILSA, with the page title beside it.
 ! Art style: the house ligne claire. Brick red belongs to Ya alone (her field jacket). Ochre is kept for three things: Jalal's gamcha, the brass pot, and the glint of the tag on the tracked fish.
@@ -354,7 +354,7 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 ├───────────┴───────────┤
 │ 8.4  BREAKFAST        │
 ├───────────────────────┤
-│ 8.5  EVERY RIVER      │
+│ 8.5 GARDEN│ 8.6 DOCTOR│
 └───────────────────────┘
 ```
 
@@ -383,10 +383,15 @@ Morning, breakfast half eaten on the mat. Ya on the left listens gravely, Taro b
 ! SHAPLA (speech): Some mornings I can't feel the knife in my hand. Jalal drops the nets. My mother's hands shook like this too.
 ! YA (speech, across the border below): That's mercury, from one river's fish every day. Follow the hilsa and you eat from every river it passes.
 
-### Panel 8.5 (cells 12–15), wide strip: what Ya describes
+### Panel 8.5 (cells 12–13): KAN's garden
 
-An atlas-style panorama of the river from the coast to the hills, a silver shoal along it, and a different food at each place it passes: crabs and prawns in the mangroves, fish and ducks in the paddies, floating gardens of greens and gourds, mustard and millet fields, mango and jackfruit orchards, fruit on the hills, markets and boats along the banks.
-! CAPTION: Other fish, greens, grains, fruit. Eat widely, and within months the mercury leaves the body, and the numbness can ease.
+A new permaculture kitchen garden beside the hut: greens in raised beds, gourds on a bamboo trellis, beans, banana and papaya, a duck pond and a second fish pond. A KAN gardener in a teal waistcoat shows Shapla how to plant seedlings; Jalal carries a basket of vegetables.
+! KAN GARDENER (speech): These vegetables can be harvested every week. They will help balance against any mercury in the fish you eat.
+
+### Panel 8.6 (cells 14–15): the barefoot doctor
+
+A KAN barefoot doctor from a neighbouring village (a woman in her forties, faded blue sari, teal KAN waistcoat, barefoot, a cloth bag of medicines) has come by boat. On the porch she examines Jalal's trembling hand; Shapla watches, hopeful. A test kit on a cloth.
+! CAPTION: (Sam is writing it.)
 
 ## Page 9: The Hilsa's People (Scene 6, ending)
 

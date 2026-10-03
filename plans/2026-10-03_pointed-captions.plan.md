@@ -46,7 +46,7 @@ The two PAO:4:2 captions use them.
 - [x] Geometry + model: `point`, `pointedPath`, `textPadding`, caption rotation (tests first)
 - [x] Ops/MCP/describe: accept `point` and caption `rotation`; describe them (tests first)
 - [x] Rendering + inspector controls
-- [ ] Apply to the two PAO:4:2 captions and check the board
+- [x] Apply to the two PAO:4:2 captions and check the board
 
 ## UI mockups (ASCII)
 
@@ -106,4 +106,12 @@ On the page:
       by hand in `/local` on the dev server.
 
 ## Outcome
+
+_Status stays active until the last two Verification items pass: the e2e test has not run (no
+Docker), and PNG/PDF export of page 4 is unchecked._
+
+Shipped to production (`vercel deploy --prod`, 2026-10-03). Both PAO:4:2 captions are pennants
+tilted −10°: "The Great Pluriversalization" points right, "Security, Stakes, Services" points
+left, each widened by the depth of its point (56 units) so the lettering kept its room. Checked
+on the live board: lettering sits inside both, matching Sam's inspiration image.
 

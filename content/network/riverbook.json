@@ -307,11 +307,15 @@
 			"stories": [
 				"hilsa"
 			],
-			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa.",
+			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. Meets Shapla at seventeen (2048). His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa.",
 			"portraits": [
 				{
 					"cast": "Jalal",
-					"from": null
+					"from": 2060
+				},
+				{
+					"cast": "Jalal at 17",
+					"from": 2048
 				}
 			]
 		},
@@ -326,11 +330,40 @@
 			"stories": [
 				"hilsa"
 			],
-			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, then the drowned delta. She cooks the tagged hilsa into the feast.",
+			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, war in 1971, then the drowned delta, which she left at eight with her mother for a village on the Meghna. She meets Jalal there at fifteen (2048). In 2065 she cooks the tagged hilsa into the feast, distrusts Ya's offer, and is won over cooking breakfast with her.",
 			"portraits": [
 				{
 					"cast": "Shapla",
-					"from": null
+					"from": 2060
+				},
+				{
+					"cast": "Shapla at 8",
+					"from": 2041
+				},
+				{
+					"cast": "Shapla at 15",
+					"from": 2048
+				}
+			]
+		},
+		{
+			"id": "shaplas-mother",
+			"name": "Shapla's mother",
+			"kind": "person",
+			"aliases": [
+				"the mother"
+			],
+			"born": null,
+			"died": null,
+			"home": "The Ganges delta, then a village on the Meghna",
+			"stories": [
+				"hilsa"
+			],
+			"summary": "Leads eight-year-old Shapla out of the drowned delta in the 2040s, carrying the family's brass pot to the Meghna. In 2048 she turns down PREMISE's funds: generations of being moved on have taught her to trust only the river.",
+			"portraits": [
+				{
+					"cast": "Shapla's mother",
+					"from": 2041
 				}
 			]
 		},
@@ -427,7 +460,12 @@
 			"portraits": [
 				{
 					"cast": "Maya",
-					"from": 2090
+					"from": 2090,
+					"focus": {
+						"x": 0.2,
+						"y": 0.45,
+						"zoom": 4.5
+					}
 				}
 			]
 		},
@@ -486,6 +524,21 @@
 			],
 			"summary": "The corps Soraya leaves home to serve in 2075.",
 			"portraits": []
+		},
+		{
+			"id": "premise",
+			"name": "PREMISE",
+			"kind": "institution",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": [
+				"delegate",
+				"hilsa",
+				"epilogue"
+			],
+			"summary": "The Pluriverse's risk institution: its derivatives pay out ahead of need in the 2029 crisis, it offers Meghna families funds to adapt in 2048, and its support backs the Muara flood covenant in 2090."
 		}
 	],
 	"links": [
@@ -637,7 +690,7 @@
 			"label": "married",
 			"story": "hilsa",
 			"year": null,
-			"note": ""
+			"note": "They meet on the Meghna landing in 2048, at seventeen and fifteen."
 		},
 		{
 			"id": "jalal-drone",
@@ -768,6 +821,36 @@
 			"story": "epilogue",
 			"year": 2075,
 			"note": "She left when Teja was eleven."
+		},
+		{
+			"id": "shaplas-mother-shapla",
+			"source": "shaplas-mother",
+			"target": "shapla",
+			"type": "family",
+			"label": "mother",
+			"story": "hilsa",
+			"year": 2041,
+			"note": "Leads her out of the drowned delta to the Meghna."
+		},
+		{
+			"id": "shaplas-mother-premise",
+			"source": "shaplas-mother",
+			"target": "premise",
+			"type": "member",
+			"label": "turns down its funds",
+			"story": "hilsa",
+			"year": 2048,
+			"note": "\"Everyone who brings papers brings trouble our way.\""
+		},
+		{
+			"id": "ya-shapla",
+			"source": "ya",
+			"target": "shapla",
+			"type": "friends",
+			"label": "cook breakfast together",
+			"story": "hilsa",
+			"year": 2065,
+			"note": "Ya stays the night and wins her over in the kitchen."
 		}
 	]
 }

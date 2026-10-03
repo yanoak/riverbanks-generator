@@ -159,4 +159,5 @@ Yan reviews in the editor and **edits lettering live** while the agent works.
 | A set's colours drift between panels (green walls in a tan hut) | Name the material's colour in every prompt ("pale tan woven bamboo, not green") |
 | Faces fill the top of a wide strip and leave no room for lettering | Say what fills the upper half ("the high ceiling fills the upper half") and that the figures sit in the lower half |
 | A cast name gets drawn as text on the object ("Ya's e-paper notebook") | Leave the prop out of `cast` and describe it |
+| A detail the model adds by habit keeps coming back despite the cast description (Shapla's bindi, green walls) | Open the prompt with "Important: …" naming it; buried in the middle, it is ignored |
 | Left and right won't hold (the boat in VH 7.4) | Spell out every direction; if it still flips, keep the take with the right emotion and flag it |

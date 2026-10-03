@@ -283,8 +283,10 @@ def draw(name, spec, lon, lat, z, down, acc, lake):
     if spec["mark"]:
         x, y = f.xy(*spec["mark"])
         svg.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="11" fill="none" stroke="{PALETTE["mark"]}" stroke-width="2.5"/>'
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" fill="{PALETTE["mark"]}" stroke="{PALETTE["ink"]}" stroke-width="1"/>'
+            # An ink-edged red ring and dot: it has to read from across the room on the A1 board.
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="18" fill="none" stroke="{PALETTE["ink"]}" stroke-width="8"/>'
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="18" fill="none" stroke="{PALETTE["mark"]}" stroke-width="5"/>'
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{PALETTE["mark"]}" stroke="{PALETTE["ink"]}" stroke-width="1.5"/>'
         )
     if spec["legend"]:
         for k, (key, edge) in enumerate([("land", 0.7), ("shelf", 1.6)]):

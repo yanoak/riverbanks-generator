@@ -1,7 +1,7 @@
 # Riverbanks: the canon
 
 The current canonical story and context for the Riverbanks exhibition, compiled for whoever picks
-this up next, human or agent. Compiled on **2026-10-02** from the sources below, and updated the same day with Yan's answers to the open questions.
+this up next, human or agent. Compiled on **2026-10-02** from the sources below, and updated the same day with Yan's answers to the open questions. Updated on **2026-10-03** with Act Three (KAE), from Sam's voice note.
 
 **This file is a snapshot, not the source.** The Google sources are canon. Where they and this
 file differ, the sources win, so re-read them before relying on anything here. The story text
@@ -14,6 +14,7 @@ below is copied word for word from the sources.
 | **Sam's "RIVERBANKS Paneling" slides** | The exhibition frame, the act structure, the Prologue and Act One. **The text is final; the graphics may change.** | [slides](https://docs.google.com/presentation/d/15NZ60aWo9e7i9ZCYXLlMVJrA6JRxp-RArsLSs3IYd0c/edit) |
 | **RIVERBOOK › Edited Drafts** and its *Script:* tabs | The refined stories (Ismahan, Dew & Ya, the Hilsa) and their panel scripts | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.igit5bn60vtm) |
 | **Character timeline** sheet | Years, ages, and family | [sheet](https://docs.google.com/spreadsheets/d/1tSifqkz57Ociu9xq-dRsMxBDvGYcprkoxBNd77GNY_A/edit?gid=0#gid=0) |
+| **RIVERBOOK › KAE** (Sam's voice note, transcribed 2026-10-03) | Act Three: the KAE concept and its panel options, as Sam explained them | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.y1s20b8y7ny8) |
 | RIVERBOOK › SHOW WORLD › PLURIVERS ⨁ | The world bible: institutions and symbolism. The slides restate the parts that matter. | same doc, tab `t.t8praw6lmbav` |
 
 - **Precedence:**
@@ -43,7 +44,7 @@ below is copied word for word from the sources.
 | Prologue | **Six Disasters, One Dream** | Sam's slide 3 (final text, below) |
 | Act One | **Life, the Pluriverse, and Everything** | Sam's slides 5–8 (final text, below). Edited Drafts files *Ismahan: The Youngest Delegate* under "Prologue and Act One". |
 | Act Two | **Taming Currents** | Title only on the slides |
-| Act Three | **Yes We K.A.N.** | Title only on the slides |
+| Act Three | **KAE** (Kinetic Adaptation Economy); the slides still say **Yes We K.A.N.** | Sam's voice note in the KAE tab; see [Act Three](#act-three-kae-the-kinetic-adaptation-economy-sams-voice-note-2026-10-03). The slide title has yet to change. |
 | Act Four | *The Year It Snowed* (replaces **Happy Meals**) | *Dew & Ya: The Year It Snowed* (Edited Drafts). Yan, 2026-10-02: it replaces "Happy Meals"; the slide title has yet to change. |
 | Act Five | **A Visa for a Hilsa** | *Visa for a Hilsa* (Edited Drafts) |
 | Epilogue | **Moving House** | Title only. Still in development; see [In development](#in-development). |
@@ -167,6 +168,61 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
    also able and empowered to come together and symbiote without coercion. A healthy ecology rests
    upon protecting this basic flexibility and freedom.
 
+## Act Three: KAE, the Kinetic Adaptation Economy (Sam's voice note, 2026-10-03)
+
+Source: the transcript in RIVERBOOK's **KAE** tab, made from
+`riverbanks/materials/Sam_KAE_Chapter_explanation.m4a`. This is Sam explaining the act, not final
+text: the panel wording is still to be written.
+
+**The idea.** KAN's planetary systems describe the network. KAE is life inside the economy that
+network creates: "don't talk about Uber, talk about Uber driver life". The century's most
+important and most lucrative economic task is keeping the planet alive and making it as healthy as
+possible. The work is *kinetic*: physical, local and done in context. It means a thousand
+beaver-scale dams rather than one Hoover Dam, and person-to-person care work by neighbours rather
+than an elite global agency, which would leave a neo-colonial footprint. Under PLURIVERS, anyone
+can do work for the planet and get paid for it, whether in local currency or in support for their
+life. The daily anxiety changes from "will I have enough to eat tomorrow?" to "I can't wait to see
+how my river is doing." Sam's references: Guy Standing (the precariat), David Graeber (bullshit
+jobs), Syed Hussein Alatas (*The Myth of the Lazy Native*), Marshall Sahlins (the original
+affluent society).
+
+**The name.** KAE is borrowed from the Cosmo Local CNX world, which crosses over into Riverbanks.
+There, the **Kinetic Aid Echelon** is an emergency-response squad headquartered at Wiang Kum Kam,
+Chiang Mai, within a five-hour flight of more than half the world's population. The **Kinetic
+Adaptation Economy** reuses the acronym. In Burmese, ကယ် (*kae*) means to rescue or save.
+
+**Panel options** (three to five panels; Sam set no order):
+
+1. **How KAN works.** An explainer infographic, like a diagram of how Uber plugs drivers, platform
+   and riders together. Planetary systems sense a need (a coming flood, land after a wildfire),
+   the need becomes a gig, and people find it across languages and devices, or by word of mouth.
+   KAN may also mobilise non-human ecology, the way a plant under attack signals for the predators
+   of its pest.
+2. **The Riverkeepers.** A one-page introduction to the job: roaming ranger-gardeners who patrol
+   rivers by kayak and bicycle and read the river's signs. Smita's "Smita: Riverkeepers" tab has
+   example panels, and its Riverkeeper is Siratana.
+3. **War and peace** (no title yet). Two combatants both fund their struggle by cleaning the river,
+   so the war zone has the cleanest river on the planet. Human nature hasn't changed; the
+   incentives have.
+4. **KAE, the Kinetic Aid Echelon.** How the squad was founded, and how it works gently alongside
+   locals and Indigenous people. "Some of the gentlest people on earth, but also the toughest."
+5. **KAN Academy.** The second-order jobs: training, learning and knowledge transmission across
+   cultures and ecologies. Online and offline; travelling teachers for what can't be shown over a
+   screen. Its immersive programmes are KAN's three *-abouts* (see World context).
+
+**Ideas from the discussion** (not yet written into Edited Drafts):
+
+- Carry existing characters through Act Three rather than invent new ones, so it foreshadows Acts
+  Four and Five.
+- Ya and Ismahan present the final project of their 2052 sailabout. Ya turns from a girl who only
+  cares about cooking into a Riverkeeper trainee on the Ping, in a KAN management-trainee
+  programme, before her research years.
+- Ismahan, in her later years, becomes a peacekeeper who negotiates in the war-and-peace conflict
+  zone.
+- The Hilsa characters appear: Ya checks up on Jalal, and Shapla, the fisherman's wife, gets a
+  bigger role.
+- "Pluriversity" was floated for KAN's university system.
+
 ## World context (from the PLURIVERS world bible; background to the slides)
 
 - **The logo ⨁, the Planetary Plus or Teal Cross.**
@@ -182,10 +238,17 @@ PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsuranc
 - **PESA** works like SaaS for the planet. Communities sign a Planetary Ecosystem Service
   Agreement (PSA) with service levels, conditions and recompense, and services get cheaper over
   time.
-- **KAN** turns PREMISE's foresight into work. In the stories it runs **sailabouts**, experiential
-  learning journeys along rivers inspired by the Aboriginal walkabout, with Young Leaders and
-  Executive MBA programmes. It is also the network that research bodies such as the **Bengal
-  Passage Cooperative** belong to.
+- **KAN** turns PREMISE's foresight into work. It is not one agency but a platform-cooperative
+  economy where anyone can work for the planet and be paid for it (Act Three, KAE). It is also the
+  network that research bodies such as the **Bengal Passage Cooperative** belong to.
+  - **Three immersive learning programmes** (Yan, 2026-10-03). All are inspired by the Aboriginal
+    walkabout:
+    - **sailabouts:** learning by travelling along rivers with others. KAN runs them with Young
+      Leaders and Executive MBA programmes.
+    - **soilabouts:** learning by tending one piece of nature, such as a farm or a mangrove,
+      over time.
+    - **soulabouts:** learning through a spiritual quest to work on yourself.
+  - **KAN Academy** is KAN's training and knowledge-transmission arm.
 - **The Gross Delish Index (GDI)** measures quality of life beyond money: flavour as a health
   report of the ecosystem behind the food. It has five tiers: Soil (base), Water, Seed, Air and
   Wind (tip). It comes from Jules's material, and the stories use it as canon: Dew lived it before
@@ -560,8 +623,9 @@ Drafts is canon.
     uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
     *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
     elder, teal stole). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
-  - **Next:** *Visa for a Hilsa* gets an A1 rebuild from its v2 draft in `content/drafts/`, after
-    the same playbook polish.
+  - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 7 A1
+    boards and 36 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
+    polished v2 script in the *Script: Visa for a Hilsa* tab. Awaiting Yan's review.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
   claire on cream, with teal, mangrove green and silt brown, and an ochre or brick-red accent.
   - **Characters and props:** its cast has an in-style sheet for each of Ismahan at 18, 20 and 42;
@@ -569,7 +633,10 @@ Drafts is canon.
     Jalal; Shapla; Taro as kitten and cat; the drone; Jalal's boat; and Ya's sailboat.
   - **Places:** since 2026-10-02 it also has *the flotel*, drawn from Sam's slide 6, and *the throne
     room of Muara*, the recurring set for *The Youngest Delegate*; and *Dew's restaurant on the
-    Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*.
+    Ping*, the stilt restaurant with its riverbed shrine, for *The Year It Snowed*; and *Jalal and
+    Shapla's hut* (tan woven bamboo, tin roof with two solar panels) for *Visa for a Hilsa*.
+  - ***The brass pot*** (2026-10-03): Shapla's family kolshi, ochre, dented, carried by every
+    generation in the Hilsa prologue.
   - **Solarpunk props** (Yan, 2026-10-02: the 2040s–50s are rooted in tradition but high tech):
     *the GDI screen* (public displays replace chalkboards; icons and bars only, numbers are
     lettered), *the solar lantern*, *Ismahan's hydrofoil*, *Ya's notebook* (e-paper), and *Ya's
@@ -581,6 +648,8 @@ Drafts is canon.
     - **Tengku Hamzah** is clean-shaven with a black crew cut. His green uniform shirt is always
       tucked in, with a brown belt, sleeves down.
     - **Tengku Faris** wears a black suit, with slicked-back black hair.
+    - **Jalal** always has a thick black moustache and no beard, and a white sleeveless vest.
+    - **Shapla** always wears a plain mangrove-green sari, her hair in a low bun.
 - **Story network:** [riverbanks-generator.vercel.app/network](https://riverbanks-generator.vercel.app/network)
   shows 14 characters and 21 ties, with portraits.
   - The canon file is `content/network/riverbook.json`.
@@ -630,9 +699,19 @@ Drafts is canon.
     2026-10-02). The names are invented; the real Johor princes' names were avoided on purpose. The
     General is clean-shaven, with no moustache.
 
+**Settled by Yan on 2026-10-03:**
+
+12. **Act Three is KAE, the Kinetic Adaptation Economy**, replacing "Yes We K.A.N." The slide
+    title has yet to change. KAE is borrowed from the Cosmo Local CNX world, where it is the
+    Kinetic Aid Echelon.
+13. **Soilabouts and soulabouts** join sailabouts as KAN's learning programmes, and **KAN Academy**
+    is the training arm (not "KAE Academy").
+14. **ကယ် (*kae*) means to rescue or save** in Burmese, not "aid and care" as said in the voice note.
+
 **Still open:**
 
-- What Acts Two ("Taming Currents") and Three ("Yes We K.A.N.") contain. They have titles only.
+- What Act Two ("Taming Currents") contains beyond *The Youngest Delegate*.
+- Which of Act Three's five panel options are made, and in what order.
 - The Epilogue, "Moving House".
 - Whether the invented birth years should go into the timeline sheet.
 

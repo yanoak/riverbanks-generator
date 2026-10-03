@@ -155,3 +155,8 @@ Yan reviews in the editor and **edits lettering live** while the agent works.
 | A physical object comes out wrong (a 3D button out of a screen) | Say "flat, on-screen, two-dimensional" in the prompt |
 | Gemini prepaid credits run out | Yan tops up in AI Studio; generation resumes |
 | A generation times out | It has usually finished: check before retrying |
+| A hologram comes out in full colour (VH 3.6) | Leave the character out of `cast` (their sheet brings their colours) and describe them in words as one flat colour |
+| A set's colours drift between panels (green walls in a tan hut) | Name the material's colour in every prompt ("pale tan woven bamboo, not green") |
+| Faces fill the top of a wide strip and leave no room for lettering | Say what fills the upper half ("the high ceiling fills the upper half") and that the figures sit in the lower half |
+| A cast name gets drawn as text on the object ("Ya's e-paper notebook") | Leave the prop out of `cast` and describe it |
+| Left and right won't hold (the boat in VH 7.4) | Spell out every direction; if it still flips, keep the take with the right emotion and flag it |

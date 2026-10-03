@@ -1,4 +1,4 @@
-! Version 2 (3 Oct 2026): eight A1 boards, 41 panels: a two-page prologue (Edited Drafts' "Scene 0: Story of the Wife") and one board per Edited Drafts scene. Revised the same day after Khai's notes (see below). This replaces the four-page art-style test, which is kept below as Version 1. The story was approved by Yan on 2 Oct 2026 and polished against the comic playbook (docs/comic-playbook.md) on 3 Oct.
+! Version 2 (3 Oct 2026): nine A1 boards, 46 panels: a two-page prologue (Edited Drafts' "Scene 0: Story of the Wife") and one board per Edited Drafts scene. Revised the same day after Khai's notes (see below). This replaces the four-page art-style test, which is kept below as Version 1. The story was approved by Yan on 2 Oct 2026 and polished against the comic playbook (docs/comic-playbook.md) on 3 Oct.
 ! Format: each A1 board is a header band, a 4 × 4 grid (cells 0–15, numbered left to right and top to bottom) and a footer band. Lettering is kept short for standing readers; dialogue lines start from Edited Drafts. Concepts go in caption boxes on the large panels, so visitors learn the world as they read.
 ! Header (every page): ACT FIVE / A VISA FOR A HILSA, with the page title beside it.
 ! Art style: the house ligne claire. Brick red belongs to Ya alone (her field jacket). Ochre is kept for three things: Jalal's gamcha, the brass pot, and the glint of the tag on the tracked fish.
@@ -79,17 +79,17 @@ On two-cell panels the faces fill the frame. Their balloons go across the border
 ### Panel 1.2 (cells 2–3)
 
 1971. Night. A young woman in a faded blue sari wades through a flooded paddy with a baby in a sling and the brass pot on her hip. Fires on the far horizon under a dark night sky.
-! CAPTION: 1971. A new country is born in war. Her daughter has to run.
+! CAPTION: 1971. A new country, Bangladesh, is born in war. Her daughter has to run.
 
 ### Panel 1.3 (cells 4–7), wide strip
 
 The 2040s. Salt-white, dead rice fields in the Ganges delta, the sea pushing up the channels; abandoned huts stand in the water. A woman in a green sari leads Shapla, eight, by the hand through knee-deep water, the brass pot on her head. A broad grey-white sky.
-! CAPTION: The 2040s. The sea swallows the delta, and her great-granddaughter leaves with what she can carry.
+! CAPTION: 2040s. rising sea levels swallow the GANGES delta.  / her great-granddaughter leaves with what she can carry.
 
 ### Panel 1.4 (cells 8–15), large
 
 A village on the wide Meghna under a broad pale sky. A small borrowed hut of woven bamboo on the bank; neighbours' boats drawn up. Through the open doorway, Shapla's mother reaches up to set the brass pot on a low shelf, while Shapla, eight, stands in the doorway looking out at the river.
-! CAPTION: At last, on the Meghna, her great-great-granddaughter settles. This is the story of Shapla.
+! CAPTION: At last, on the Meghna, her great-great-granddaughter settles. This is her story. This is the story of Shapla.
 
 ## Page 2: Strangers with Papers (prologue)
 
@@ -108,26 +108,28 @@ A village on the wide Meghna under a broad pale sky. A small borrowed hut of wov
 ### Panel 2.1 (cells 0–3), wide strip
 
 The Meghna village's landing, years later, under a broad pale sky. A sleek PREMISE launch with a teal ⨁ on its hull is moored at the ghat. Villagers queue at a folding table where field agents in teal waistcoats tap tablets and take thumbprints. At the back of the crowd, Shapla's mother stands with her arms folded; Shapla, fifteen, beside her.
-! CAPTION: 2048. PREMISE pays ahead of need: before the next flood, every family is offered funds to adapt.
+! CAPTION: 2048. PREMISE pays OUT ahead of need: before the next flood, every family is offered funds to adapt.
 
 ### Panel 2.2 (cells 4–5)
 
 The PREMISE agent holds out her tablet for a thumbprint. Shapla's mother turns away, hand raised; Shapla watches from behind her.
 ! AGENT (speech, across the border above): Just your thumbprint, here and here…
-! MOTHER (speech): Everyone who brings papers wants us gone. We'll manage.
+! MOTHER (speech): No. Everyone who brings papers brings trouble our way. We'll manage.
 
 ### Panel 2.3 (cells 6–7)
 
 At the water's edge, Jalal, seventeen, mending a net beside his father's boat, holds out a piece of grilled fish on a leaf to Shapla.
-! CAPTION: She meets a boy...
-! LABELS: JALAL, 17 · SHAPLA, 15
 ! JALAL (speech, across the border above): New here? Try it. Today's catch.
+! LABEL: SHAPLA, 15
+! LABEL: JALAL, 17
+! CAPTION: She meets a boy...
 
 ### Panel 2.4 (cells 8–11), wide strip
 
 Dusk on the bank. Shapla and Jalal, teenagers, sit on an upturned boat eating fish and rice from a shared leaf, laughing; children and grandparents eat fish around cooking fires along the bank.
-! CAPTION: Even the Pluriverse had its problems. In some of the most remote villages, burdened by generations of violence from institutions, distrust runs deep. Her mother trusted the river instead.
+! CAPTION: the Pluriverse was not without its problems. DISTRUsT RAN DEEP In MANY villages, burdened by generations of INSTITUTIONAL violence. MANY, LIKE SHAPLA's mother, trusted ONLY the river.
 ! CAPTION: They ate its fish every day, as everyone did. Nobody told them that mercury builds up in a river's fish, and in the people who eat nothing else.
+! CAPTION: Meanwhile, by the river…  / Shapla falls in love with the boy
 
 ### Panels 2.5–2.8 (cells 12, 13, 14, 15)
 
@@ -136,7 +138,7 @@ Four small square panels, wordless except for one caption across the first three
 2.6: Hilsa crowd against the grey concrete face of a river barrage.
 2.7: A Ganges river dolphin and two egrets in a black oil slick on the water.
 2.8: A single hilsa in open green water, a small ochre glint at its gills, swimming off to the right.
-! CAPTION (across 2.5–2.7): The river's creatures were being moved on too: by fire, by dams, by oil.
+! CAPTION: Shapla's people have been running their whole lives, just like all the creatures of river... from floods, fire, dams, and oil spills...
 
 ## Page 3: The Feed (Scene 1)
 
@@ -154,7 +156,7 @@ Four small square panels, wordless except for one caption across the first three
 ### Panel 3.1 (cells 0–3), wide strip
 
 Night. The Cooperative's field station on stilts over the Meghna, its screens lit. Ya sits at a bank of monitors showing blank bar graphs and a river map; Taro sleeps on the desk. A dark starry sky through the open side.
-! CAPTION: Ya, once a cook on the Ping, now studies food ecosystems for the Bengal Passage Cooperative.
+! CAPTION: 2065. Ya, once a cook on the Ping, now studies food ecosystems for the Bengal Passage Cooperative.
 ! LABEL (on the main screen): NEUROTOLITH LINK: ACTIVE · SUBJECT H-117
 
 ### Panel 3.2 (cells 4–11), large: the hilsa's point of view
@@ -163,12 +165,13 @@ Underwater in the Meghna, looking upstream through clear green water. Mangrove r
 ! CAPTION: Under the Passage Covenant, no one owns a migratory fish. The river holds the hilsa in passage.
 ! CAPTION: Every place it passes gives something (a nursery, fresh water) and earns a share of the catch.
 ! CAPTION: A tag in its ear-stone, the NeurOtolith, records what the fish lives through.
-! LABELS: NURSERY RESTORATION ZONE 8 · HARVEST ABSTENTION YEAR 19
+! LABEL: HARVEST ABSTENTION YEAR 19
+! LABEL: NURSERY RESTORATION ZONE 8
 
 ### Panel 3.3 (cells 12–13)
 
 The shoal thickens into thousands of silver bodies, and the tagged fish turns into a narrow, silted side channel.
-! LABELS: ROUTE MATCH 31% · ARCHIVAL CORRIDOR: DORMANT · LAST TRANSIT 62 YEARS AGO
+! LABELS: ROUTE MATCH 31% / ARCHIVAL CORRIDOR: DORMANT / LAST TRANSIT 62 YEARS AGO
 
 ### Panel 3.4 (cell 14)
 
@@ -203,12 +206,12 @@ Morning on the Meghna under a broad pale sky. The drone bursts out of the river 
 
 Jalal holds the fish up to the drone's camera eye.
 ! JALAL (speech, across the border above): How much will this fetch at the ghat?
-! DRONE (speech): Beep boop. 0 taka.
+! DRONE (speech): Beep boop. / 0 taka.
 
 ### Panel 4.3 (cells 6–7)
 
 Jalal throws up his hands at the hovering drone.
-! JALAL (shout, across the border above): Idiot drone! I knew you were too cheap to work.
+! JALAL (shout, across the border above): Are you saying this giant hilsa is worthless?? Idiot drone! I knew you were too cheap to work.
 
 ### Panel 4.4 (cells 8–11), wide strip
 
@@ -246,7 +249,7 @@ A small figure of Ya, in flat pale teal outlined in thin teal ink, stands in the
 ### Panel 5.1 (cells 0–3), wide strip
 
 Afternoon. Ya walks the raised path between green paddies towards Jalal and Shapla's hut, Taro trotting beside her, under a broad pale sky with a few soft clouds.
-! CAPTION: Taro, the kitten from the sailabout, is a teenager now. Cats live longer these days.
+! CAPTION: Ya comes to visit Jalal and Shapla's village, eager to retrieve the tagged hilsa that he caught.
 
 ### Panel 5.2 (cells 4–5)
 
@@ -256,7 +259,7 @@ Jalal in the doorway, beaming, arms wide.
 ### Panel 5.3 (cells 6–7)
 
 Inside, Shapla sets dishes on the mat (fish, vegetables, curries and rice) and keeps her eyes on the stranger. The brass pot is on the shelf behind her.
-! SHAPLA (thought, across the border above): An "opportunity". Opportunities always mean packing.
+! SHAPLA (thought, across the border above): Oh here comes the woman from the city. Jalal says she is offering an "opportunity". Opportunities always mean packing.
 
 ### Panel 5.4 (cells 8–11), wide strip
 
@@ -288,17 +291,17 @@ A breather between two dense pages: four panels and almost no words, ending on o
 ### Panel 6.1 (cells 0–3), wide strip
 
 Ya sets down her spoon, eager, notebook beside her plate.
-! YA (speech): May I look at the fish?
+! YA (speech): Oh, by the way, may I look at the fish that you caught?
 
 ### Panel 6.2 (cells 4–5)
 
 Jalal turns towards the kitchen corner.
-! JALAL (speech, across the border above): My dear, could you bring the fish?
+! JALAL (speech, across the border above): My dear, could you bring the fish? I left it swimming in a jar in the kitchen.
 
 ### Panel 6.3 (cells 6–7)
 
 Shapla, puzzled, points at the table. The brass pot on the shelf behind her.
-! SHAPLA (speech, across the border above): The fish is already on the table.
+! SHAPLA (speech, across the border above): The fish? You mean the one I cooked for dinner?
 
 ### Panel 6.4 (cells 8–15), large
 
@@ -326,20 +329,22 @@ After an awkward silence, Ya speaks very politely, hands folded. Jalal leans in;
 
 A map-like panorama of the hilsa's passage under a broad pale sky: from the Bay of Bengal up the Padma and the Meghna into the hills, with borders drawn as faint dotted lines across the water. Small boats of fisher-researchers follow a silver shoal; a stilt field station on a bend.
 ! CAPTION: The hilsa has never needed a visa. Its passage runs through three countries' waters, and none of their borders.
-! CAPTION: Under the Covenant, those who follow it for science travel on a passage too. KAN calls them schools: people who move with the fish and teach stewardship as they go.
+! CAPTION: Under the Covenant, those who follow it for science travel on a passage too.
+! CAPTION: KAN calls them schools: people who move with the fish and teach stewardship as they go.
 ! YA (speech): Our researchers go wherever the fish go. The hilsa carry passage across every border, and so do the people who follow them.
 
 ### Panel 7.3 (cells 12–13)
 
 Jalal, eyes shining.
-! JALAL (speech, across the border above): Wherever the fish go…
+! JALAL (thought, across the border above): I can go wherever the fish go… but…
+! CAPTION (first): Jalal is intrigued by Ya's offer, but is worried that his wife has ruined the chances by killing the important fish Ya wanted
 
 ### Panel 7.4 (cells 14–15)
 
 Shapla, one hand on the brass pot on the shelf, her face closed.
-! SHAPLA (thought, across the border above): Another stranger with papers.
+! SHAPLA (thought): I hope he isn't going to make us leave this village to pursue his dreams of travelling.
 
-## Page 8: Wherever the Hilsa Goes (Scene 6)
+## Page 8: Breakfast (Scene 6)
 
 ```
 ┌───────────────────────┐
@@ -349,7 +354,7 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 ├───────────┴───────────┤
 │ 8.4  BREAKFAST        │
 ├───────────────────────┤
-│ 8.5  DOWNRIVER        │
+│ 8.5  EVERY RIVER      │
 └───────────────────────┘
 ```
 
@@ -369,18 +374,58 @@ Ya in the doorway, sleeves rolled up, smiling. Jalal and Shapla turn, caught mid
 
 Ya and Shapla kneel side by side at the clay stove, grinding spices on a stone slab. Shapla stops and rubs her numb fingertips; Ya notices.
 ! YA (speech, across the border above): Your fingers. Do they go numb?
-! SHAPLA (speech): Since I was a girl. Jalal's hands shake.
+! SHAPLA (speech): Since I was a girl. Jalal's hands shake. So do mine.
 ! CAPTION: Ya knew mercury poisoning when she saw it.
 
 ### Panel 8.4 (cells 8–11), wide strip
 
-Morning light. The three of them eat breakfast together on the mat (rice, dal, greens, a little fish): Ya on the left with Taro beside her, Jalal in the middle, Shapla on the right, laughing. The brass pot on the shelf behind, Ya's folio still shut beside it.
-! YA (speech): Fish every day from one river is where the mercury comes from. Follow the hilsa and you eat from every river it passes.
-! SHAPLA (speech): Then he can collect the data. And I'll choose what we cook.
+Morning, breakfast half eaten on the mat. Ya on the left listens gravely, Taro beside her; Jalal in the middle looks at his own trembling hand; Shapla on the right holds up her hands, palms up, tired and sad. (The image is panned up for headroom.)
+! SHAPLA (speech): Some mornings I can't feel the knife in my hand. Jalal drops the nets. My mother's hands shook like this too.
+! YA (speech, across the border below): That's mercury, from one river's fish every day. Follow the hilsa and you eat from every river it passes.
 
-### Panel 8.5 (cells 12–15), wide strip, final panel, wordless
+### Panel 8.5 (cells 12–15), wide strip: what Ya describes
 
-Dawn on the wide Meghna under a broad pale sky. Jalal and Shapla's boat follows a silver shoal of hilsa downriver, the drone flying overhead. Jalal at the oar; Shapla sits with the brass pot in her lap and looks ahead, calm.
+An atlas-style panorama of the river from the coast to the hills, a silver shoal along it, and a different food at each place it passes: crabs and prawns in the mangroves, fish and ducks in the paddies, floating gardens of greens and gourds, mustard and millet fields, mango and jackfruit orchards, fruit on the hills, markets and boats along the banks.
+! CAPTION: Other fish, greens, grains, fruit. Eat widely, and within months the mercury leaves the body, and the numbness can ease.
+
+## Page 9: The Hilsa's People (Scene 6, ending)
+
+```
+┌───────────────────────┐
+│ 9.1  THE POT          │
+├───────────┬───────────┤
+│ 9.2       │ 9.3       │
+├───────────┴───────────┤
+│ 9.4  THE GHAT         │
+├───────────────────────┤
+│ 9.5  DOWNRIVER        │
+└───────────────────────┘
+```
+
+### Panel 9.1 (cells 0–3), wide strip
+
+Inside the hut. Shapla (no bindi) lifts the brass pot down from the shelf with both hands, calm and decided; Jalal in the doorway behind her, hand on his heart.
+! SHAPLA (speech): My family always left because we had to. This time, we choose to go.
+
+### Panel 9.2 (cells 4–5)
+
+On the bank, Ya shows Jalal how to read the folio's river data; the drone hovers beside them.
+! CAPTION: Jalal joined KAN to collect river data, with the drone he bought at a night market.
+
+### Panel 9.3 (cells 6–7)
+
+Shapla packs the boat: jars of spices and pickles, sacks of rice and lentils, a basket of seeds and greens.
+! SHAPLA (speech): He collects the data. I choose what we cook.
+
+### Panel 9.4 (cells 8–11), wide strip
+
+Sunrise at the ghat. Neighbours wave from the steps as Jalal and Shapla step into the loaded boat; Ya waves from the bank, Taro at her feet.
+! YA (speech): Send me a recipe from every river!
+
+### Panel 9.5 (cells 12–15), wide strip, final panel
+
+The boat follows the silver shoal downriver to the right, the drone overhead, the village left behind; Shapla, the pot in her lap, looks ahead.
+! CAPTION: The hilsa has never needed a visa. Now, wherever it goes, neither do they.
 
 ## Inventions (approved by Yan, 2 Oct 2026)
 

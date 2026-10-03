@@ -623,8 +623,8 @@ Drafts is canon.
     uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
     *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
     elder, teal stole). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
-  - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 8 A1
-    boards and 41 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
+  - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 9 A1
+    boards and 46 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
     polished v2 script in the *Script: Visa for a Hilsa* tab, then revised the same day after
     Khai's notes (below). Awaiting Yan's review.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
@@ -722,6 +722,11 @@ Drafts is canon.
       following the fish means eating from many rivers.
     - **Ya stays the night** after the curry, wakes to the couple arguing and cooks breakfast with
       Shapla. That wins Shapla over, and she accepts Jalal joining KAN's data collection.
+    - **The ending is its own page** (Yan): over breakfast Shapla describes the numbness, and Ya
+      explains that eating from many rivers lets the mercury leave the body. Then Shapla takes the
+      pot down ("This time, we choose to go"), Jalal joins KAN's data collection, Shapla packs the
+      boat with food, Ya waves them off, and the boat follows the hilsa. The last caption: "The
+      hilsa has never needed a visa. Now, wherever it goes, neither do they."
 
 **Still open:**
 

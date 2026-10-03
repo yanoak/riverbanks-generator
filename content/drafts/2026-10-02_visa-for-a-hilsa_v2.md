@@ -17,11 +17,13 @@ Sam's feedback (2 Oct 2026, relayed by Yan): every comic should carry the ideas 
 2. Jalal and Shapla have both had mercury poisoning since childhood, from a diet heavy in river fish. It reaches them only through the fish: pollution puts it in the river, the fish build it up, and people who eat the same river's fish every day build it up in turn. Planted on page 2 (2.4), found by Ya on page 8 (8.3), answered by a varied diet (8.4).
 3. Ya's intervention changes. She doesn't win Jalal with a way out of poverty; she wins Shapla by cooking with her, not as another outsider with papers to sign, but as someone who treats her like family. Page 7 sets up the failure of the paperwork offer. On page 8 (Yan, 3 Oct) Ya doesn't leave: she stays the night, wakes to the couple arguing, and offers to cook breakfast with Shapla. Shapla warms to her and accepts Jalal joining KAN's data collection, and Ya tells her that following the fish also means a more varied diet.
 
+4. They are not poor: nobody is, in the Pluriverse (Khai, via Yan, 3 Oct). The reason to move is a better diet. So no line frames the offer as a way out of poverty: Jalal wants to follow the hilsa, and Ya's case to Shapla is the varied diet that answers the mercury (8.4).
+
 ## Cast and places
 
 Each cast member's look is pinned in the house style's cast. Name them in every panel prompt and spell out the details below again.
 Jalal, 34: wiry, dark brown skin, ALWAYS a thick black moustache and no beard, short black hair; a white sleeveless vest, a blue-and-teal checked lungi, and an ochre gamcha over one shoulder. Barefoot.
-Shapla, 32: dark brown skin, black hair in a low bun, a plain mangrove-green cotton sari, a steady, tired gaze. Small gold studs in her ears; no other colour on her.
+Shapla, 32: dark brown skin, black hair in a low bun, a plain mangrove-green cotton sari, a steady, tired gaze. Small gold studs in her ears; no other colour on her, and NO bindi.
 Ya at 33: short black bob with a straight fringe, round wire glasses, ALWAYS the brick-red field jacket with chest pockets over a brown shirt. She carries her e-paper notebook from The Year It Snowed, the napkin pyramid still tucked into its cover.
 Taro the cat: Ya's grey tabby, now a lean teenage cat. In a corner of a panel on every page from page 2 on. Nobody remarks on her.
 The drone: battered, olive green with silt-brown patches, one round camera eye, a net slung beneath. Its lights are drawn as small coloured dots, never as a glow.
@@ -329,7 +331,7 @@ A map-like panorama of the hilsa's passage under a broad pale sky: from the Bay 
 ### Panel 7.3 (cells 12–13)
 
 Jalal, eyes shining.
-! JALAL (speech, across the border above): Wherever the fish go… and a salary! We'd never be poor again.
+! JALAL (speech, across the border above): Wherever the fish go…
 
 ### Panel 7.4 (cells 14–15)
 
@@ -354,7 +356,7 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 
 Dawn at the hut, seen from the yard under a pale dawn sky. On the porch, Ya sits up on a borrowed mat, rubbing her eyes, Taro curled at her feet. Through the open doorway, Jalal and Shapla argue inside.
 ! CAPTION: Ya stayed the night. At dawn, she woke to raised voices.
-! JALAL (speech): That was our one chance to leave this village life!
+! JALAL (speech): That was our chance to follow the hilsa!
 ! SHAPLA (speech): Leave for where? My family has done nothing but leave.
 
 ### Panel 8.2 (cells 4–5)
@@ -371,7 +373,7 @@ Ya and Shapla kneel side by side at the clay stove, grinding spices on a stone s
 
 ### Panel 8.4 (cells 8–11), wide strip
 
-Morning light. The three of them eat breakfast together on the mat (rice, dal, greens, a little fish), Taro by Ya; Shapla is laughing. The brass pot on the shelf behind, Ya's folio still shut beside it.
+Morning light. The three of them eat breakfast together on the mat (rice, dal, greens, a little fish): Ya on the left with Taro beside her, Jalal in the middle, Shapla on the right, laughing. The brass pot on the shelf behind, Ya's folio still shut beside it.
 ! YA (speech): Fish every day from one river is where the mercury comes from. Follow the hilsa and you eat from every river it passes.
 ! SHAPLA (speech): Then he can collect the data. And I'll choose what we cook.
 

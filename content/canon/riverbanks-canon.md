@@ -623,9 +623,10 @@ Drafts is canon.
     uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
     *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
     elder, teal stole). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
-  - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 7 A1
-    boards and 36 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
-    polished v2 script in the *Script: Visa for a Hilsa* tab. Awaiting Yan's review.
+  - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 8 A1
+    boards and 41 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
+    polished v2 script in the *Script: Visa for a Hilsa* tab, then revised the same day after
+    Khai's notes (below). Awaiting Yan's review.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
   claire on cream, with teal, mangrove green and silt brown, and an ochre or brick-red accent.
   - **Characters and props:** its cast has an in-style sheet for each of Ismahan at 18, 20 and 42;
@@ -649,7 +650,9 @@ Drafts is canon.
       tucked in, with a brown belt, sleeves down.
     - **Tengku Faris** wears a black suit, with slicked-back black hair.
     - **Jalal** always has a thick black moustache and no beard, and a white sleeveless vest.
-    - **Shapla** always wears a plain mangrove-green sari, her hair in a low bun.
+    - **Shapla** always wears a plain mangrove-green sari, her hair in a low bun, and no bindi.
+    - **Young cast for the Hilsa prologue** (2026-10-03): *Shapla at 8*, *Shapla at 15*, *Jalal at
+      17* (no moustache yet) and *Shapla's mother* (green sari, grey at the temples).
 - **Story network:** [riverbanks-generator.vercel.app/network](https://riverbanks-generator.vercel.app/network)
   shows 14 characters and 21 ties, with portraits.
   - The canon file is `content/network/riverbook.json`.
@@ -707,6 +710,18 @@ Drafts is canon.
 13. **Soilabouts and soulabouts** join sailabouts as KAN's learning programmes, and **KAN Academy**
     is the training arm (not "KAE Academy").
 14. **ကယ် (*kae*) means to rescue or save** in Burmese, not "aid and care" as said in the voice note.
+
+12. **Khai's notes on *Visa for a Hilsa*** (relayed by Yan, 2026-10-03):
+    - **A second prologue page, set in 2048,** not the 2030s, which the birth years rule out.
+      Shapla's mother turns down PREMISE's adaptation funds: the system has a last mile, and the
+      family's history has taught it to distrust outsiders with papers. Shapla (15) meets Jalal
+      (17) on the Meghna.
+    - **Jalal and Shapla have had mercury poisoning since childhood,** through the fish they eat.
+      It shows as Shapla's numb fingertips and Jalal's shaking hands.
+    - **They are not poor; nobody is, in the Pluriverse.** The reason to move is a better diet:
+      following the fish means eating from many rivers.
+    - **Ya stays the night** after the curry, wakes to the couple arguing and cooks breakfast with
+      Shapla. That wins Shapla over, and she accepts Jalal joining KAN's data collection.
 
 **Still open:**
 

@@ -433,9 +433,9 @@ At a mudflat stop, Ismahan spots mudskippers and lights up. As a girl in Muara s
 The talk turns personal. Ismahan talks about her brothers and how the kingdom changed; Ya talks about her immigrant family and her fluid sense of home. More and more, Ya says 'my grandma used to say…', which sets up the reveal at the shrine.
 
 
-#### Act 3, Scene 1: Peaberry Rice in Chiang Mai
+#### Act 3, Scene 1: Snowberry Rice in Chiang Mai
 
-The sailabout ends in Chiang Mai, at the family restaurant on stilts on the Ping. Ya is thrilled to finally cook her grandmother's peaberry rice for Ismahan. While they cook, she tells the story of the year it snowed. Ismahan already feels connected to this grandmother she has only heard about.
+The sailabout ends in Chiang Mai, at the family restaurant on stilts on the Ping. Ya is thrilled to finally cook her grandmother's snowberry rice for Ismahan. While they cook, she tells the story of the year it snowed. Ismahan already feels connected to this grandmother she has only heard about.
 
 **YA:** Oh, I can actually show you my grandma's shrine. The water seems to have gone down today.
 

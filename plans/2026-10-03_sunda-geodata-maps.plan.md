@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-03_sunda-geodata-maps
-status: active
+status: done
 started: 2026-10-03
-finished:
+finished: 2026-10-03
 issue:
 ---
 
@@ -33,7 +33,8 @@ A script re-makes both SVGs from scratch.
 
 ## Approach
 
-- **Elevation:** ETOPO1 (1 arc-minute, NOAA ERDDAP `etopo180`) clipped to the region. GEBCO is
+- **Elevation:** ETOPO 2022 (1 arc-minute; NCEI THREDDS WCS — the ERDDAP mirror was unreachable)
+  clipped to 88–128°E, 12°S–24°N. GEBCO is
   finer but 15″ is far beyond what a 495-unit panel shows.
 - **Lowstand coast:** contour the grid at −120 m (the LGM lowstand Voris 2000 uses).
 - **Present coast:** the same grid at 0 m, so both coastlines share one source and line up exactly.
@@ -49,11 +50,11 @@ A script re-makes both SVGs from scratch.
 
 ## Tasks
 
-- [ ] Script: download + clip ETOPO1, contours, flow routing, SVG writer
-- [ ] Render both maps, check against the moodboard (shape of shelf, Molengraaff course)
-- [ ] Check 5°N 110°E against the derived main channel; flag if the caption needs changing
-- [ ] Draw both into PAO:3:1 and PAO:3:2, add place-name caption balloons
-- [ ] Visual check of board 3 in the editor
+- [x] Script: download + clip ETOPO 2022, contours, flow routing, SVG writer
+- [x] Render both maps, check against the moodboard (shape of shelf, Molengraaff course)
+- [x] Check 5°N 110°E against the derived main channel; flag if the caption needs changing
+- [x] Draw both into PAO:3:1 and PAO:3:2, add place-name caption balloons
+- [x] Visual check of board 3 in the editor
 
 ## Verification
 
@@ -72,6 +73,22 @@ A script re-makes both SVGs from scratch.
 
 - [ ] Caption 3:2 says "one of Pangaea's largest" — Pangaea is ~200 million years too early.
       Suggested: "one of the planet's largest". Yan to decide.
+- [ ] Caption 3:2 (y 44–162) runs under the top of PAO:3:2 (y 125), so its last line is hidden.
+      Predates the maps. Shorten it or move the panel row down.
 
 ## Outcome
 
+Both panels are now data-built SVGs (`draw_panel_svg`), with labels as size-11 caption balloons.
+
+- The flow routing reproduced the published reconstructions without tracing: the Gulf of Thailand
+  is a lowstand lake, the Siam river drains it into the North Sunda (Molengraaff) trunk, and the
+  Malacca and East Sunda systems come out separately. The trunk reaches the shelf edge at about
+  109.4°E 5°N, about 60 km from the flotel's 5°N 110°E, so caption 3:3 holds.
+- Two fixes were needed. ETOPO has pits deeper than −120 m in mid-shelf; counted as sea, they
+  pulled the rivers into false mouths, so "sea" is now only water joined to the open ocean. And
+  filled depressions are drawn as lakes only when large and on today's sea floor; highland pits and
+  channel pools were noise that broke the rivers.
+- The SVG goes through the MCP as text, so the size budget is set by what can be passed reliably,
+  not by the 500 KB limit: whole-unit relative coordinates, ~20–30 KB a map.
+- Output lands in `riverbanks/maps/` (gitignored with the rest of `riverbanks/`); the script is
+  the source of truth.

@@ -42,13 +42,13 @@ PALETTE = {
 # board (to print where label balloons go) and the places to label.
 MAPS = {
     "sunda-landmass": dict(
-        west=88.2, east=127.8, lat=2.5, threshold=30000, rivers=0.9, mark=None, legend=True,
+        west=88.2, east=127.8, lat=2.5, threshold=30000, rivers=0.9, mark=None, legend=True, detail=0.55,
         panel=(0, 125, 495, 295),
         labels={"SUNDA": (106, 3), "SUMATRA": (101.5, -1), "BORNEO": (114, 0.5), "JAVA": (110, -7.4),
                 "MALAY PENINSULA": (102, 4.5), "INDOCHINA": (106, 13.5)},
     ),
     "sunda-river": dict(
-        west=96, east=122, lat=4.5, threshold=3000, rivers=1.0, mark=(110, 5), legend=False,
+        west=96, east=122, lat=4.5, threshold=3000, rivers=1.0, mark=(110, 5), legend=False, detail=1.0,
         panel=(505, 125, 495, 295),
         labels={"FLOTEL 5°N 110°E": (110, 5), "PALEO-LAKE": (101.3, 10.5),
                 "SIAM RIVER": (102.5, 7.5), "NORTH SUNDA RIVER": (107, 1.5),
@@ -170,10 +170,7 @@ class Frame:
 
 
 def num(v):
-    """Shortest form of a coordinate in tenths: 0.5 → .5, -0.5 → -.5, 2.0 → 2."""
-    t = f"{v / 10:.1f}".rstrip("0").rstrip(".")
-    t = t.replace("0.", ".", 1) if t.startswith("0.") else t.replace("-0.", "-.", 1)
-    return t if t not in ("", "-") else "0"
+    return str(v)
 
 
 def pair(x, y):
@@ -182,8 +179,9 @@ def pair(x, y):
 
 
 def path(pts, close=False):
-    """An SVG subpath in relative coordinates, rounded to a tenth of a unit without drift."""
-    q = [(round(x * 10), round(y * 10)) for x, y in pts]
+    """An SVG subpath in relative coordinates, rounded to whole units (0.3 mm on the A1 board)
+    without drift. Small enough to pass through draw_panel_svg."""
+    q = [(round(x), round(y)) for x, y in pts]
     q = [p for i, p in enumerate(q) if i == 0 or p != q[i - 1]]
     if len(q) < 2:
         return ""
@@ -194,7 +192,7 @@ def path(pts, close=False):
     return d + ("z" if close else "")
 
 
-def rings(z, level, f, min_area=6.0, tol=0.5):
+def rings(z, level, f, min_area=10.0, tol=0.8, detail=1.0):
     """Closed contours of z at level, as one even-odd SVG path, inside the frame only."""
     r0 = max(int((f.lat[0] - f.north) / f.dlat) - 4, 0)
     r1 = min(int((f.lat[0] - f.south) / f.dlat) + 4, z.shape[0])
@@ -206,9 +204,9 @@ def rings(z, level, f, min_area=6.0, tol=0.5):
     for ring in measure.find_contours(sub, level):
         pts = [f.cell(r - 1 + r0, c - 1 + c0) for r, c in ring]
         poly = Polygon(pts)
-        if poly.area < min_area:
+        if poly.area < min_area / detail**2:
             continue
-        coords = LineString(pts).simplify(tol).coords
+        coords = LineString(pts).simplify(tol / detail).coords
         if len(coords) >= 4:
             parts.append(path(coords, close=True))
     return "".join(parts)
@@ -255,7 +253,7 @@ def rivers(down, acc, lake, shape, f, threshold, scale):
         a = acc[seg[-1]]
         w = scale * min(0.6 + 0.55 * np.log2(a / threshold), 5.0)
         w = round(max(w, 0.6 * scale) * 4) / 4
-        line = LineString(chaikin(pts)).simplify(0.4)
+        line = LineString(chaikin(pts)).simplify(0.6)
         widths.setdefault(w, []).append(path(line.coords))
     return widths
 
@@ -263,17 +261,18 @@ def rivers(down, acc, lake, shape, f, threshold, scale):
 def draw(name, spec, lon, lat, z, down, acc, lake):
     f = Frame(lon, lat, spec["west"], spec["east"], spec["lat"])
     dry = np.where(ocean(z), z, np.maximum(z, LOWSTAND + 1))
+    k = spec["detail"]
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">',
         f'<rect width="{W}" height="{H}" fill="{PALETTE["deep"]}"/>',
-        f'<path d="{rings(z, -1000, f, min_area=20)}" fill="{PALETTE["sea"]}" fill-rule="evenodd"/>',
-        f'<path d="{rings(dry, LOWSTAND, f)}" fill="{PALETTE["shelf"]}" fill-rule="evenodd" '
+        f'<path d="{rings(z, -1000, f, min_area=20, detail=k)}" fill="{PALETTE["sea"]}" fill-rule="evenodd"/>',
+        f'<path d="{rings(dry, LOWSTAND, f, detail=k)}" fill="{PALETTE["shelf"]}" fill-rule="evenodd" '
         f'stroke="{PALETTE["ink"]}" stroke-width="1.6" stroke-linejoin="round"/>',
-        f'<path d="{rings(z, 0, f, min_area=3)}" fill="{PALETTE["land"]}" fill-rule="evenodd" '
+        f'<path d="{rings(z, 0, f, min_area=6, detail=k)}" fill="{PALETTE["land"]}" fill-rule="evenodd" '
         f'stroke="{PALETTE["ink"]}" stroke-width="0.7" stroke-linejoin="round"/>',
     ]
     svg.append(
-        f'<path d="{rings(np.where(lake, 1.0, -1.0), 0, f, min_area=4)}" fill="{PALETTE["sea"]}" '
+        f'<path d="{rings(np.where(lake, 1.0, -1.0), 0, f, min_area=10, detail=k)}" fill="{PALETTE["sea"]}" '
         f'fill-rule="evenodd" stroke="{PALETTE["river"]}" stroke-width="0.8"/>'
     )
     for w, ds in sorted(rivers(down, acc, lake, z.shape, f, spec["threshold"], spec["rivers"]).items()):

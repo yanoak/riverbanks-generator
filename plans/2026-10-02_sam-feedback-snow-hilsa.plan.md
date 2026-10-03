@@ -83,6 +83,7 @@ tabs, and the two comics are rebuilt from them on A1 boards and checked page by 
 - [x] Yan review of the polished *Snow* script; Yan added the floodplain (3.2) and edited the lettering on pages 1–2
 - [x] *Snow* v2 written into the *Script: The Year It Snowed* tab, above Version 1 (2026-10-02)
 - [x] Polish the *Hilsa* v2 script against `docs/comic-playbook.md`: grids, cast pins, through-lines, no words in the art, ≤120 words a page (2026-10-03)
+- [x] *Hilsa* v2 written into the *Script: Visa for a Hilsa* tab, above Version 1, at Yan's request (2026-10-03)
 - [ ] Yan review of the polished *Hilsa* script
 - [ ] Write the approved scripts into the Edited Drafts script tabs, and the story prose changes into Edited Drafts
 - [ ] Refresh `content/canon/riverbanks-canon.md`

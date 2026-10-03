@@ -74,22 +74,22 @@ On two-cell panels the faces fill the frame. Their balloons go across the border
 ### Panel 1.1 (cells 0–1)
 
 1947. A crowded train crosses flat Bengal country under a broad pale sky. On its roof, among refugees and bundles, a teenage girl in a white sari with a red border hugs the brass pot.
-! CAPTION: 1947. Bengal is cut in two. Shapla's great-great-grandmother crosses the new border.
+! CAPTION: 1947. Bengal is cut in two, and so is a young woman's life.
 
 ### Panel 1.2 (cells 2–3)
 
 1971. Night. A young woman in a faded blue sari wades through a flooded paddy with a baby in a sling and the brass pot on her hip. Fires on the far horizon under a dark night sky.
-! CAPTION: 1971. A new country is born in war. Her great-grandmother runs, then comes home.
+! CAPTION: 1971. A new country is born in war. Her daughter has to run.
 
 ### Panel 1.3 (cells 4–7), wide strip
 
 The 2040s. Salt-white, dead rice fields in the Ganges delta, the sea pushing up the channels; abandoned huts stand in the water. A woman in a green sari leads Shapla, eight, by the hand through knee-deep water, the brass pot on her head. A broad grey-white sky.
-! CAPTION: The 2040s. The sea walks up the delta and the rice dies in salt. Shapla is eight.
+! CAPTION: The 2040s. The sea swallows the delta, and her great-granddaughter leaves with what she can carry.
 
 ### Panel 1.4 (cells 8–15), large
 
 A village on the wide Meghna under a broad pale sky. A small borrowed hut of woven bamboo on the bank; neighbours' boats drawn up. Through the open doorway, Shapla's mother reaches up to set the brass pot on a low shelf, while Shapla, eight, stands in the doorway looking out at the river.
-! CAPTION: At last, a village on the Meghna. Her mother sets the pot on a shelf, and means to leave it there.
+! CAPTION: At last, on the Meghna, her great-great-granddaughter settles. This is the story of Shapla.
 
 ## Page 2: Strangers with Papers (prologue)
 
@@ -119,13 +119,14 @@ The PREMISE agent holds out her tablet for a thumbprint. Shapla's mother turns a
 ### Panel 2.3 (cells 6–7)
 
 At the water's edge, Jalal, seventeen, mending a net beside his father's boat, holds out a piece of grilled fish on a leaf to Shapla.
+! CAPTION: She meets a boy...
 ! LABELS: JALAL, 17 · SHAPLA, 15
 ! JALAL (speech, across the border above): New here? Try it. Today's catch.
 
 ### Panel 2.4 (cells 8–11), wide strip
 
 Dusk on the bank. Shapla and Jalal, teenagers, sit on an upturned boat eating fish and rice from a shared leaf, laughing; children and grandparents eat fish around cooking fires along the bank.
-! CAPTION: Even the new system had a last mile: forms in a language she couldn't read, and strangers who never stayed. Her mother trusted the river instead.
+! CAPTION: Even the Pluriverse had its problems. In some of the most remote villages, burdened by generations of violence from institutions, distrust runs deep. Her mother trusted the river instead.
 ! CAPTION: They ate its fish every day, as everyone did. Nobody told them that mercury builds up in a river's fish, and in the people who eat nothing else.
 
 ### Panels 2.5–2.8 (cells 12, 13, 14, 15)
@@ -356,7 +357,7 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 
 Dawn at the hut, seen from the yard under a pale dawn sky. On the porch, Ya sits up on a borrowed mat, rubbing her eyes, Taro curled at her feet. Through the open doorway, Jalal and Shapla argue inside.
 ! CAPTION: Ya stayed the night. At dawn, she woke to raised voices.
-! JALAL (speech): That was our chance to follow the hilsa!
+! JALAL (speech): That was our chance to start a new life, and see the world!
 ! SHAPLA (speech): Leave for where? My family has done nothing but leave.
 
 ### Panel 8.2 (cells 4–5)
@@ -369,7 +370,7 @@ Ya in the doorway, sleeves rolled up, smiling. Jalal and Shapla turn, caught mid
 Ya and Shapla kneel side by side at the clay stove, grinding spices on a stone slab. Shapla stops and rubs her numb fingertips; Ya notices.
 ! YA (speech, across the border above): Your fingers. Do they go numb?
 ! SHAPLA (speech): Since I was a girl. Jalal's hands shake.
-! CAPTION: Ya knew mercury when she saw it.
+! CAPTION: Ya knew mercury poisoning when she saw it.
 
 ### Panel 8.4 (cells 8–11), wide strip
 

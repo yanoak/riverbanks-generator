@@ -6,6 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { exactAspect, nearestAspect } from '$lib/generation/aspect';
 import { sanitizeSvg } from '$lib/generation/svg';
+import { printPrompt } from './print-prompt';
 import { DEFAULT_MODEL, PRINT_MODEL, modelFor, type ModelInfo } from '$lib/generation/models';
 import { composePrompt } from '$lib/generation/prompt';
 import type { Room } from '$lib/generation/room';
@@ -40,11 +41,7 @@ export interface GenerateInput {
 
 export type Quality = 'draft' | 'print';
 
-/** A print version redraws the chosen image at 4K; it must not become a different picture. */
-export const PRINT_PROMPT =
-	'Redraw this image at high resolution for print. Keep everything exactly as it is: the ' +
-	'composition, framing, characters, poses, colours, linework and texture. Do not add, remove ' +
-	'or change anything, and do not add any text.';
+export { PRINT_PROMPT } from './print-prompt';
 
 export interface GenerateResult {
 	generationId: string;
@@ -144,9 +141,7 @@ async function printVersion(
 	// Redraws drift in colour (terracotta turned salmon in a live test): name the exact palette.
 	const profile = input.profileId ? await getProfile(supabase, input.profileId) : null;
 	const palette = profile?.palette.map((c) => (c.name ? `${c.hex} (${c.name})` : c.hex)) ?? [];
-	const fullPrompt = palette.length
-		? `${PRINT_PROMPT} Match the image's colours exactly; they come from this palette: ${palette.join(', ')}.`
-		: PRINT_PROMPT;
+	const fullPrompt = printPrompt(palette);
 	const load = async (): Promise<RefImage[]> => {
 		const { data, error } = await supabase.storage.from('assets').download(path);
 		if (error || !data) throw new Error(`Could not read the image to redraw: ${error?.message}`);

@@ -47,7 +47,7 @@ below is copied word for word from the sources.
 | Act Three | **KAE** (Kinetic Adaptation Economy); the slides still say **Yes We K.A.N.** | Sam's voice note in the KAE tab; see [Act Three](#act-three-kae-the-kinetic-adaptation-economy-sams-voice-note-2026-10-03). The slide title has yet to change. |
 | Act Four | *The Year It Snowed* (replaces **Happy Meals**) | *Dew & Ya: The Year It Snowed* (Edited Drafts). Yan, 2026-10-02: it replaces "Happy Meals"; the slide title has yet to change. |
 | Act Five | **A Visa for a Hilsa** | *Visa for a Hilsa* (Edited Drafts) |
-| Epilogue | **Moving House** | Title only. Still in development; see [In development](#in-development). |
+| Epilogue | **Moving House** | Set in 2090. Built on 2026-10-03 from Khairun's paneling in *Khairun: Moving House* (comic `MH`); not yet in Edited Drafts. |
 
 ## Prologue: Six Disasters, One Dream (Sam, slide 3; final text)
 
@@ -628,11 +628,11 @@ Drafts is canon.
     polished v2 script in the *Script: Visa for a Hilsa* tab, then revised the same day after
     Khai's notes (below). Awaiting Yan's review.
   - ***Moving House*, A1 version** (`58a1f570-b0e5-4a82-9192-4c064d5bc53a`, code `MH`): 4 A1
-    boards and 27 panels under "Moving House / Prologue · I–IV", built on 2026-10-03 from
+    boards and 27 panels under "Moving House / Epilogue · I–IV", set in 2090, built on 2026-10-03 from
     Khairun's paneling in the non-canon tab *Khairun: Moving House*, adapted to the timeline sheet
     (grandmother = Ismahan at 80, mother = Soraya, no Kandaria, Muara, the childhood scene in 2075
-    at 11). Script: `content/drafts/2026-10-03_moving-house_v1.md`; not yet in the doc. Yan called
-    it the prologue; this file still lists *Moving House* as the Epilogue. Awaiting Yan's review.
+    at 11). Script: `content/drafts/2026-10-03_moving-house_v1.md`; not yet in the doc. It is the
+    Epilogue (Yan, 2026-10-03). Awaiting Yan's review.
   - **Moving House cast** (2026-10-03): *Teja* (26), *Teja at 11*, *Ismahan at 80* and *at 65*,
     *Soraya* (51) and *Soraya at 36*, *Syahbandar*, *Maya* (one-eyed mudskipper), *Jentayu* (the
     bird-form AI vessel) and the place *the House of Taming*.

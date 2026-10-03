@@ -1,6 +1,6 @@
 {
 	"meta": {
-		"syncedAt": "2026-10-02",
+		"syncedAt": "2026-10-03",
 		"sources": [
 			{
 				"name": "RIVERBOOK › Edited Drafts (and its Script tabs)",
@@ -9,13 +9,18 @@
 			{
 				"name": "Character timeline (sheet)",
 				"url": "https://docs.google.com/spreadsheets/d/1tSifqkz57Ociu9xq-dRsMxBDvGYcprkoxBNd77GNY_A/edit?gid=0#gid=0"
+			},
+			{
+				"name": "RIVERBOOK › Khairun: Moving House (Epilogue; Khai's paneling)",
+				"url": "https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.dqk19wo73c67"
 			}
 		],
 		"notes": [
 			"The timeline sheet is canon for years and family; the Edited Drafts tab is canon for the stories.",
 			"Ages of the Sultan and the princes come from the character designs, not from canon.",
 			"Portraits are the starred cast sheets of the \"Riverbanks house style\", copied in on each sync.",
-			"Jalal's and Shapla's birth years (2031, 2033) were invented on 2026-10-02 to fill gaps in canon."
+			"Jalal's and Shapla's birth years (2031, 2033) were invented on 2026-10-02 to fill gaps in canon.",
+			"The Epilogue, Moving House (2090), comes from Khairun's tab, not yet from Edited Drafts; added at Yan's request on 2026-10-03 and adapted to the timeline sheet (Ismahan is the grandmother, Soraya the mother)."
 		],
 		"styleProfileId": "b5f76d95-af53-4a85-b365-b85bfc781eae"
 	},
@@ -39,10 +44,16 @@
 			"order": 3
 		},
 		{
+			"id": "epilogue",
+			"title": "Moving House",
+			"years": "2075 · 2090",
+			"order": 4
+		},
+		{
 			"id": "timeline",
 			"title": "Timeline only",
 			"years": "",
-			"order": 4
+			"order": 5
 		}
 	],
 	"people": [
@@ -50,12 +61,19 @@
 			"id": "ismahan",
 			"name": "Ismahan",
 			"kind": "person",
-			"aliases": ["Princess Ismahan", "the princess"],
+			"aliases": [
+				"Princess Ismahan",
+				"the princess"
+			],
 			"born": 2010,
 			"died": null,
-			"home": "Mua",
-			"stories": ["delegate", "snow"],
-			"summary": "Youngest child of Sultan Nuh of Mua. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja.",
+			"home": "Muara",
+			"stories": [
+				"delegate",
+				"snow",
+				"epilogue"
+			],
+			"summary": "Youngest child of Sultan Nuh of Muara. At 18 she is the youngest delegate at the 2028 Sunda Summit; in 2030 she becomes the first leader of the consensus-based kinship councils as the sultanate gives way to a pluriversal matriarchy. On sabbatical in 2052 she is Ya's boatmate on a KAN sailabout. Grandmother of Teja. In 2090, at eighty, she is the House of Taming's last elder; she chooses to stay behind when the House takes to the sea, and trusts Teja to decide.",
 			"portraits": [
 				{
 					"cast": "Ismahan at 18",
@@ -68,6 +86,14 @@
 				{
 					"cast": "Ismahan at 42",
 					"from": 2040
+				},
+				{
+					"cast": "Ismahan at 65",
+					"from": 2075
+				},
+				{
+					"cast": "Ismahan at 80",
+					"from": 2090
 				}
 			]
 		},
@@ -75,12 +101,16 @@
 			"id": "sultan-ibrahim",
 			"name": "Sultan Nuh",
 			"kind": "person",
-			"aliases": ["the Sultan"],
+			"aliases": [
+				"the Sultan"
+			],
 			"born": null,
 			"died": null,
-			"home": "Mua",
-			"stories": ["delegate"],
-			"summary": "Ageing Sultan of Mua (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord.",
+			"home": "Muara",
+			"stories": [
+				"delegate"
+			],
+			"summary": "Ageing Sultan of Muara (around seventy in 2027), sceptical of the Sunda Summit as another Western scheme. Sends his youngest instead of his sons, and in 2030 signs the Confluence Accord.",
 			"portraits": [
 				{
 					"cast": "Sultan Nuh",
@@ -92,12 +122,17 @@
 			"id": "the-general",
 			"name": "Tengku Hamzah",
 			"kind": "person",
-			"aliases": ["the General", "the elder prince"],
+			"aliases": [
+				"the General",
+				"the elder prince"
+			],
 			"born": null,
 			"died": null,
-			"home": "Mua",
-			"stories": ["delegate"],
-			"summary": "The General: elder prince and commander of Mua's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled.",
+			"home": "Muara",
+			"stories": [
+				"delegate"
+			],
+			"summary": "The General: elder prince and commander of Muara's military. Promises his troops can handle any disaster; in the 2029 crisis the fishers and farmers carry his soldiers while he takes the credit. Humbled.",
 			"portraits": [
 				{
 					"cast": "the General",
@@ -109,11 +144,16 @@
 			"id": "the-financier",
 			"name": "Tengku Faris",
 			"kind": "person",
-			"aliases": ["the Financier", "the second prince"],
+			"aliases": [
+				"the Financier",
+				"the second prince"
+			],
 			"born": null,
 			"died": null,
-			"home": "Mua",
-			"stories": ["delegate"],
+			"home": "Muara",
+			"stories": [
+				"delegate"
+			],
 			"summary": "The Financier: second prince, years on Wall Street. His lines of credit fail in the 2029 crisis while PREMISE derivatives pay out to those most in need without him. Humbled.",
 			"portraits": [
 				{
@@ -126,12 +166,27 @@
 			"id": "soraya",
 			"name": "Soraya",
 			"kind": "person",
-			"aliases": ["Teja's mother"],
+			"aliases": [
+				"Teja's mother"
+			],
 			"born": 2039,
 			"died": null,
-			"home": "Mua",
-			"stories": ["timeline"],
-			"summary": "Ismahan's daughter, the middle generation, and Teja's mother."
+			"home": "Muara",
+			"stories": [
+				"epilogue",
+				"timeline"
+			],
+			"summary": "Ismahan's daughter and Teja's mother. She leaves in 2075 to serve the KAE Corps, and returns in 2090 at the head of a Bugis fleet to carry the House across the water.",
+			"portraits": [
+				{
+					"cast": "Soraya",
+					"from": 2090
+				},
+				{
+					"cast": "Soraya at 36",
+					"from": 2075
+				}
+			]
 		},
 		{
 			"id": "teja",
@@ -140,19 +195,37 @@
 			"aliases": [],
 			"born": 2064,
 			"died": null,
-			"home": "Mua",
-			"stories": ["timeline"],
-			"summary": "Soraya's daughter and Ismahan's granddaughter. Appears at 11 in a scene with Grandma Ismahan (2075)."
+			"home": "Muara",
+			"stories": [
+				"epilogue",
+				"timeline"
+			],
+			"summary": "Ismahan's granddaughter, heir of the ninth generation of the House of Taming. When a flood permanently moves the river in 2090, she withdraws the finance that would defend the House's palace, opens the mangrove's path inland, and takes the House to sea.",
+			"portraits": [
+				{
+					"cast": "Teja",
+					"from": 2090
+				},
+				{
+					"cast": "Teja at 11",
+					"from": 2075
+				}
+			]
 		},
 		{
 			"id": "dew",
 			"name": "Dew",
 			"kind": "person",
-			"aliases": ["Grandma Dew"],
+			"aliases": [
+				"Grandma Dew"
+			],
 			"born": 1965,
 			"died": 2041,
 			"home": "Chiang Mai, on the Ping",
-			"stories": ["delegate", "snow"],
+			"stories": [
+				"delegate",
+				"snow"
+			],
 			"summary": "Runs the family's Chinese restaurant on stilts on the Ping; her cooking lived by the Gross Delish Index before it had a name. At the 2028 Sunda Summit with the Ping river valley delegation she shares a meal with young Ismahan. Teaches eight-year-old Ya to cook through the year it snowed (2040) and dies the next year; her shrine sits under the restaurant, reachable when the water drops.",
 			"portraits": [
 				{
@@ -169,7 +242,10 @@
 			"born": 2032,
 			"died": null,
 			"home": "Chiang Mai",
-			"stories": ["snow", "hilsa"],
+			"stories": [
+				"snow",
+				"hilsa"
+			],
 			"summary": "Dew's granddaughter, from a Chinese immigrant family long settled on the Ping, with a fluid sense of home. Learns to cook from Dew in 2040; on her 2052 sailabout teaches Ismahan to cook. Inspired by that trip into research; by 2065 she studies food ecosystems with the Bengal Passage Cooperative and recruits Jalal.",
 			"portraits": [
 				{
@@ -194,7 +270,10 @@
 			"born": 2052,
 			"died": null,
 			"home": "",
-			"stories": ["snow", "hilsa"],
+			"stories": [
+				"snow",
+				"hilsa"
+			],
 			"summary": "Ya's grey tabby: a tiny kitten on the 2052 sailabout, a teenage cat (cats live longer now) at her side in 2065.",
 			"portraits": [
 				{
@@ -225,7 +304,9 @@
 			"born": 2031,
 			"died": null,
 			"home": "A village on the Meghna",
-			"stories": ["hilsa"],
+			"stories": [
+				"hilsa"
+			],
 			"summary": "Meghna fisherman whose second-hand drone nets a research-tagged hilsa. His metis cracks Ya's data puzzle (the hilsa have gone home up the old channel); in 2065 he decides to become a data collector and follow the hilsa.",
 			"portraits": [
 				{
@@ -242,7 +323,9 @@
 			"born": 2033,
 			"died": null,
 			"home": "A village on the Meghna",
-			"stories": ["hilsa"],
+			"stories": [
+				"hilsa"
+			],
 			"summary": "Jalal's wife. Her family's history is one of leaving: Bengal after Partition, then the drowned delta. She cooks the tagged hilsa into the feast.",
 			"portraits": [
 				{
@@ -259,7 +342,9 @@
 			"born": null,
 			"died": null,
 			"home": "",
-			"stories": ["hilsa"],
+			"stories": [
+				"hilsa"
+			],
 			"summary": "A chatty second-hand fishing drone Jalal bought at a night market. Formerly KAN's, so KAN researchers can still patch in through it.",
 			"portraits": [
 				{
@@ -277,23 +362,130 @@
 			"id": "kan",
 			"name": "KAN",
 			"kind": "institution",
-			"aliases": ["Kinetic Adaptation Network"],
+			"aliases": [
+				"Kinetic Adaptation Network"
+			],
 			"born": null,
 			"died": null,
 			"home": "",
-			"stories": ["snow", "hilsa"],
+			"stories": [
+				"snow",
+				"hilsa"
+			],
 			"summary": "The adaptation network. Runs sailabouts (Young Leaders, Executive MBA) and the research network the Bengal Passage Cooperative belongs to."
 		},
 		{
 			"id": "cooperative",
 			"name": "Bengal Passage Cooperative",
 			"kind": "institution",
-			"aliases": ["the Cooperative"],
+			"aliases": [
+				"the Cooperative"
+			],
 			"born": null,
 			"died": null,
 			"home": "Bengal",
-			"stories": ["hilsa"],
+			"stories": [
+				"hilsa"
+			],
 			"summary": "Research organisation in the KAN network helping the fishers and farmers of the river system; tracks tagged hilsa."
+		},
+		{
+			"id": "syahbandar",
+			"name": "Syahbandar",
+			"kind": "person",
+			"aliases": [
+				"the steward of flows"
+			],
+			"born": null,
+			"died": null,
+			"home": "Muara",
+			"stories": [
+				"epilogue"
+			],
+			"summary": "Teja's childhood friend, steward of flows at the port of Muara like his father. He moves boats and capital ahead of the flood and coordinates the fleet's departure.",
+			"portraits": [
+				{
+					"cast": "Syahbandar",
+					"from": 2090
+				}
+			]
+		},
+		{
+			"id": "maya",
+			"name": "Maya",
+			"kind": "animal",
+			"aliases": [
+				"the one-eyed mudskipper"
+			],
+			"born": null,
+			"died": null,
+			"home": "Muara mangroves",
+			"stories": [
+				"epilogue"
+			],
+			"summary": "An irritable one-eyed mudskipper, Teja's private friend in the mangroves. The flood destroys her burrows; Teja moves her to a temporary refuge and takes her aboard.",
+			"portraits": [
+				{
+					"cast": "Maya",
+					"from": 2090
+				}
+			]
+		},
+		{
+			"id": "jentayu",
+			"name": "Jentayu",
+			"kind": "companion",
+			"aliases": [
+				"the bird vessel"
+			],
+			"born": null,
+			"died": null,
+			"home": "Muara",
+			"stories": [
+				"epilogue"
+			],
+			"summary": "A bird-shaped AI vessel carrying the recorded voices of the House's elders, Teja's companion all her life. After the farewell ritual it also carries Ismahan's voice.",
+			"portraits": [
+				{
+					"cast": "Jentayu",
+					"from": 2090
+				}
+			]
+		},
+		{
+			"id": "house-of-taming",
+			"name": "The House of Taming",
+			"kind": "institution",
+			"aliases": [
+				"the House"
+			],
+			"born": null,
+			"died": null,
+			"home": "Muara",
+			"stories": [
+				"epilogue"
+			],
+			"summary": "Ismahan's family house as a steward of Muara: its palace, schools, archive, farms, endowment and obligations. After the flood it becomes a fleet, an archive and a web of obligations rather than a place.",
+			"portraits": [
+				{
+					"cast": "the House of Taming",
+					"from": 2090
+				}
+			]
+		},
+		{
+			"id": "kae",
+			"name": "KAE Corps",
+			"kind": "institution",
+			"aliases": [],
+			"born": null,
+			"died": null,
+			"home": "",
+			"stories": [
+				"epilogue"
+			],
+			"summary": "The corps Soraya leaves home to serve in 2075.",
+			"portraits": []
 		}
 	],
 	"links": [
@@ -305,7 +497,7 @@
 			"label": "father",
 			"story": "delegate",
 			"year": null,
-			"note": "Sends her to the Sunda Summit as Mua's youngest delegate (2027)."
+			"note": "Sends her to the Sunda Summit as Muara's youngest delegate (2027)."
 		},
 		{
 			"id": "sultan-general",
@@ -383,9 +575,9 @@
 			"target": "teja",
 			"type": "family",
 			"label": "grandmother",
-			"story": "timeline",
+			"story": "epilogue",
 			"year": 2075,
-			"note": "A scene of Teja at 11 with Grandma Ismahan."
+			"note": "She holds eleven-year-old Teja as Soraya leaves, and in 2090 answers Teja's question with her trust."
 		},
 		{
 			"id": "dew-ya",
@@ -405,7 +597,7 @@
 			"label": "inspired at the Sunda Summit",
 			"story": "delegate",
 			"year": 2028,
-			"note": "\"Sit. Eat. The whole river is in this bowl.\" Food ties everything together, a lesson Ismahan carries home to Mua."
+			"note": "\"Sit. Eat. The whole river is in this bowl.\" Food ties everything together, a lesson Ismahan carries home to Muara."
 		},
 		{
 			"id": "ismahan-ya",
@@ -506,6 +698,76 @@
 			"story": "snow",
 			"year": 2052,
 			"note": ""
+		},
+		{
+			"id": "teja-syahbandar",
+			"source": "teja",
+			"target": "syahbandar",
+			"type": "friends",
+			"label": "childhood friends",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "They grew up together among the House's families."
+		},
+		{
+			"id": "teja-maya",
+			"source": "teja",
+			"target": "maya",
+			"type": "companion",
+			"label": "her mudskipper friend",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "The one being Teja doesn't perform for."
+		},
+		{
+			"id": "teja-jentayu",
+			"source": "teja",
+			"target": "jentayu",
+			"type": "companion",
+			"label": "her AI vessel",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "She switches it off to grieve the difference between continuity and presence."
+		},
+		{
+			"id": "ismahan-jentayu",
+			"source": "ismahan",
+			"target": "jentayu",
+			"type": "companion",
+			"label": "her voice, recorded",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "Recorded at the farewell ritual before she stays behind."
+		},
+		{
+			"id": "teja-house-of-taming",
+			"source": "teja",
+			"target": "house-of-taming",
+			"type": "member",
+			"label": "heir",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "Eldest of the ninth generation."
+		},
+		{
+			"id": "ismahan-house-of-taming",
+			"source": "ismahan",
+			"target": "house-of-taming",
+			"type": "member",
+			"label": "last elder",
+			"story": "epilogue",
+			"year": 2090,
+			"note": "She chose to stay when the House went to sea."
+		},
+		{
+			"id": "soraya-kae",
+			"source": "soraya",
+			"target": "kae",
+			"type": "member",
+			"label": "serves",
+			"story": "epilogue",
+			"year": 2075,
+			"note": "She left when Teja was eleven."
 		}
 	]
 }

@@ -6,7 +6,7 @@ finished:
 issue:
 ---
 
-# Moving House on A1 boards, from Khai's paneling
+# Moving House (the Epilogue) on A1 boards, from Khai's paneling
 
 ## Context
 
@@ -17,7 +17,7 @@ issue:
 - Yan, 2026-10-03: use Khai's paneling for the prologue (*Moving House*) and make it a comic.
 - The [canon](../content/canon/riverbanks-canon.md) lists *Moving House* as the Epilogue, "in
   development", and Prologue as Sam's *Six Disasters, One Dream*. Yan now calls it the prologue;
-  the header says PROLOGUE, and the canon clash is flagged rather than resolved here.
+  the header said PROLOGUE until Yan corrected it: it is the **Epilogue**, set in 2090.
 - The tab predates the canon family decisions, so it is adapted to the timeline sheet (canon):
   - Teja b. 2064, so 26 in **2090** (matches Khai).
   - **Grandmother is Ismahan** (b. 2010, so 80). Khai's "Sultana Kandaria" was removed on
@@ -96,7 +96,7 @@ B1 INHERITANCE (6 cols)          B2–B4 (2 cols, 5 rows)
 
 ## Open questions
 
-- [ ] Prologue or Epilogue? Canon still says Epilogue, and Prologue is Sam's *Six Disasters*.
+- [x] Prologue or Epilogue? **Epilogue, set in 2090** (Yan, 2026-10-03). Headers changed to EPILOGUE.
 - [ ] Whose voice is Jentayu's at the start?
 
 ## Outcome
@@ -115,4 +115,6 @@ board lettered and checked in the editor. Status stays `active` until Yan has re
   songket band (2.6, 2.7, 3.5). 4.6 has no visible Teja, Soraya or Syahbandar, which Khai asked for.
 - **Lettering** is mine, from Khai's prose: Ismahan's "I ask myself…" and Teja's Council speech are
   his words; the rest is new and short (≤ ~130 words a board).
-
+- **Story network** (Yan's follow-up): a *Moving House* story; Teja, Soraya and Ismahan gained their
+  2075 and 2090 cards; Syahbandar, Maya, Jentayu, the House of Taming and the KAE Corps added with
+  seven ties. "Mua" became "Muara" throughout, per canon decision 5.

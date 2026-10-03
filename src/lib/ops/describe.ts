@@ -27,7 +27,7 @@ function crop(img: PanelImage, box: { w: number; h: number }) {
 /** The shape settings a balloon has of its own, if any. */
 function shapeOf(b: Balloon) {
 	const shape = Object.fromEntries(
-		(['roundness', 'points', 'depth'] as const).flatMap((k) =>
+		(['roundness', 'points', 'depth', 'point'] as const).flatMap((k) =>
 			b[k] === undefined ? [] : [[k, b[k]]]
 		)
 	);
@@ -81,6 +81,7 @@ export function describeComic(comic: Comic, meta: { id: string; rev: number; app
 					...shapeOf(b),
 					...(b.anchor ? { anchor: b.anchor } : {}),
 					...(b.type === 'sfx' ? { rotation: sfxRotation(b) } : {}),
+					...(b.type === 'caption' && b.rotation !== undefined ? { rotation: b.rotation } : {}),
 					...(b.next ? { next: b.next, connector: b.connector ?? 'neck' } : {}),
 					...(b.tail
 						? { tailTip: { x: Math.round(b.x + b.tail.x), y: Math.round(b.y + b.tail.y) } }

@@ -100,3 +100,32 @@ test('a non-contiguous merge is refused with a reason', async ({ page }) => {
 	await expect(page.getByRole('status')).toHaveText(/share an edge/);
 	await expect(panels).toHaveCount(12);
 });
+
+test('a caption becomes a tilted pennant from the inspector, and back', async ({ page }) => {
+	await openEditor(page, '/local');
+	await page.getByRole('button', { name: 'Caption', exact: true }).click();
+	await page.keyboard.press('Escape');
+
+	const inspector = page.getByRole('complementary', { name: 'Inspector' });
+	const point = inspector.locator('[data-shape="point"]');
+	const outline = canvas(page)
+		.locator('.balloon-text')
+		.locator('xpath=..')
+		.locator('svg path')
+		.first();
+	const turned = canvas(page).locator('.balloon-text').locator('xpath=..');
+
+	await point.focus();
+	await point.selectOption('left');
+	await expect(outline).toHaveAttribute('d', /L 0 /);
+	await expect(inspector.locator('[data-shape="roundness"]')).toBeDisabled();
+
+	const angle = inspector.getByLabel('Rotation in degrees');
+	await angle.fill('-8');
+	await angle.press('Enter');
+	await expect(turned).toHaveAttribute('style', /rotate\(-8deg\)/);
+
+	await point.selectOption('');
+	await expect(outline).toHaveAttribute('d', /^M 0 0 H \S+ V \S+ H 0 Z$/);
+	await expect(inspector.locator('[data-shape="roundness"]')).toBeEnabled();
+});

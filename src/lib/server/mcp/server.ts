@@ -146,7 +146,14 @@ const shapeArgs = {
 		.nullable()
 		.optional()
 		.describe(
-			'sfx only: the lettering’s angle in degrees (default −6, a slight tilt). null resets.'
+			'Tilt in degrees. sfx: the lettering’s angle (default −6, a slight tilt). caption: the whole box turns about its centre (default 0), e.g. to run a pennant along a curve. null resets.'
+		),
+	point: z
+		.enum(['left', 'right'])
+		.nullable()
+		.optional()
+		.describe(
+			'caption only: draw it as a pennant (an arrow-shaped sign) pointed at this end; the lettering keeps clear of the point. Pair with rotation to follow a curve. null makes it a plain box again.'
 		),
 	connector: z
 		.enum(['neck', 'line'])

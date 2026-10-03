@@ -26,7 +26,7 @@
 	import { panelBox } from '$lib/geometry/panel';
 	import { htmlToPlain } from '$lib/ops/text';
 	import { comicCode } from '$lib/model/refs';
-	import { sfxRotation } from '$lib/model/balloons';
+	import { balloonRotation } from '$lib/model/balloons';
 	import { bandShown, BANDS, hasBand, type Band } from '$lib/model/bands';
 	import { formatOf, PAGE_FORMATS } from '$lib/model/factory';
 
@@ -136,6 +136,39 @@
 	}
 </script>
 
+<!-- The tilt of an sfx's lettering or of a whole caption. -->
+{#snippet rotationRow(b: Balloon)}
+	{@const angle = balloonRotation(b)}
+	<label class="row gap-2">
+		<span>Rotation</span>
+		<span class="flex items-center gap-2">
+			<input
+				class="w-20"
+				type="range"
+				min="-180"
+				max="180"
+				value={angle}
+				data-shape="rotation"
+				aria-valuetext="{angle} degrees"
+				oninput={(e) => slide(b.id, 'Rotation', { rotation: +e.currentTarget.value })}
+				onchange={endSlide}
+			/>
+			<input
+				class="w-14 rounded border border-stone-300 px-1 py-0.5 text-right"
+				type="number"
+				min="-180"
+				max="180"
+				value={angle}
+				aria-label="Rotation in degrees"
+				onchange={(e) =>
+					editor.patch('Rotation', b.id, {
+						rotation: Math.min(180, Math.max(-180, +e.currentTarget.value || 0))
+					})}
+			/>°
+		</span>
+	</label>
+{/snippet}
+
 <aside
 	class="w-64 shrink-0 overflow-y-auto border-l border-stone-200 bg-white p-4 text-sm text-stone-700"
 	aria-label="Inspector"
@@ -243,36 +276,8 @@
 			/>
 		</label>
 		{#if b.type === 'sfx'}
-			{@const angle = sfxRotation(b)}
 			<h3 class="sub">Shape</h3>
-			<label class="row gap-2">
-				<span>Rotation</span>
-				<span class="flex items-center gap-2">
-					<input
-						class="w-20"
-						type="range"
-						min="-180"
-						max="180"
-						value={angle}
-						data-shape="rotation"
-						aria-valuetext="{angle} degrees"
-						oninput={(e) => slide(b.id, 'Rotation', { rotation: +e.currentTarget.value })}
-						onchange={endSlide}
-					/>
-					<input
-						class="w-14 rounded border border-stone-300 px-1 py-0.5 text-right"
-						type="number"
-						min="-180"
-						max="180"
-						value={angle}
-						aria-label="Rotation in degrees"
-						onchange={(e) =>
-							editor.patch('Rotation', b.id, {
-								rotation: Math.min(180, Math.max(-180, +e.currentTarget.value || 0))
-							})}
-					/>°
-				</span>
-			</label>
+			{@render rotationRow(b)}
 		{/if}
 		{#if ROUNDED.includes(b.type) || b.type === 'thought' || b.type === 'shout'}
 			<h3 class="sub">Shape</h3>
@@ -289,6 +294,10 @@
 						min="0"
 						max="100"
 						value={Math.round(r * 100)}
+						disabled={b.type === 'caption' && !!b.point}
+						title={b.type === 'caption' && b.point
+							? 'A pointed caption is always square'
+							: undefined}
 						data-shape="roundness"
 						aria-valuetext={r >= 1 ? 'ellipse' : r <= 0 ? 'box' : `${Math.round(r * 100)}%`}
 						oninput={(e) => slide(b.id, 'Roundness', { roundness: +e.currentTarget.value / 100 })}
@@ -297,6 +306,25 @@
 					oval
 				</span>
 			</label>
+		{/if}
+		{#if b.type === 'caption'}
+			<label class="row gap-2">
+				<span>Point</span>
+				<select
+					class="w-24 rounded border border-stone-300 px-1 py-0.5"
+					data-shape="point"
+					value={b.point ?? ''}
+					onchange={(e) =>
+						editor.patch('Point', b.id, {
+							point: (e.currentTarget.value || undefined) as Balloon['point']
+						})}
+				>
+					<option value="">none</option>
+					<option value="left">left</option>
+					<option value="right">right</option>
+				</select>
+			</label>
+			{@render rotationRow(b)}
 		{/if}
 		{#if b.type === 'thought' || b.type === 'shout'}
 			{@const count = pointsOf(b.type, b.w, b.h, b.points)}

@@ -1,10 +1,10 @@
 <!-- A balloon's outline and text, in balloon-local coordinates. Interaction lives outside. -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { BALLOON_STROKE, balloonShape, textInset } from '$lib/geometry/balloon';
+	import { BALLOON_STROKE, balloonShape, textPadding } from '$lib/geometry/balloon';
 	import type { Balloon } from '$lib/model/types';
 	import { letteringFor, type Typography } from '$lib/typography/typography';
-	import { sfxRotation } from '$lib/model/balloons';
+	import { balloonRotation, sfxRotation } from '$lib/model/balloons';
 
 	let {
 		balloon,
@@ -23,57 +23,67 @@
 		balloonShape(balloon.type, balloon.w, balloon.h, balloon.tail, {
 			roundness: balloon.roundness,
 			points: balloon.points,
-			depth: balloon.depth
+			depth: balloon.depth,
+			point: balloon.point
 		})
 	);
-	const inset = $derived(textInset(balloon.type, balloon.roundness));
+	const pad = $derived(
+		textPadding(balloon.type, balloon.w, balloon.h, {
+			roundness: balloon.roundness,
+			point: balloon.point
+		})
+	);
+	// A caption turns as a whole about its centre; an sfx turns only its lettering (below).
+	const tilt = $derived(balloon.type === 'caption' ? balloonRotation(balloon) : 0);
 	const lettering = $derived(letteringFor(balloon, typography));
 </script>
 
 <div class="absolute inset-0" style:clip-path={clip}>
-	<svg
-		class="pointer-events-none absolute top-0 left-0 overflow-visible"
-		width={balloon.w}
-		height={balloon.h}
-		aria-hidden="true"
-	>
-		<g
-			fill="none"
-			stroke={balloon.stroke}
-			stroke-width={BALLOON_STROKE}
-			stroke-linejoin="round"
-			stroke-dasharray={shape.dashed ? '12 9' : undefined}
+	<div class="absolute inset-0" style:transform={tilt ? `rotate(${tilt}deg)` : undefined}>
+		<svg
+			class="pointer-events-none absolute top-0 left-0 overflow-visible"
+			width={balloon.w}
+			height={balloon.h}
+			aria-hidden="true"
 		>
-			{#each shape.paths as d, i (i)}<path {d} />{/each}
-			{#each shape.circles as c, i (i)}<circle cx={c.cx} cy={c.cy} r={c.r} />{/each}
-		</g>
-		<g fill={balloon.fill}>
-			{#each shape.paths as d, i (i)}<path {d} />{/each}
-			{#each shape.circles as c, i (i)}<circle cx={c.cx} cy={c.cy} r={c.r} />{/each}
-		</g>
-	</svg>
+			<g
+				fill="none"
+				stroke={balloon.stroke}
+				stroke-width={BALLOON_STROKE}
+				stroke-linejoin="round"
+				stroke-dasharray={shape.dashed ? '12 9' : undefined}
+			>
+				{#each shape.paths as d, i (i)}<path {d} />{/each}
+				{#each shape.circles as c, i (i)}<circle cx={c.cx} cy={c.cy} r={c.r} />{/each}
+			</g>
+			<g fill={balloon.fill}>
+				{#each shape.paths as d, i (i)}<path {d} />{/each}
+				{#each shape.circles as c, i (i)}<circle cx={c.cx} cy={c.cy} r={c.r} />{/each}
+			</g>
+		</svg>
 
-	<div
-		class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
-		class:sfx={balloon.type === 'sfx'}
-		class:title={balloon.type === 'title'}
-		class:solid={balloon.type === 'title' && lettering.fontFamily.includes('Distressed')}
-		style:inset="{balloon.h * inset}px {balloon.w * inset}px"
-		style:font-family={lettering.fontFamily}
-		style:font-weight={lettering.fontWeight}
-		style:font-style={lettering.fontStyle}
-		style:text-transform={lettering.textTransform}
-		style:font-size="{balloon.fontSize}px"
-		style:--sfx-fill={balloon.fill}
-		style:--sfx-stroke={balloon.stroke}
-		style:--sfx-rotation="{sfxRotation(balloon)}deg"
-	>
-		{#if text}
-			{@render text()}
-		{:else}
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -- the comic's own editor output -->
-			{@html balloon.html}
-		{/if}
+		<div
+			class="balloon-text absolute flex flex-col justify-center overflow-visible text-center"
+			class:sfx={balloon.type === 'sfx'}
+			class:title={balloon.type === 'title'}
+			class:solid={balloon.type === 'title' && lettering.fontFamily.includes('Distressed')}
+			style:inset="{pad.top}px {pad.right}px {pad.bottom}px {pad.left}px"
+			style:font-family={lettering.fontFamily}
+			style:font-weight={lettering.fontWeight}
+			style:font-style={lettering.fontStyle}
+			style:text-transform={lettering.textTransform}
+			style:font-size="{balloon.fontSize}px"
+			style:--sfx-fill={balloon.fill}
+			style:--sfx-stroke={balloon.stroke}
+			style:--sfx-rotation="{sfxRotation(balloon)}deg"
+		>
+			{#if text}
+				{@render text()}
+			{:else}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- the comic's own editor output -->
+				{@html balloon.html}
+			{/if}
+		</div>
 	</div>
 </div>
 

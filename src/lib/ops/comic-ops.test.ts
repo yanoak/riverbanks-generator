@@ -138,6 +138,32 @@ describe('balloon ops', () => {
 		expect(comic.pages[0].balloons).toHaveLength(0);
 	});
 
+	it('points and tilts a caption, clears both, and refuses them where they mean nothing', () => {
+		const comic = createComic();
+		const { id } = addBalloon(comic, {
+			page: 1,
+			type: 'caption',
+			text: 'THE GREAT PLURIVERSALIZATION',
+			point: 'left',
+			rotation: -8
+		});
+		const b = comic.pages[0].balloons.find((x) => x.id === id)!;
+		expect(b).toMatchObject({ point: 'left', rotation: -8 });
+		updateBalloon(comic, { page: 1, balloonId: id, point: 'right' });
+		expect(b.point).toBe('right');
+		updateBalloon(comic, { page: 1, balloonId: id, point: null, rotation: null });
+		expect(b.point).toBeUndefined();
+		expect(b.rotation).toBeUndefined();
+
+		const speech = addBalloon(comic, { page: 1, type: 'speech', text: 'Hi' }).id;
+		expect(() => updateBalloon(comic, { page: 1, balloonId: speech, point: 'left' })).toThrow(
+			/caption/
+		);
+		expect(() => updateBalloon(comic, { page: 1, balloonId: speech, rotation: 5 })).toThrow(
+			/sfx and caption/
+		);
+	});
+
 	it('sets a balloon’s own font, and an empty font hands it back to the style', () => {
 		const comic = createComic();
 		const { id } = addBalloon(comic, { page: 1, type: 'speech', text: 'x' });

@@ -8,7 +8,8 @@ import {
 	connectBalloons,
 	createBalloon,
 	removeBalloon,
-	repinAnchors
+	repinAnchors,
+	ROTATES
 } from '$lib/model/balloons';
 import {
 	createFreePanel,
@@ -269,8 +270,10 @@ export interface ShapeArgs {
 	/** Connect to the next balloon in the exchange; null unlinks. */
 	next?: string | null;
 	connector?: 'neck' | 'line';
-	/** An sfx's lettering angle in degrees; null resets it to the −6° tilt. */
+	/** Tilt in degrees for an sfx (its lettering) or a caption (the box); null resets it. */
 	rotation?: number | null;
+	/** Draw a caption as a pennant pointed at this end; null makes it a plain box again. */
+	point?: 'left' | 'right' | null;
 }
 
 function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
@@ -280,9 +283,14 @@ function applyShape(page: Page, b: Balloon, args: ShapeArgs) {
 		else if (v !== undefined) b[key] = v;
 	}
 	if (args.rotation !== undefined) {
-		if (b.type !== 'sfx') throw invalid('Only sfx lettering rotates.');
+		if (!ROTATES.includes(b.type)) throw invalid('Only sfx and caption balloons rotate.');
 		if (args.rotation === null) delete b.rotation;
 		else b.rotation = args.rotation;
+	}
+	if (args.point !== undefined) {
+		if (args.point === null) delete b.point;
+		else if (b.type !== 'caption') throw invalid('Only a caption can be pointed.');
+		else b.point = args.point;
 	}
 	if (args.anchor === null) delete b.anchor;
 	else if (args.anchor) {

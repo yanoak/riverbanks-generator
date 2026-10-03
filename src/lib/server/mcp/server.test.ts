@@ -705,6 +705,33 @@ describe('Riverbanks MCP server', () => {
 		expect(d.pages[0].balloons[0].rotation).toBe(-6);
 	});
 
+	it('points and tilts a caption, and reports both', async () => {
+		const { call } = await connect();
+		const { id } = JSON.parse((await call('create_comic', { title: 'Pennant' })).text);
+		await call('add_balloon', {
+			comicId: id,
+			page: 1,
+			type: 'caption',
+			text: 'SECURITY, STAKES, SERVICES',
+			point: 'right',
+			rotation: -10
+		});
+		let d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		const cap = d.pages[0].balloons[0];
+		expect(cap.shape).toEqual({ point: 'right' });
+		expect(cap.rotation).toBe(-10);
+		await call('update_balloon', {
+			comicId: id,
+			page: 1,
+			balloonId: cap.id,
+			point: null,
+			rotation: null
+		});
+		d = JSON.parse((await call('get_comic', { comicId: id })).text);
+		expect(d.pages[0].balloons[0].shape).toBeUndefined();
+		expect(d.pages[0].balloons[0].rotation).toBeUndefined();
+	});
+
 	it('crops and zooms a panel image, resets it, and refuses a panel without one', async () => {
 		const { call } = await connect();
 		const { id } = JSON.parse((await call('create_comic', { title: 'Crop' })).text);

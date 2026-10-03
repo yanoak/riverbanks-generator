@@ -11,11 +11,12 @@ export interface BalloonShape {
 	dashed: boolean;
 }
 
-/** A balloon's adjustable shape (see Balloon.roundness, .points, .depth); absent is the default. */
+/** A balloon's adjustable shape (see Balloon.roundness, .points, .depth, .point); absent is the default. */
 export interface ShapeOptions {
 	roundness?: number;
 	points?: number;
 	depth?: number;
+	point?: 'left' | 'right';
 }
 
 /** The outline's stroke width, in page units. */
@@ -65,6 +66,19 @@ export function roundedPath(w: number, h: number, r: number): string {
 		arc(rx, 0),
 		'Z'
 	].join(' ');
+}
+
+/** How far a pennant caption's point cuts into its box: half the height, at most a third of the width. */
+export function pointDepth(w: number, h: number): number {
+	return Math.min(h / 2, w / 3);
+}
+
+/** A pennant: a box whose `side` end comes to a point at mid-height, all inside the w×h box. */
+export function pointedPath(w: number, h: number, side: 'left' | 'right'): string {
+	const d = pointDepth(w, h);
+	return side === 'left'
+		? `M ${f(d)} 0 H ${f(w)} V ${f(h)} H ${f(d)} L 0 ${f(h / 2)} Z`
+		: `M 0 0 H ${f(w - d)} L ${f(w)} ${f(h / 2)} L ${f(w - d)} ${f(h)} H 0 Z`;
 }
 
 /**
@@ -186,7 +200,14 @@ export function balloonShape(
 		case 'title':
 			return none;
 		case 'caption':
-			return { ...none, paths: [roundedPath(w, h, roundnessOf(type, opts.roundness))] };
+			return {
+				...none,
+				paths: [
+					opts.point
+						? pointedPath(w, h, opts.point)
+						: roundedPath(w, h, roundnessOf(type, opts.roundness))
+				]
+			};
 		case 'thought':
 			return {
 				...none,
@@ -218,15 +239,38 @@ export function textInset(type: BalloonType, roundness?: number): number {
 	return r >= 1 ? 0.15 : Math.max(0.06, 0.15 * r);
 }
 
+/**
+ * The lettering's padding from each edge, in balloon units: textInset all round, plus the depth of
+ * a pennant caption's point on its pointed side, so no letter sits in the narrowing tip.
+ */
+export function textPadding(
+	type: BalloonType,
+	w: number,
+	h: number,
+	opts: Pick<ShapeOptions, 'roundness' | 'point'> = {}
+) {
+	const i = textInset(type, opts.roundness);
+	const pad = { top: h * i, right: w * i, bottom: h * i, left: w * i };
+	if (type === 'caption' && opts.point) pad[opts.point] += pointDepth(w, h);
+	return pad;
+}
+
 // --- connectors between balloons ------------------------------------------------------------
 
 /** What a connector needs to know about a balloon. */
-export type Connectable = Rect & { type: BalloonType; roundness?: number };
+export type Connectable = Rect & {
+	type: BalloonType;
+	roundness?: number;
+	point?: 'left' | 'right';
+};
 
+// A pennant is near enough a box for where a connector meets it.
 const outlineRoundness = (b: Connectable) =>
-	b.type === 'speech' || b.type === 'whisper' || b.type === 'caption'
-		? roundnessOf(b.type, b.roundness)
-		: 1;
+	b.type === 'caption' && b.point
+		? 0
+		: b.type === 'speech' || b.type === 'whisper' || b.type === 'caption'
+			? roundnessOf(b.type, b.roundness)
+			: 1;
 
 /** Where each balloon's outline faces the other: the line between their centres, cut by both. */
 export function connectorEnds(a: Connectable, b: Connectable): { from: Point; to: Point } {

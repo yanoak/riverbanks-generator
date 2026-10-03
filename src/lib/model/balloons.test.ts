@@ -6,6 +6,7 @@ import {
 	createBalloon,
 	removeBalloon,
 	repinAnchors,
+	balloonRotation,
 	sfxRotation
 } from './balloons';
 import { panelBox } from '$lib/geometry/panel';
@@ -162,5 +163,16 @@ describe('sfx rotation', () => {
 		expect(sfxRotation({ ...sfx, rotation: 30 })).toBe(30);
 		expect(sfxRotation({ ...sfx, rotation: 400 })).toBe(180);
 		expect(sfxRotation({ ...sfx, rotation: -400 })).toBe(-180);
+	});
+});
+
+describe('balloonRotation', () => {
+	it('tilts sfx by −6° and captions not at all unless they say so, within ±180°', () => {
+		expect(balloonRotation({ type: 'sfx' })).toBe(-6);
+		expect(balloonRotation({ type: 'caption' })).toBe(0);
+		expect(balloonRotation({ type: 'caption', rotation: -8 })).toBe(-8);
+		expect(balloonRotation({ type: 'caption', rotation: 999 })).toBe(180);
+		// Other balloons never rotate, even with a stray value.
+		expect(balloonRotation({ type: 'speech', rotation: 20 })).toBe(0);
 	});
 });

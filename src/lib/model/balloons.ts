@@ -134,3 +134,13 @@ export function removeBalloon(page: Page, id: string): void {
 export function sfxRotation(b: Pick<Balloon, 'rotation'>): number {
 	return Math.min(180, Math.max(-180, b.rotation ?? -6));
 }
+
+/** Balloon types that can be tilted: an sfx's lettering, or a whole caption. */
+export const ROTATES: readonly Balloon['type'][] = ['sfx', 'caption'];
+
+/** A balloon's tilt in degrees: an sfx's lettering (−6° by default), a caption (0°), else none. */
+export function balloonRotation(b: Pick<Balloon, 'type' | 'rotation'>): number {
+	if (b.type === 'sfx') return sfxRotation(b);
+	if (b.type === 'caption') return Math.min(180, Math.max(-180, b.rotation ?? 0));
+	return 0;
+}

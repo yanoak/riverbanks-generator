@@ -4,8 +4,11 @@ import {
 	connectorEnds,
 	neckShape,
 	outlinePoint,
+	pointDepth,
+	pointedPath,
 	roundedPath,
 	textInset,
+	textPadding,
 	tailBase,
 	thoughtTrail
 } from './balloon';
@@ -204,5 +207,71 @@ describe('title lettering', () => {
 	it('has no shape and sits on its box with a small inset', () => {
 		expect(balloonShape('title', 400, 200)).toEqual({ paths: [], circles: [], dashed: false });
 		expect(textInset('title')).toBe(0);
+	});
+});
+
+describe('pointed captions', () => {
+	// Every coordinate pair in a path made of M/L/H/V commands with absolute numbers.
+	const vertices = (d: string) => {
+		const pts: { x: number; y: number }[] = [];
+		let x = 0;
+		let y = 0;
+		for (const [, cmd, args] of d.matchAll(/([MLHVZ])([^MLHVZ]*)/g)) {
+			const n = args
+				.trim()
+				.split(/[\s,]+/)
+				.filter(Boolean)
+				.map(Number);
+			if (cmd === 'H') x = n[0];
+			else if (cmd === 'V') y = n[0];
+			else if (cmd === 'M' || cmd === 'L') [x, y] = n;
+			else continue;
+			pts.push({ x, y });
+		}
+		return pts;
+	};
+
+	it('keeps the pennant inside its box, with the apex at mid-height on the pointed side', () => {
+		for (const side of ['left', 'right'] as const) {
+			const pts = vertices(pointedPath(w, h, side));
+			for (const p of pts) {
+				expect(p.x).toBeGreaterThanOrEqual(0);
+				expect(p.x).toBeLessThanOrEqual(w);
+				expect(p.y).toBeGreaterThanOrEqual(0);
+				expect(p.y).toBeLessThanOrEqual(h);
+			}
+			const apex = { x: side === 'left' ? 0 : w, y: h / 2 };
+			expect(pts).toContainEqual(apex);
+			// The opposite end stays square: both its corners are there.
+			const far = side === 'left' ? w : 0;
+			expect(pts).toContainEqual({ x: far, y: 0 });
+			expect(pts).toContainEqual({ x: far, y: h });
+		}
+	});
+
+	it('cuts the point no deeper than half the height or a third of the width', () => {
+		expect(pointDepth(200, 100)).toBe(50);
+		expect(pointDepth(90, 100)).toBe(30);
+	});
+
+	it('draws a pointed caption as the pennant, whatever its roundness', () => {
+		const shape = balloonShape('caption', w, h, undefined, { point: 'right', roundness: 0.5 });
+		expect(shape.paths).toEqual([pointedPath(w, h, 'right')]);
+		// Point means nothing to other types.
+		const speech = balloonShape('speech', w, h, undefined, { point: 'right' });
+		expect(speech.paths).toEqual([roundedPath(w, h, 1)]);
+	});
+
+	it('pads the lettering clear of the point, and evenly when there is none', () => {
+		const plain = textPadding('caption', w, h);
+		const inset = textInset('caption');
+		expect(plain).toEqual({ top: h * inset, bottom: h * inset, left: w * inset, right: w * inset });
+		const left = textPadding('caption', w, h, { point: 'left' });
+		expect(left.left).toBeCloseTo(w * inset + pointDepth(w, h));
+		expect(left.right).toBeCloseTo(w * inset);
+		expect(left.top).toBeCloseTo(h * inset);
+		const right = textPadding('caption', w, h, { point: 'right' });
+		expect(right.right).toBeCloseTo(w * inset + pointDepth(w, h));
+		expect(textPadding('speech', w, h, { point: 'left' })).toEqual(textPadding('speech', w, h));
 	});
 });

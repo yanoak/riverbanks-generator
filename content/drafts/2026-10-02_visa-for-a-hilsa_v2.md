@@ -14,8 +14,8 @@ Sam's feedback (2 Oct 2026, relayed by Yan): every comic should carry the ideas 
 ## Khai's notes (3 Oct 2026), and where they land
 
 1. A page between the prologue and the hilsa, on how Shapla came to the Meghna and met Jalal. As teenagers, Shapla's mother turns down PREMISE's funds: even the new system has a last mile, and generations of being moved on have taught the family not to trust anything from outsiders. This is the new page 2.
-2. Jalal and Shapla have both had mercury poisoning since childhood, from a diet heavy in river fish. It is planted on page 2 (2.4) and found by Ya on page 8 (8.3).
-3. Ya's intervention changes. She doesn't win Jalal with a way out of poverty; she wins Shapla by cooking with her, not as another outsider with papers to sign, but as someone who treats her like family. Page 7 sets up the failure of the paperwork offer; page 8 is the meal.
+2. Jalal and Shapla have both had mercury poisoning since childhood, from a diet heavy in river fish. It reaches them only through the fish: pollution puts it in the river, the fish build it up, and people who eat the same river's fish every day build it up in turn. Planted on page 2 (2.4), found by Ya on page 8 (8.3), answered by a varied diet (8.4).
+3. Ya's intervention changes. She doesn't win Jalal with a way out of poverty; she wins Shapla by cooking with her, not as another outsider with papers to sign, but as someone who treats her like family. Page 7 sets up the failure of the paperwork offer. On page 8 (Yan, 3 Oct) Ya doesn't leave: she stays the night, wakes to the couple arguing, and offers to cook breakfast with Shapla. Shapla warms to her and accepts Jalal joining KAN's data collection, and Ya tells her that following the fish also means a more varied diet.
 
 ## Cast and places
 
@@ -29,7 +29,8 @@ Shapla's foremothers (page 1 only): variations on Shapla's face, with the same e
 1947, her great-great-grandmother, about 15: a white cotton sari with a thin red border, hair in a long plait.
 1971, her great-grandmother, about 20: a faded blue cotton sari, hair tied back, a baby in a sling.
 The 2040s, her mother, about 35: a mangrove-green sari like Shapla's, a cloth bundle; she leads Shapla at eight, a thin girl with two short plaits in a cream frock. On page 2 she is about 42, greying at the temples, in the same green sari.
-Shapla at 15 and Jalal at 17 (page 2 only): the same faces, younger and thinner. Shapla has a single long plait and a faded green frock; Jalal has no moustache yet, a white vest and a checked lungi.
+Shapla at 8, Shapla at 15 and Jalal at 17 (pages 1–2, cast cards): the same faces, younger and thinner. Shapla at 8 has two short plaits and a cream frock; at 15 a single long plait and a faded green frock; Jalal at 17 has no moustache yet, a white vest and a checked lungi.
+Shapla's mother (pages 1–2, cast card).
 The PREMISE field agent (2.2 only): a young woman in a teal waistcoat with the ⨁ badge, holding a tablet; friendly, in a hurry.
 Places and props, to prepare before building (playbook step 2):
 Jalal's boat (in the cast already).
@@ -39,13 +40,12 @@ The Cooperative's field station (3.1 and 3.4 only, described in the prompt): a t
 
 ## Through-lines
 
-The brass pot: carried in 1947, 1971 and the 2040s (1.1–1.3), set on the shelf by Shapla's mother (1.4), behind Shapla at the feast (5.3, 6.4), under her hand during the offer (7.4), beside Ya's closed folio at the meal (8.1), and in Shapla's lap on the boat (8.5).
+The brass pot: carried in 1947, 1971 and the 2040s (1.1–1.3), set on the shelf by Shapla's mother (1.4), behind Shapla at the feast (5.3, 6.4), under her hand during the offer (7.4), beside Ya's closed folio at breakfast (8.4), and in Shapla's lap on the boat (8.5).
 The tag: a small ochre glint at the hilsa's gills (2.8, 3.2), the readout over Jalal's boat (4.4), the fish in the curry (6.4).
-Papers: the PREMISE agent's tablet and thumbprint (2.2); Ya's offer (7.1); Ya closing her folio and setting it down (8.1). Shapla's "another stranger with papers" (7.4) answers her mother on page 2.
-Mercury: planted in a caption (2.4), shown as Shapla rubbing numb fingertips (8.3).
+Papers: the PREMISE agent's tablet and thumbprint (2.2); Ya's offer (7.1); Ya's folio left shut on the shelf (8.2, 8.4). Shapla's "another stranger with papers" (7.4) answers her mother on page 2.
+Mercury: planted in a caption (2.4), shown as Shapla rubbing numb fingertips (8.3), answered by the fish's many rivers (8.4).
 Two camera positions on the hut: from the paddy path outside (5.1), and from inside, across the mat towards the shelf (5.4, 6.4, 8.4).
-Ya's notebook: the map of the dormant channel (5.4); Jalal taps it (5.5); Ya closes it and puts it away to cook (8.1). It is the same e-paper folio Ya started in The Year It Snowed.
-Home travels with you: Ya repeats her grandmother's saying from The Year It Snowed (3.4) to Shapla at the meal (8.4).
+Ya's notebook: the map of the dormant channel (5.4); Jalal taps it (5.5); left shut on the shelf while she cooks (8.2, 8.4). It is the same e-paper folio Ya started in The Year It Snowed.
 The river's direction: the hilsa swims upstream, out of the page's right edge (2.8, 3.2); the boat follows the shoal downriver at the end (8.5).
 
 ## Lettering and prompt rules (from the playbook)
@@ -124,7 +124,7 @@ At the water's edge, Jalal, seventeen, mending a net beside his father's boat, h
 
 Dusk on the bank. Shapla and Jalal, teenagers, sit on an upturned boat eating fish and rice from a shared leaf, laughing; children and grandparents eat fish around cooking fires along the bank.
 ! CAPTION: Even the new system had a last mile: forms in a language she couldn't read, and strangers who never stayed. Her mother trusted the river instead.
-! CAPTION: They ate its fish every day, as everyone did. Nobody tested them for the mercury that had settled in the river from upstream for fifty years.
+! CAPTION: They ate its fish every day, as everyone did. Nobody told them that mercury builds up in a river's fish, and in the people who eat nothing else.
 
 ### Panels 2.5–2.8 (cells 12, 13, 14, 15)
 
@@ -340,11 +340,11 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 
 ```
 ┌───────────────────────┐
-│ 8.1  NO PAPERS        │
+│ 8.1  DAWN             │
 ├───────────┬───────────┤
 │ 8.2       │ 8.3       │
 ├───────────┴───────────┤
-│ 8.4  THE MEAL         │
+│ 8.4  BREAKFAST        │
 ├───────────────────────┤
 │ 8.5  DOWNRIVER        │
 └───────────────────────┘
@@ -352,27 +352,28 @@ Shapla, one hand on the brass pot on the shelf, her face closed.
 
 ### Panel 8.1 (cells 0–3), wide strip
 
-Evening in the hut. Ya closes her e-paper folio and sets it down on the shelf beside the brass pot, then rolls up her sleeves and turns to Shapla at the clay stove. Jalal looks on, puzzled; Taro sniffs the empty curry dish.
-! YA (speech): Forget the forms. You cooked my research fish beautifully. Will you show me how? I was a cook before all this.
+Dawn at the hut, seen from the yard under a pale dawn sky. On the porch, Ya sits up on a borrowed mat, rubbing her eyes, Taro curled at her feet. Through the open doorway, Jalal and Shapla argue inside.
+! CAPTION: Ya stayed the night. At dawn, she woke to raised voices.
+! JALAL (speech): That was our one chance to leave this village life!
+! SHAPLA (speech): Leave for where? My family has done nothing but leave.
 
 ### Panel 8.2 (cells 4–5)
 
-Ya and Shapla kneel side by side at the stove, grinding mustard seed on a stone slab. Shapla, wary, half smiles.
-! SHAPLA (speech, across the border above): Every outsider wants something signed.
-! YA (speech): No papers. Just mustard.
+Ya in the doorway, sleeves rolled up, smiling. Jalal and Shapla turn, caught mid-argument. Ya's folio lies shut on the shelf by the brass pot.
+! YA (speech, across the border above): Sorry, I couldn't help hearing. Can I cook breakfast with you? No forms, I promise.
 
 ### Panel 8.3 (cells 6–7)
 
-Close on Shapla's hands: she stops grinding and rubs her numb fingertips. Ya notices.
+Ya and Shapla kneel side by side at the clay stove, grinding spices on a stone slab. Shapla stops and rubs her numb fingertips; Ya notices.
 ! YA (speech, across the border above): Your fingers. Do they go numb?
 ! SHAPLA (speech): Since I was a girl. Jalal's hands shake.
-! CAPTION: Ya knew mercury when she saw it. The Cooperative could test for it, and treat it.
+! CAPTION: Ya knew mercury when she saw it.
 
 ### Panel 8.4 (cells 8–11), wide strip
 
-Night, lamplight. The three of them eat mustard hilsa and greens together on the mat, Taro curled by Ya; Shapla is laughing for the first time. The brass pot on the shelf behind, Ya's folio closed beside it.
-! SHAPLA (speech): My family has done nothing but leave.
-! YA (speech): Mine too. My grandmother said home travels with you, if you carry it right.
+Morning light. The three of them eat breakfast together on the mat (rice, dal, greens, a little fish), Taro by Ya; Shapla is laughing. The brass pot on the shelf behind, Ya's folio still shut beside it.
+! YA (speech): Fish every day from one river is where the mercury comes from. Follow the hilsa and you eat from every river it passes.
+! SHAPLA (speech): Then he can collect the data. And I'll choose what we cook.
 
 ### Panel 8.5 (cells 12–15), wide strip, final panel, wordless
 
@@ -387,6 +388,6 @@ The dormant corridor's "62 years" puts its last transit in 2003, in Jalal's gran
 The prologue's dates and generations (1947, 1971, the 2040s), and Shapla being eight when her family leaves the delta. Edited Drafts says "great-great-grandparents from Bengal".
 The brass pot, and the animal vignettes. The barrage and the oil spill echo real Ganges and Sundarbans history, but no real names appear on the page.
 Shorter lines for Shapla and Jalal on page 7, since the prologue now carries her family's history.
-Added after Khai's notes (3 Oct): the page-2 prologue (the 2048 PREMISE visit, Shapla's mother refusing the funds, Shapla meeting Jalal at fifteen and seventeen); mercury from upstream pollution, felt as numb fingers and shaking hands; Ya winning Shapla over by cooking mustard hilsa with her; Ya repeating her grandmother's "home travels with you" from The Year It Snowed. Jalal's page-7 argument with Shapla is cut: Ya, not Jalal, changes her mind, and Shapla's "My family has done nothing but leave" now goes to Ya.
+Added after Khai's notes (3 Oct): the page-2 prologue (the 2048 PREMISE visit, Shapla's mother refusing the funds, Shapla meeting Jalal at fifteen and seventeen); mercury from a diet of the river's fish, felt as numb fingers and shaking hands; Ya staying the night, waking to Jalal and Shapla's argument, and winning Shapla over by cooking breakfast with her (Yan's shape for the scene); a varied diet as the answer to the mercury, and as a reason to follow the fish. Jalal's line "This time we choose it" is cut: Ya, not Jalal, changes Shapla's mind.
 Added in the 3 Oct polish: the hut and the brass pot as cast members; Ya's notebook in place of the tablet; Taro on every page from page 2; the telemetry lettered as labels rather than drawn; page 5's punchline as one large silent panel; page 7's Ya leaving and Jalal's outburst merged into one panel, so the final boat gets half the board.
 Left out of Monsoon Hilsa: the upstream/downstream custody dispute, the Cooperative's "emergent passage zone" and the Dhaka chef. Each needs its own scenes.

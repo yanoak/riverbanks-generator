@@ -273,7 +273,7 @@ Adaptation Economy** reuses the acronym. In Burmese, ကယ် (*kae*) means to 
 
 Birth years: Dew 1965, Ismahan 2010, Ya 2032, Soraya 2039, Teja 2064.
 
-**Invented on 2026-10-02 to fill gaps** (Yan said to invent them). These are not yet in the sheet:
+**Invented on 2026-10-02 to fill gaps** (Yan said to invent them). Added to the sheet on 2026-10-04, with Shapla and Taro columns and the 2029, 2030, 2041, 2048, 2075 and 2090 events:
 
 - **Jalal:** born **2031**, so 34 in 2065.
 - **Shapla:** born **2033**, so 32 in 2065.
@@ -742,7 +742,6 @@ Drafts is canon.
 - What Act Two ("Taming Currents") contains beyond *The Youngest Delegate*.
 - Which of Act Three's five panel options are made, and in what order.
 - The Epilogue, "Moving House".
-- Whether the invented birth years should go into the timeline sheet.
 
 ## How to refresh this file
 

@@ -12,6 +12,23 @@
 	const THUMB_WIDTH = 88;
 	const peersOn = (pageId: string) =>
 		(editor.presence?.peers ?? []).filter((p) => p.page === pageId);
+
+	// Deleting a page takes everything on it, so it asks first. The question belongs to one
+	// page: moving to another page (or the page going away) withdraws it.
+	let confirmingId = $state<string | null>(null);
+	$effect(() => {
+		if (confirmingId !== editor.comic.pages[editor.pageIndex]?.id) confirmingId = null;
+	});
+	const focusOnMount = (node: HTMLElement) => node.focus();
+	function cancelOnEscape(e: KeyboardEvent) {
+		if (e.key !== 'Escape') return;
+		e.stopPropagation();
+		confirmingId = null;
+	}
+	function confirmDelete() {
+		confirmingId = null;
+		editor.deletePage();
+	}
 </script>
 
 <nav
@@ -54,7 +71,28 @@
 				{/each}
 			</span>
 		</button>
-		{#if i === editor.pageIndex}
+		{#if i === editor.pageIndex && confirmingId === page.id}
+			<div
+				class="-mt-2 flex flex-col items-center gap-1 text-xs"
+				role="group"
+				aria-label="Delete page {i + 1}?"
+			>
+				<span class="text-stone-600">Delete page {i + 1}?</span>
+				<span class="flex gap-2">
+					<button
+						class="font-medium text-red-700 hover:underline"
+						onkeydown={cancelOnEscape}
+						onclick={confirmDelete}>Delete</button
+					>
+					<button
+						class="text-stone-500 hover:text-stone-900"
+						use:focusOnMount
+						onkeydown={cancelOnEscape}
+						onclick={() => (confirmingId = null)}>Cancel</button
+					>
+				</span>
+			</div>
+		{:else if i === editor.pageIndex}
 			<div class="-mt-2 flex justify-center gap-0.5 text-stone-500">
 				<button
 					class="mini"
@@ -75,7 +113,7 @@
 					aria-label="Delete page"
 					title="Delete page"
 					disabled={editor.comic.pages.length === 1}
-					onclick={() => editor.deletePage()}><Trash2 size={14} /></button
+					onclick={() => (confirmingId = page.id)}><Trash2 size={14} /></button
 				>
 			</div>
 		{/if}

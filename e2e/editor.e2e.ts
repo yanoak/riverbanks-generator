@@ -80,7 +80,19 @@ test('pages: add, reorder, delete, and persist', async ({ page }) => {
 	await expect(thumbs.nth(1)).toHaveAttribute('aria-current', 'page');
 	await expect(page.locator('main .balloon-text')).toHaveCount(1);
 
+	// Deleting asks first; Cancel (focused, so Enter is safe) and Escape both keep the page.
 	await page.getByRole('button', { name: 'Delete page' }).click();
+	const ask = page.getByRole('group', { name: 'Delete page 2?' });
+	await expect(ask.getByRole('button', { name: 'Cancel' })).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect(ask).toHaveCount(0);
+	await page.getByRole('button', { name: 'Delete page' }).click();
+	await page.keyboard.press('Escape');
+	await expect(ask).toHaveCount(0);
+	await expect(thumbs).toHaveCount(3);
+
+	await page.getByRole('button', { name: 'Delete page' }).click();
+	await ask.getByRole('button', { name: 'Delete', exact: true }).click();
 	await expect(thumbs).toHaveCount(2);
 	await page.keyboard.press('ControlOrMeta+z');
 	await expect(thumbs).toHaveCount(3);

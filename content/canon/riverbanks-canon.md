@@ -636,6 +636,15 @@ Drafts is canon.
   - **Moving House cast** (2026-10-03): *Teja* (26), *Teja at 11*, *Ismahan at 80* and *at 65*,
     *Soraya* (51) and *Soraya at 36*, *Syahbandar*, *Maya* (one-eyed mudskipper), *Jentayu* (the
     bird-form AI vessel) and the place *the House of Taming*.
+  - ***Epilogue: River of Seeds*, A1 version** (`ccfbe106-b609-4cd3-b2d7-fbafd3c7098d`, code `ERS`, renamed by Yan from *Epilogue: Seeds*, `ES`): 5 A1
+    boards and 31 panels under "SEEDS / EPILOGUE · I–V", plus a wordless sixth board (VI. Night on the River), built on 2026-10-05 from
+    `content/drafts/2026-10-05_epilogue-seeds_v2.md` (plan `2026-10-04_epilogue-seeds`). Svalbard in
+    2075, then Ismahan's funeral in Muara in 2090. It reworks the Epilogue without a crisis and
+    supersedes the flood story of `MH`, which is kept. Not yet in Edited Drafts, so not canon.
+    Awaiting Yan's review.
+  - **Epilogue cast** (2026-10-05): *Biret* (Sámi elder, keeper of the vault), *Ya at 58*, *Taro
+    the beaing* (Taro at 38, cybernetically enhanced, after Seapunk's *Southbeast Asia*), and the
+    places *the seed vault* and *the burial bank*.
 - **The style:** "Riverbanks house style" (`b5f76d95-af53-4a85-b365-b85bfc781eae`). It is ligne
   claire on cream, with teal, mangrove green and silt brown, and an ochre or brick-red accent.
   - **Characters and props:** its cast has an in-style sheet for each of Ismahan at 18, 20 and 42;

@@ -1,7 +1,7 @@
 # Riverbanks: the canon
 
 The current canonical story and context for the Riverbanks exhibition, compiled for whoever picks
-this up next, human or agent. Compiled on **2026-10-02** from the sources below, and updated the same day with Yan's answers to the open questions. Updated on **2026-10-03** with Act Three (KAE), from Sam's voice note.
+this up next, human or agent. Compiled on **2026-10-02** from the sources below, and updated the same day with Yan's answers to the open questions. Updated on **2026-10-03** with Act Three (KAE), from Sam's voice note, and on **2026-10-06** with the Act Three planning talk and Yan's decisions on it.
 
 **This file is a snapshot, not the source.** The Google sources are canon. Where they and this
 file differ, the sources win, so re-read them before relying on anything here. The story text
@@ -15,6 +15,7 @@ below is copied word for word from the sources.
 | **RIVERBOOK › Edited Drafts** and its *Script:* tabs | The refined stories (Ismahan, Dew & Ya, the Hilsa) and their panel scripts | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.igit5bn60vtm) |
 | **Character timeline** sheet | Years, ages, and family | [sheet](https://docs.google.com/spreadsheets/d/1tSifqkz57Ociu9xq-dRsMxBDvGYcprkoxBNd77GNY_A/edit?gid=0#gid=0) |
 | **RIVERBOOK › KAE** (Sam's voice note, transcribed 2026-10-03) | Act Three: the KAE concept and its panel options, as Sam explained them | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.y1s20b8y7ny8) |
+| **RIVERBOOK › Act 3 - Planning Talk (6 Oct)** (Granola recording, cleaned 2026-10-06) | Act Three's theory (kinetic economics), cast and seven-panel plan, as discussed; Yan's decisions are written into its briefing | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.9ax3fp41cyl) |
 | RIVERBOOK › SHOW WORLD › PLURIVERS ⨁ | The world bible: institutions and symbolism. The slides restate the parts that matter. | same doc, tab `t.t8praw6lmbav` |
 
 - **Precedence:**
@@ -67,7 +68,9 @@ below is copied word for word from the sources.
 The six disasters collapse the last global reinsurer, which is the precipitating event of
 PLURIVERS. The timeline sheet's 2027 entry agrees: "6 disasters break reinsurance system".
 
-**The banker is a woman and stays unnamed** (Yan, 2026-10-02).
+**The banker is a woman, Daria** (Yan, 2026-10-02; named 2026-10-06). She is the grizzled veteran on the verge of retirement, and a friend of Kate Raworth's rather than her student. Her dream is kinetic economics; see Act Three.
+
+**The Summit speaker is Nusa** (Yan, 2026-10-06): the white-haired elder in the teal stole who opens the Sunda Summit (slide 5). *Nusa* is Malay and Indonesian for island, as in *Nusantara*: an island speaking over Sunda, the drowned continent. She is **Minangkabau**, from West Sumatra (Indonesia), of a confident matriarchal lineage, and **Daria's old friend**: in Act Three she is the one Daria tells the dream to (Yan, 2026-10-06).
 
 ## Act One: Life, the Pluriverse, and Everything (Sam, slides 5–8; final text)
 
@@ -222,6 +225,23 @@ Adaptation Economy** reuses the acronym. In Burmese, ကယ် (*kae*) means to 
 - The Hilsa characters appear: Ya checks up on Jalal, and Shapla, the fisherman's wife, gets a
   bigger role.
 - "Pluriversity" was floated for KAN's university system.
+
+**The planning talk** (Granola, 2026-10-06; RIVERBOOK tab *Act 3 - Planning Talk (6 Oct)*). Not
+final text. The act is the macro history of PLURIVERS's first two decades, animated by
+**kinetic economics**: Raworth's donut turned into a wheel or propeller that goes somewhere.
+Proposed seven panels: (1–2) Daria's dream and Christmas-2027 brunch napkin sketch, then the
+Summit pitch with Ismahan in the audience; (3–4) the war zone with the clean river, where
+Ismahan meets Hamzah, now a Riverkeeper; (5–6) Faris steering PREMISE money to decommission a
+dam; (7) Faris's "no one exits to a unicorn any more" monologue. Yan's decisions (2026-10-06):
+
+- Daria is the Prologue banker (see Prologue).
+- **Page 1 (Yan, 2026-10-06):** Daria wakes from dozing off at her desk in her Manila office, where she has been sheltering from the typhoon. When the weather clears, she meets Nusa at a café nearby over bicho-bicho. "Like our friend Kate's donut economics?" Her three institutions: the floor (PREMISE), the ceiling pushed out (PESA), so the donut breathes; and the donut that evolves and branches with a genealogy, drawn as an isometric donut.
+- **PROSPER** is the pluriversal leap from sovereign wealth funds to a stake tied to riverine and other planetary systems.
+- On the donut, **PREMISE keeps the floor** for human flourishing and **PESA pushes the
+  ecological ceiling out**, as the Riverkeepers do. PROSPER is the propulsion.
+- Ismahan joins KAN some years after the Summit. The act's story starts in **2040**, when she
+  (30) goes on a mission with KAN.
+- The talk's "jump to 152" was garbled audio, not a year.
 
 ## World context (from the PLURIVERS world bible; background to the slides)
 
@@ -622,7 +642,7 @@ Drafts is canon.
     ("improvingecosystem"; "opting-intos *of* the Pluriversal Covenant"). Board 5's PROSPER box
     uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
     *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
-    elder, teal stole). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
+    elder, teal stole; named **Nusa** by Yan on 2026-10-06). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
   - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 9 A1
     boards and 46 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the
     polished v2 script in the *Script: Visa for a Hilsa* tab, then revised the same day after
@@ -695,7 +715,7 @@ Drafts is canon.
    means a river mouth or estuary, the mouth of a different, not yet drowned river. Muara and Johor otherwise stay
    vague on purpose: don't state that Muara is Johor. The 1914 Johor line and the "Singapore &
    Johor" flood can both stand as they are.
-6. **The prologue's banker is a woman, unnamed.**
+6. **The prologue's banker is a woman, unnamed.** *(Superseded 2026-10-06: she is Daria.)*
 7. **Birth years were invented where canon had none:** Jalal 2031 and Shapla 2033.
 8. **Monsoon Hilsa coinages are canon,** following Sam's feedback (decided 2026-10-02):
    - the Passage Covenant;

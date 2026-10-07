@@ -254,7 +254,9 @@ and a ceiling pushing out; (4) two fictional armies (NMLA, MHDF) fund their war 
 river for PESA money, and the man both sides trust is Hamzah; (5) the Riverkeepers Bar, ending
 on Faris's arrival; (6) Faris dismantles the Myitsone Dam (built, in this world, after its 2011
 suspension) for small hydropower, watching only his PROSPER stake; "nobody exits to a unicorn
-any more". It supersedes KAE Draft v1 as the working draft.
+any more". It supersedes KAE Draft v1 as the working draft. Yan approved every page on 2026-10-07, after these notes: Daria jolts awake in her Prologue pose (PAO:1:7) without drawing anything; her answer to Nusa is "Yes. But donuts that live and breathe"; the bar cat is a calico, never to be confused with Taro; the bar mechanic is modelled on Smita, an athletic Punjabi woman in her early forties.
+
+**The brothers' ages** (Yan, 2026-10-07; now in the timeline sheet): Tengku Hamzah, the General, born **1996**; Tengku Faris, the Financier, born **1999**. At the Summit they are 32 and 29; in 2040, 44 and 41.
 
 ## World context (from the PLURIVERS world bible; background to the slides)
 

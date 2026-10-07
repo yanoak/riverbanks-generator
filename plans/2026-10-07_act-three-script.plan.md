@@ -35,8 +35,8 @@ picked up later.
 - [x] Page-by-page script, pages 1–6, with Yan's decisions applied
 - [x] Consistency read-through
 - [x] RIVERBOOK tab *Script: Kinetic Adaptation Economy* (`t.w8nhl8g6gcj`) under Edited Drafts
-- [ ] Yan resolves the ◇ items listed in the script's "Still to decide"
-- [ ] Check the Hukawng tiger caption's history before it goes on a board
+- [x] Yan's page notes applied and every ◇ item approved (7 Oct); brothers' birth years added to the timeline sheet
+- [x] Tiger caption generalised to "this has precedent in the region since the 1990s", so no specific claim needs checking
 - [ ] Build the six A1 boards in Riverbanks (a separate plan, per the comic production process)
 
 ## Verification
@@ -49,8 +49,8 @@ Building the boards; generating art; reworking Act One's slide text.
 
 ## Open questions
 
-- [ ] Page titles (The Dream, The Pitch, The Anomaly, Neither Side, The Riverkeepers Bar, The Surgeon)
-- [ ] Whether the act's closing caption stays
+- [x] Page titles (The Dream, The Pitch, The Anomaly, Neither Side, The Riverkeepers Bar, The Surgeon): approved
+- [x] Whether the act's closing caption stays: it stays
 
 ## Outcome
 

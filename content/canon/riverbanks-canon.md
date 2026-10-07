@@ -15,7 +15,8 @@ below is copied word for word from the sources.
 | **RIVERBOOK › Edited Drafts** and its *Script:* tabs | The refined stories (Ismahan, Dew & Ya, the Hilsa) and their panel scripts | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.igit5bn60vtm) |
 | **Character timeline** sheet | Years, ages, and family | [sheet](https://docs.google.com/spreadsheets/d/1tSifqkz57Ociu9xq-dRsMxBDvGYcprkoxBNd77GNY_A/edit?gid=0#gid=0) |
 | **RIVERBOOK › KAE** (Sam's voice note, transcribed 2026-10-03) | Act Three: the KAE concept and its panel options, as Sam explained them | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.y1s20b8y7ny8) |
-| **RIVERBOOK › Act 3 - Planning Talk (6 Oct)** (Granola recording, cleaned 2026-10-06) | Act Three's theory (kinetic economics), cast and seven-panel plan, as discussed; Yan's decisions are written into its briefing | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.9ax3fp41cyl) |
+| **RIVERBOOK › Act 3 - Planning Talk (6 Oct)** (Granola recording, cleaned 2026-10-06) | Act Three's theory (kinetic economics), cast and seven-page plan, as discussed (the talk says "panels" for pages); Yan's decisions are written into its briefing | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.9ax3fp41cyl) |
+| **RIVERBOOK › Edited Drafts › Script: Kinetic Adaptation Economy** (written with Yan, 2026-10-07) | Act Three's six-page panel script, v1; local copy `content/drafts/2026-10-07_act-three_v1.md` | [doc tab](https://docs.google.com/document/d/18NGMxqVUeZz93RChMafRJ-Eh0aKomNfE02zNmpqDh9U/edit?tab=t.w8nhl8g6gcj) |
 | RIVERBOOK › SHOW WORLD › PLURIVERS ⨁ | The world bible: institutions and symbolism. The slides restate the parts that matter. | same doc, tab `t.t8praw6lmbav` |
 
 - **Precedence:**
@@ -229,7 +230,7 @@ Adaptation Economy** reuses the acronym. In Burmese, ကယ် (*kae*) means to 
 **The planning talk** (Granola, 2026-10-06; RIVERBOOK tab *Act 3 - Planning Talk (6 Oct)*). Not
 final text. The act is the macro history of PLURIVERS's first two decades, animated by
 **kinetic economics**: Raworth's donut turned into a wheel or propeller that goes somewhere.
-Proposed seven panels: (1–2) Daria's dream and Christmas-2027 brunch napkin sketch, then the
+Proposed seven pages (the talk says "panels" but means pages; Yan, 2026-10-07): (1–2) Daria's dream and Christmas-2027 brunch napkin sketch, then the
 Summit pitch with Ismahan in the audience; (3–4) the war zone with the clean river, where
 Ismahan meets Hamzah, now a Riverkeeper; (5–6) Faris steering PREMISE money to decommission a
 dam; (7) Faris's "no one exits to a unicorn any more" monologue. Yan's decisions (2026-10-06):
@@ -242,6 +243,18 @@ dam; (7) Faris's "no one exits to a unicorn any more" monologue. Yan's decisions
 - Ismahan joins KAN some years after the Summit. The act's story starts in **2040**, when she
   (30) goes on a mission with KAN.
 - The talk's "jump to 152" was garbled audio, not a year.
+
+**The script, v1** (Yan, 2026-10-07; RIVERBOOK tab *Script: Kinetic Adaptation Economy*). The
+header is **ACT THREE: KINETIC ADAPTATION ECONOMY** and the act is **six pages**: (1) Daria
+wakes in Manila in the typhoon and, in December 2027, sketches the three jobs on a napkin with
+Nusa over bicho-bicho; (2) Nusa's Summit speech names PREMISE, PESA and PROSPER on the donut,
+with Daria in the front row and Ismahan inspired; (3) 2040, KAN Academy at the KAE base, where
+Nusa, frail but sharp, shows Ismahan the dashboard anomaly at **Myitsone**: a war below the floor
+and a ceiling pushing out; (4) two fictional armies (NMLA, MHDF) fund their war by cleaning the
+river for PESA money, and the man both sides trust is Hamzah; (5) the Riverkeepers Bar, ending
+on Faris's arrival; (6) Faris dismantles the Myitsone Dam (built, in this world, after its 2011
+suspension) for small hydropower, watching only his PROSPER stake; "nobody exits to a unicorn
+any more". It supersedes KAE Draft v1 as the working draft.
 
 ## World context (from the PLURIVERS world bible; background to the slides)
 

@@ -1,0 +1,26 @@
+import base64, json, os, sys, urllib.request, concurrent.futures as cf
+D=os.path.dirname(os.path.abspath(__file__))
+key=[l.split('=',1)[1].strip().strip('"') for l in open('/Users/yan/Coding_work/riverbanks-generator/.env') if l.startswith('GEMINI_API_KEY=')][0]
+BASE=("Draw an ISOMETRIC illustration (three-quarter view from above, about 30 degrees) of Kate Raworth's Doughnut turned into a physical little world, for a nonfiction graphic-history comic. "
+"The FIRST attached image is the flat diagram: keep its meaning and structure exactly. The doughnut is a wide round platform: an inner raised dark-teal ring wall (the social foundation, the floor) around a central hole divided into 12 pale wedges; a broad green band of land on top (the safe and just space) with rivers, trees and people; an outer raised dark-teal ring wall (the ecological ceiling); beyond it, 9 pale wedges of ground. "
+"The SECOND attached image shows the flat colours and composition to keep. The THIRD and FOURTH attached images are panels from the comic itself: draw every person, tree, river, boat and building in exactly that ligne-claire style: even black ink outlines, flat colour fills, simple faces with dot-and-line features, no gradients, no glow, no texture. "
+"Palette only: cream #F3ECDC, river teal #2E6B67, mangrove green #7C9A62 and its lighter tint, silt brown #8A6A48, skin tan #B07A4E, ochre #D9A441, brick red #C4553A only where stated, black ink. Plain cream background. Absolutely NO text, letters, numbers or labels anywhere. ")
+SPEC={
+"floor":("IMPORTANT: the FIFTH attached image shows the exact camera angle and shape to match: a strongly tilted isometric view from about 30 degrees above, so the doughnut appears as a wide flattened ellipse with visible side walls and thickness, and the far side smaller than the near side. Draw this doughnut at exactly that same angle and size, NOT top-down. Ignore the fifth image's content (no arrows, no dashed line). THE FLOOR (PREMISE). The inner teal ring wall is a sturdy floor, its top edge outlined in ochre. Around the whole ring, small Southeast Asian villagers stand safely on it and on the green band just outside it, evenly spread all the way round, some holding hands, a few stilt houses and rice fields on the band. The 12 wedges of the hole below are clean pale ground: no red, nobody falls in. No arrows.", ["base_floor.png","nb2_floor.png","iso_ceiling.png"]),
+"ceiling":("THE BREATHING DOUGHNUT (PESA). The outer teal ring wall has been pushed outward: a dashed line on the green ground shows where it used to stand, and teal arrows point outward from the new wall. Small people do the repair work that moved it: a kayaker paddling a river that crosses the band, a woman planting mangrove seedlings, a farmer with a hoe, a cyclist on a bank path, young trees growing on the widened band. The inner ring is unchanged.", ["base_ceiling.png","nb_ceiling.png"]),
+"propeller":("THE PROPELLER (PROSPER, kinetic economics). Four of these doughnut platforms are stacked one above another, rising up one tall vertical black arrow (time) through their centres, joined by an ochre spiral ribbon like a propeller or coiled spring. The lowest platform's band is bare silt-brown ground with a few tired people; each level higher is greener, with more trees, rivers and busy people; the top platform is lush, and smaller doughnut platforms branch off it like a family tree. Four ochre bars at the lower right grow taller from left to right.", ["base_propeller.png","nb_propeller.png"]),
+"myitsone":("THE MYITSONE DOUGHNUT, as a glowing model on a very dark blue-green screen (background #1d2b2b, keep it dark). On the left, three brick-red wedges of the hole are cracked and broken and the inner teal ring wall is breached there: tiny soldiers in olive fatigues and burnt ground (shortfall: a war). On the right, the outer ring wall swells outward in bright sky blue #3E8FB0 past a dashed line, with blue arrows, and tiny Riverkeepers with teal armbands mend a clear river and replant its banks there. Red only in those left-hand wedges.", ["base_myitsone.png","nb_myitsone.png"]),
+}
+def img(p): return {"inlineData":{"mimeType":"image/png" if p.endswith('png') else "image/jpeg","data":base64.b64encode(open(f"{D}/{p}",'rb').read()).decode()}}
+def run(n):
+    text,refs=SPEC[n]
+    parts=[{"text":BASE+text}]+[img(r) for r in refs[:2]]+[img("style_bar.jpg"),img("style_river.jpg")]+[img(r) for r in refs[2:]]
+    body={"contents":[{"parts":parts}],"generationConfig":{"responseModalities":["IMAGE"],"imageConfig":{"aspectRatio":"1:1","imageSize":"2K"}}}
+    req=urllib.request.Request("https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent",data=json.dumps(body).encode(),headers={"Content-Type":"application/json","x-goog-api-key":key})
+    r=json.load(urllib.request.urlopen(req,timeout=300))
+    for part in r["candidates"][0]["content"]["parts"]:
+        if "inlineData" in part:
+            open(f"{D}/iso2_{n}.png","wb").write(base64.b64decode(part["inlineData"]["data"])); return n+" ok"
+    return n+" no image: "+json.dumps(r)[:300]
+with cf.ThreadPoolExecutor(4) as ex:
+    for res in ex.map(run, sys.argv[1:] or list(SPEC)): print(res)

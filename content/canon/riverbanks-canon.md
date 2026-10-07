@@ -656,7 +656,7 @@ Drafts is canon.
     2026-10-02. All of Sam's text is lettered, verbatim except two slips fixed on board 5
     ("improvingecosystem"; "opting-intos *of* the Pluriversal Covenant"). Board 5's PROSPER box
     uses PROSPER's own name and slide 7's description, because slide 8 repeats PESA's. New cast:
-    *the banker* (grey bob, charcoal jacket, teal skirt) and *the Summit speaker* (white-haired
+    *the banker* (charcoal jacket, teal skirt; since 2026-10-07 drawn with straight shoulder-length BLACK hair and gold-rimmed glasses, to match the printed dream panel PAO:1:7) and *the Summit speaker* (white-haired
     elder, teal stole; named **Nusa** by Yan on 2026-10-06). Young Ismahan and Dew appear among the delegates on boards 2 and 3.
   - ***Visa for a Hilsa*, A1 version** (`d89a6f17-e319-4102-b990-d2d55f83988d`, code `VH`): 9 A1
     boards and 46 panels under "Act Five / A Visa for a Hilsa", built on 2026-10-03 from the

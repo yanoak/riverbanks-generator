@@ -1,6 +1,6 @@
 ---
 slug: 2026-10-07_act-three-boards
-status: draft
+status: in-progress
 started: 2026-10-07
 finished:
 issue:
@@ -43,7 +43,8 @@ the editor already supports (move, resize, z-order).
 | Hamzah at 44 | character | *the General*'s face; CLEAN-SHAVEN; black crew cut GREYING; green shirt ALWAYS tucked into the brown leather belt; no medals; a river-teal Riverkeeper's armband |
 | the NMLA colonel | character | grey moustache, beret, olive fatigues |
 | the MHDF commander | character | younger, reading glasses pushed up, mismatched camouflage |
-| the kayaker | character | wiry woman, sun-faded shirt, paddle |
+| Siratana | character | experienced Riverkeeper, 35, from Smita's material: lean, short dark hair, worn but well-kept bicycle; few words (replaces the kayaker, Yan 7 Oct) |
+| Patika | character | newcomer Riverkeeper, early 20s, from Smita's material: WILD CURLY hair, gear still too clean |
 | the mechanic | character | athletic Punjabi woman, early 40s, modelled on Smita; grease to the elbows |
 | the builder | character | older man, stub of pencil |
 | the bar cat | character | CALICO, never grey or striped, so she is never mistaken for Taro |
@@ -72,14 +73,14 @@ comics, and PAO's 6-column grids don't match the script's 4 × 4.
 
 ## Tasks
 
-- [ ] Cast: write the new members above, generate each sheet, check it by eye, star it
-- [ ] Create the comic, set style and bands, add six pages, merge cells per the script's grids
-- [ ] Page 1: generate panels and the A–C and 1.5 insets; letter; check by eye; fix
-- [ ] Page 2: generate (diagrams first); letter; check; fix
-- [ ] Page 3: generate (dashboard and 3.3 inset); letter; check; fix
-- [ ] Page 4: generate; letter; check; fix
-- [ ] Page 5: generate; letter; check; fix
-- [ ] Page 6: generate; letter; check; fix
+- [x] Cast: 17 new members written, sheets generated, checked by eye and starred (7 Oct). The MHDF commander's first sheet was refused (PROHIBITED_CONTENT) until "rebel army" came out of his description
+- [x] Create the comic (`739cacfd-7664-4fd0-8ed1-b72d43207d96`), set style and bands (header ACT THREE: KINETIC ADAPTATION ECONOMY, page title as subtitle), six pages, cells merged, inset free panels added on pages 1–3
+- [x] Page 1: generate panels and the A–C and 1.5 insets; letter; check by eye; fix
+- [x] Page 2: generate (diagrams first); letter; check; fix
+- [x] Page 3: generate (dashboard and 3.3 inset); letter; check; fix
+- [x] Page 4: generate; letter; check; fix
+- [x] Page 5: generate; letter; check; fix
+- [x] Page 6: generate; letter; check; fix
 - [ ] Consistency pass at full resolution: Daria (1, 2), Nusa (1, 2, 3), Ismahan (2–6), Hamzah (4–6), Faris (5–6), the bar cat
 - [ ] Yan reviews in the editor; apply his notes
 - [ ] Close out: sync the script's lettering from the built comic, update the canon file's production state, sync the story network (Daria, Nusa, the brothers in 2040), diary, commit
@@ -98,6 +99,18 @@ comics, and PAO's 6-column grids don't match the script's 4 × 4.
 6. At full resolution: Hamzah clean-shaven with his shirt tucked in on every panel; the bar cat
    calico on every panel; Nusa recognisably the 2028 speaker on page 3.
 
+## Progress notes
+
+- 7 Oct: page 1 generation stopped at the first call: Gemini prepaid credits depleted; Yan topped up and the build resumed.
+- The Prologue's dream panel (PAO:1:7) draws the banker with black hair, while her sheet gave a silver-grey bob. PAO:1:7 is already printed, so Yan decided the sheet follows it: Daria now has straight shoulder-length black hair, and Act Three follows.
+- All six pages generated, lettered and checked by eye (7 Oct). The three donut slides on page 2 and the Myitsone donut inset on page 3 are drawn as SVG: the generated versions of 2.1 and 2.3 did not read. Header changed to ACT THREE / KINETIC ADAPTATION ECONOMY · <page title>, because the full act name wrapped and clipped.
+- Fixes along the way: 3.4 read "dashboard" as a car dashboard; 4.2 drew the teal cross as a grave-like post; 4.6 redrawn wider for Hamzah's lines, and his callback exchange moved to 4.7; 5.3 redrawn so Siratana reads as a woman (her description pinned, a new sheet drawn but not yet starred); 6.2 failed on a network drop and was retried.
+- Drawn text to watch: the bar sign in 6.5 and the chalkboard in 5.7 are covered by balloons.
+- Yan was editing live during the page 4–6 lettering; only my own new balloons were touched.
+
+- Donut diagrams as props (Yan, 7 Oct): baselines rebuilt by code on Kate Raworth's Doughnut (CC BY-SA, DoughnutEconomics), then redrawn with Nano Banana Pro as isometric little worlds in comic style, compared on the "Kinetic Donut Canvas" artifact. Four cast props now hold the chosen images: the floor donut, the breathing donut, the donut tree (after the moodboard donut_tree.png) and the Myitsone donut. Images are in riverbanks/donut-props/ (untracked); SVG baselines and generator scripts in scripts/donut-props/.
+- [ ] Regenerate the diagram panels from the props: 1.4 callouts A–C, 2.1–2.3, 3.3.
+
 ## Out of scope
 
 Print versions (`make_print_version`), which get their own pass with the redraw checks from
@@ -105,12 +118,12 @@ the memory; changes to Act One or Act Two boards.
 
 ## Open questions
 
-- [ ] The new birth years make Hamzah 31 and Faris 25 in Act Two's 2027, but *the General* and
+- [x] The new birth years make Hamzah 31 and Faris 25 in Act Two's 2027, but *the General* and
       *the Financier* sheets (and the Act Two boards) draw them in their mid-forties and around
       forty. Keep Act Two as drawn, or redraw it younger? For Act Three the existing sheets
-      already fit.
-- [ ] The ⨁ on tablets, badges and the bar sign: the model draws no text, so is a plain
-      teal cross symbol enough, or should it go in as a small caption?
+      already fit. **Settled (Yan, 7 Oct):** keep Act Two as drawn; they don't look too old there.
+- [x] The ⨁ on tablets, badges and the bar sign: the model draws no text, so is a plain
+      teal cross symbol enough, or should it go in as a small caption? **Settled (Yan, 7 Oct):** the drawn teal cross is enough.
 
 ## Outcome
 

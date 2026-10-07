@@ -109,7 +109,7 @@ comics, and PAO's 6-column grids don't match the script's 4 × 4.
 - Yan was editing live during the page 4–6 lettering; only my own new balloons were touched.
 
 - Donut diagrams as props (Yan, 7 Oct): baselines rebuilt by code on Kate Raworth's Doughnut (CC BY-SA, DoughnutEconomics), then redrawn with Nano Banana Pro as isometric little worlds in comic style, compared on the "Kinetic Donut Canvas" artifact. Four cast props now hold the chosen images: the floor donut, the breathing donut, the donut tree (after the moodboard donut_tree.png) and the Myitsone donut. Images are in riverbanks/donut-props/ (untracked); SVG baselines and generator scripts in scripts/donut-props/.
-- [x] Regenerate the diagram panels from the props: 1.4 callouts A–C, 2.1–2.3, 3.3 (7 Oct). 2.3's wide strip cropped the tall donut tree, so the strip is now plain cream and the tree sits in a borderless 3:2 free panel on its right half; callout C shows the whole image (fit).
+- [x] Regenerate the diagram panels from the props: 1.4 callouts A–C, 2.1–2.3, 3.3 (7 Oct). 2.3's wide strip cropped the tall donut tree, so the strip is now plain cream and the tree sits in a borderless 3:2 free panel on its right half; callout C shows the whole image (fit). Then, at Yan's request, the three napkin callouts on page 1 were redrawn as blue-biro sketches of the props on a paper napkin, since in the story they are Daria's actual napkin.
 
 ## Out of scope
 

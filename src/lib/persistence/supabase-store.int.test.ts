@@ -109,6 +109,31 @@ describe.skipIf(!url || !serviceKey)('SupabaseComicStore against local Supabase'
 		expect((await new SupabaseComicStore(a.client).records()).map((r) => r.id)).toContain(rec.id);
 	});
 
+	it('archives without counting as an edit, and deletes only archived comics', async () => {
+		const store = new SupabaseComicStore(a.client);
+		const rec = await create(store, 'To archive');
+		expect(await store.delete(rec.id)).toBe(false); // live: refused
+		expect(await store.get(rec.id)).not.toBeNull();
+
+		expect(await store.archive(rec.id)).toBe(true);
+		const archived = (await store.get(rec.id))!;
+		expect([archived.rev, archived.updatedAt]).toEqual([rec.rev, rec.updatedAt]);
+		expect((await store.list()).map((c) => c.id)).not.toContain(rec.id);
+		expect((await store.records()).map((r) => r.id)).not.toContain(rec.id);
+		expect(await store.list({ archived: true })).toContainEqual(
+			expect.objectContaining({ id: rec.id, archivedAt: expect.any(String) })
+		);
+
+		expect(await store.restore(rec.id)).toBe(true);
+		expect((await store.list()).map((c) => c.id)).toContain(rec.id);
+		expect((await store.list({ archived: true })).map((c) => c.id)).not.toContain(rec.id);
+
+		expect(await new SupabaseComicStore(b.client).archive(rec.id)).toBe(false); // not theirs
+		await store.archive(rec.id);
+		expect(await store.delete(rec.id)).toBe(true);
+		expect(await store.get(rec.id)).toBeNull();
+	});
+
 	it('confines storage to the user’s own folder', async () => {
 		const png = new Blob([new Uint8Array([137, 80, 78, 71])], { type: 'image/png' });
 		const own = await a.client.storage.from('assets').upload(`${a.id}/one`, png);

@@ -7,6 +7,7 @@ interface Row extends ComicRecord {
 	snapshot: Uint8Array | null;
 	snapshotRev: number;
 	upto: number;
+	archivedAt?: string;
 }
 
 /** In-memory ComicStore with the database's semantics (see the comic_ydoc_log migration). */
@@ -19,14 +20,17 @@ export class MemoryStore implements ComicStore {
 		return clone({ id: r.id, title: r.title, doc: r.doc, rev: r.rev, updatedAt: r.updatedAt });
 	}
 
-	async list(): Promise<ComicSummary[]> {
-		return [...this.rows.values()].map((r) => ({
-			id: r.id,
-			title: r.title,
-			rev: r.rev,
-			updatedAt: r.updatedAt,
-			pages: (r.doc as Comic).pages.length
-		}));
+	async list({ archived = false } = {}): Promise<ComicSummary[]> {
+		return [...this.rows.values()]
+			.filter((r) => !!r.archivedAt === archived)
+			.map((r) => ({
+				id: r.id,
+				title: r.title,
+				rev: r.rev,
+				updatedAt: r.updatedAt,
+				pages: (r.doc as Comic).pages.length,
+				...(r.archivedAt ? { archivedAt: r.archivedAt } : {})
+			}));
 	}
 
 	async get(id: string): Promise<ComicRecord | null> {
@@ -35,7 +39,7 @@ export class MemoryStore implements ComicStore {
 	}
 
 	async records(): Promise<ComicRecord[]> {
-		return [...this.rows.values()].map((r) => this.record(r));
+		return [...this.rows.values()].filter((r) => !r.archivedAt).map((r) => this.record(r));
 	}
 
 	async create(title: string, comic: Comic, state: Uint8Array): Promise<ComicRecord> {
@@ -69,7 +73,20 @@ export class MemoryStore implements ComicStore {
 		return row.id;
 	}
 
+	async archive(id: string): Promise<boolean> {
+		const row = this.rows.get(id);
+		if (row) row.archivedAt ??= new Date().toISOString();
+		return !!row;
+	}
+
+	async restore(id: string): Promise<boolean> {
+		const row = this.rows.get(id);
+		if (row) delete row.archivedAt;
+		return !!row;
+	}
+
 	async delete(id: string): Promise<boolean> {
+		if (!this.rows.get(id)?.archivedAt) return false;
 		this.updates = this.updates.filter((u) => u.comicId !== id);
 		return this.rows.delete(id);
 	}

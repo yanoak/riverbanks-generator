@@ -6,6 +6,8 @@ export interface ComicSummary {
 	rev: number;
 	updatedAt: string;
 	pages: number;
+	/** Set on archived comics (only listed with `{ archived: true }`). */
+	archivedAt?: string;
 }
 
 export interface ComicRecord {
@@ -41,13 +43,18 @@ export interface Compaction {
 
 /** Where comics live. Supabase in production (under the caller's RLS), memory in tests. */
 export interface ComicStore {
-	list(): Promise<ComicSummary[]>;
+	/** Live comics, or with `archived: true` only the archived ones. */
+	list(opts?: { archived?: boolean }): Promise<ComicSummary[]>;
 	/** The row with its JSON projection (for listing and search, not for editing). */
 	get(id: string): Promise<ComicRecord | null>;
-	/** Every comic the caller can open, with projections (for search). */
+	/** Every live comic the caller can open, with projections (for search). */
 	records(): Promise<ComicRecord[]>;
 	/** A new comic; `state` is its Y.Doc snapshot. */
 	create(title: string, comic: Comic, state: Uint8Array): Promise<ComicRecord>;
+	/** Hide a comic from the list; false if there is no such comic the caller owns. */
+	archive(id: string): Promise<boolean>;
+	restore(id: string): Promise<boolean>;
+	/** Permanently delete an archived comic; false for a live one, as for one not found. */
 	delete(id: string): Promise<boolean>;
 
 	state(id: string): Promise<StoredState | null>;

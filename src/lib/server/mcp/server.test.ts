@@ -181,6 +181,7 @@ describe('Riverbanks MCP server', () => {
 				'add_balloon',
 				'add_free_panel',
 				'add_page',
+				'archive_comic',
 				'create_comic',
 				'delete_balloon',
 				'delete_comic',
@@ -191,6 +192,7 @@ describe('Riverbanks MCP server', () => {
 				'move_page',
 				'remove_panel_image',
 				'rename_comic',
+				'restore_comic',
 				'set_grid',
 				'set_header_footer',
 				'set_page',
@@ -244,6 +246,10 @@ describe('Riverbanks MCP server', () => {
 		expect(by.set_panel_image.openWorldHint).toBe(true);
 		expect(by.list_comics.openWorldHint).toBe(false);
 		expect(by.rename_comic.idempotentHint).toBe(true);
+		for (const reversible of ['archive_comic', 'restore_comic']) {
+			expect(by[reversible].destructiveHint, reversible).toBe(false);
+			expect(by[reversible].idempotentHint, reversible).toBe(true);
+		}
 		expect(by.add_balloon.idempotentHint).toBe(false);
 	});
 
@@ -823,6 +829,52 @@ describe('Riverbanks MCP server', () => {
 		const res = await call('merge_panels', { comicId: id, page: 1, cells: [0, 5] });
 		expect(res.isError).toBe(true);
 		expect(res.text).toBe('invalid: Panels must share an edge to merge.');
+	});
+
+	describe('archive', () => {
+		const ids = (text: string) => (JSON.parse(text) as { id: string }[]).map((c) => c.id);
+
+		it('archiving hides a comic from list_comics and search; restoring brings it back', async () => {
+			const { call } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Old draft' })).text);
+			const { id: keep } = JSON.parse((await call('create_comic', { title: 'Keeper' })).text);
+
+			expect((await call('archive_comic', { comicId: id })).isError).toBe(false);
+			expect(ids((await call('list_comics')).text)).toEqual([keep]);
+			const archived = JSON.parse((await call('list_comics', { archived: true })).text);
+			expect(archived).toEqual([expect.objectContaining({ id, archivedAt: expect.any(String) })]);
+			expect((await call('search', { query: 'Old draft' })).text).not.toContain(id);
+			expect((await call('get_comic', { comicId: id })).isError).toBe(false);
+
+			expect((await call('restore_comic', { comicId: id })).isError).toBe(false);
+			expect(ids((await call('list_comics')).text).sort()).toEqual([id, keep].sort());
+			expect((await call('list_comics', { archived: true })).text).toBe('[]');
+		});
+
+		it('deletes only an archived comic', async () => {
+			const { call } = await connect();
+			const { id } = JSON.parse((await call('create_comic', { title: 'Scratch' })).text);
+
+			const refused = await call('delete_comic', { comicId: id });
+			expect(refused).toMatchObject({ isError: true });
+			expect(refused.text).toMatch(/^not-archived:/);
+			expect(ids((await call('list_comics')).text)).toEqual([id]);
+
+			await call('archive_comic', { comicId: id });
+			expect((await call('delete_comic', { comicId: id })).isError).toBe(false);
+			expect((await call('list_comics', { archived: true })).text).toBe('[]');
+			expect((await call('get_comic', { comicId: id })).isError).toBe(true);
+		});
+
+		it('archiving or restoring an unknown comic is not-found', async () => {
+			const { call } = await connect();
+			const missing = '00000000-0000-4000-8000-000000000000';
+			for (const tool of ['archive_comic', 'restore_comic', 'delete_comic']) {
+				const res = await call(tool, { comicId: missing });
+				expect(res.isError, tool).toBe(true);
+				expect(res.text, tool).toMatch(/^not-found:/);
+			}
+		});
 	});
 
 	it('reports unknown comics as not-found', async () => {

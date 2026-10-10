@@ -107,6 +107,23 @@ describe.skipIf(!url || !serviceKey)('sharing and access (RLS)', () => {
 		expect(read.error).toBeNull();
 	});
 
+	it('only the owner archives and restores; an editor still edits an archived comic', async () => {
+		expect(await editor.store.archive(comicId)).toBe(false);
+		expect((await editor.store.list()).map((c) => c.id)).toContain(comicId);
+
+		expect(await owner.store.archive(comicId)).toBe(true);
+		expect((await editor.store.list({ archived: true })).map((c) => c.id)).toContain(comicId);
+		expect(await editor.store.restore(comicId)).toBe(false);
+		expect(await editor.store.delete(comicId)).toBe(false);
+		const opened = (await openDoc(editor.store, comicId))!;
+		const base = Y.encodeStateVector(opened.doc);
+		opened.doc.getMap('comic').set('title', 'Edited while archived');
+		expect(await editor.store.append(comicId, Y.encodeStateAsUpdate(opened.doc, base))).toBeGreaterThan(
+			0
+		);
+		expect(await owner.store.restore(comicId)).toBe(true);
+	});
+
 	it('an editor cannot delete the comic or remove others, but can leave', async () => {
 		expect(await editor.store.delete(comicId)).toBe(false);
 		await expect(removePerson(editor.client, comicId, owner.id)).rejects.toThrow(/owner/);
@@ -123,6 +140,8 @@ describe.skipIf(!url || !serviceKey)('sharing and access (RLS)', () => {
 		expect(await editor.store.get(comicId)).toBeNull();
 		await removePerson(owner.client, comicId, owner.id); // a no-op, not an error
 		expect((await listPeople(owner.client, comicId)).map((p) => p.userId)).toEqual([owner.id]);
+		expect(await owner.store.delete(comicId)).toBe(false); // live: archive first
+		expect(await owner.store.archive(comicId)).toBe(true);
 		expect(await owner.store.delete(comicId)).toBe(true);
 	});
 });

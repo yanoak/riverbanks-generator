@@ -39,18 +39,23 @@ const fail = (what: string, error: { message: string; code?: string }) =>
 export class SupabaseComicStore implements ComicStore {
 	constructor(private supabase: SupabaseClient) {}
 
-	async list(): Promise<ComicSummary[]> {
-		const { data, error } = await this.supabase
+	async list({ archived = false } = {}): Promise<ComicSummary[]> {
+		const query = this.supabase
 			.from('comics')
-			.select('id, title, rev, updated_at, pages:doc->pages')
-			.order('updated_at', { ascending: false });
+			.select('id, title, rev, updated_at, archived_at, pages:doc->pages');
+		const { data, error } = await (archived
+			? query.not('archived_at', 'is', null).order('archived_at', { ascending: false })
+			: query.is('archived_at', null).order('updated_at', { ascending: false }));
 		if (error) throw fail('list comics', error);
-		return (data as (Omit<Row, 'doc'> & { pages: unknown[] })[]).map((r) => ({
+		return (
+			data as (Omit<Row, 'doc'> & { archived_at: string | null; pages: unknown[] })[]
+		).map((r) => ({
 			id: r.id,
 			title: r.title,
 			rev: r.rev,
 			updatedAt: r.updated_at,
-			pages: Array.isArray(r.pages) ? r.pages.length : 0
+			pages: Array.isArray(r.pages) ? r.pages.length : 0,
+			...(r.archived_at ? { archivedAt: r.archived_at } : {})
 		}));
 	}
 
@@ -69,6 +74,7 @@ export class SupabaseComicStore implements ComicStore {
 		const { data, error } = await this.supabase
 			.from('comics')
 			.select('id, title, doc, rev, updated_at')
+			.is('archived_at', null)
 			.order('updated_at', { ascending: false });
 		if (error) throw fail('search comics', error);
 		return (data as Row[]).map(toRecord);
@@ -147,6 +153,27 @@ export class SupabaseComicStore implements ComicStore {
 		});
 		if (error) throw fail('compact the comic', error);
 		return data === true;
+	}
+
+	archive(id: string): Promise<boolean> {
+		return this.setArchived(id, new Date().toISOString());
+	}
+
+	restore(id: string): Promise<boolean> {
+		return this.setArchived(id, null);
+	}
+
+	/** Writes archived_at alone: the trigger then leaves rev and updated_at as they were. */
+	private async setArchived(id: string, at: string | null): Promise<boolean> {
+		if (!/^[0-9a-f-]{36}$/i.test(id)) return false;
+		const { data, error } = await this.supabase
+			.from('comics')
+			.update({ archived_at: at })
+			.eq('id', id)
+			.select('id');
+		if (error?.code === '42501') return false;
+		if (error) throw fail(at ? 'archive the comic' : 'restore the comic', error);
+		return (data ?? []).length > 0;
 	}
 
 	async delete(id: string): Promise<boolean> {

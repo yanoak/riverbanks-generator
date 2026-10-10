@@ -191,6 +191,10 @@ const DELETE = {
 type Result = { content: { type: 'text'; text: string }[]; isError?: boolean };
 const text = (t: string): Result => ({ content: [{ type: 'text', text: t }] });
 const json = (value: unknown): Result => text(JSON.stringify(value, null, 2));
+const notFound = (comicId: string): Result => ({
+	...text(`not-found: No comic with id ${comicId}.`),
+	isError: true
+});
 
 /** Run a tool body, turning OpErrors into tool errors the agent can read and recover from. */
 async function guard(body: () => Promise<Result>): Promise<Result> {
@@ -286,9 +290,13 @@ export function createMcpServer(ctx: McpContext): McpServer {
 		{
 			annotations: READ,
 			title: 'List comics',
-			description: 'List the user’s comics, most recently edited first.'
+			description:
+				'List the user’s comics, most recently edited first. Archived comics are left out; archived: true lists only them, most recently archived first.',
+			inputSchema: {
+				archived: z.boolean().optional().describe('List the archived comics instead')
+			}
 		},
-		async () => json(await store.list())
+		async ({ archived }) => json(await store.list({ archived: archived ?? false }))
 	);
 
 	server.registerTool(
@@ -372,17 +380,51 @@ export function createMcpServer(ctx: McpContext): McpServer {
 	);
 
 	server.registerTool(
+		'archive_comic',
+		{
+			annotations: UPDATE,
+			title: 'Archive comic',
+			description:
+				'Archive a comic: it leaves list_comics and search but is kept, and restore_comic brings it back. Use this to tidy away a comic; only the owner can.',
+			inputSchema: { comicId: z.string() }
+		},
+		async ({ comicId }) =>
+			(await store.archive(comicId))
+				? text(`Archived comic ${comicId}. restore_comic brings it back.`)
+				: notFound(comicId)
+	);
+
+	server.registerTool(
+		'restore_comic',
+		{
+			annotations: UPDATE,
+			title: 'Restore comic',
+			description: 'Bring an archived comic back into list_comics and search.',
+			inputSchema: { comicId: z.string() }
+		},
+		async ({ comicId }) =>
+			(await store.restore(comicId)) ? text(`Restored comic ${comicId}.`) : notFound(comicId)
+	);
+
+	server.registerTool(
 		'delete_comic',
 		{
 			annotations: DELETE,
 			title: 'Delete comic',
-			description: 'Permanently delete a comic. Cannot be undone.',
+			description:
+				'Permanently delete an archived comic. Cannot be undone. A comic must be archived first (archive_comic); a live comic is refused.',
 			inputSchema: { comicId: z.string() }
 		},
-		async ({ comicId }) =>
-			(await store.delete(comicId))
-				? text(`Deleted comic ${comicId}.`)
-				: { ...text(`not-found: No comic with id ${comicId}.`), isError: true }
+		async ({ comicId }) => {
+			if (await store.delete(comicId)) return text(`Deleted comic ${comicId}.`);
+			if (!(await store.get(comicId))) return notFound(comicId);
+			return {
+				...text(
+					`not-archived: Archive the comic first (archive_comic); only archived comics can be deleted.`
+				),
+				isError: true
+			};
+		}
 	);
 
 	// --- pages -------------------------------------------------------------------------------

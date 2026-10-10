@@ -118,9 +118,9 @@ describe.skipIf(!url || !serviceKey)('sharing and access (RLS)', () => {
 		const opened = (await openDoc(editor.store, comicId))!;
 		const base = Y.encodeStateVector(opened.doc);
 		opened.doc.getMap('comic').set('title', 'Edited while archived');
-		expect(await editor.store.append(comicId, Y.encodeStateAsUpdate(opened.doc, base))).toBeGreaterThan(
-			0
-		);
+		expect(
+			await editor.store.append(comicId, Y.encodeStateAsUpdate(opened.doc, base))
+		).toBeGreaterThan(0);
 		expect(await owner.store.restore(comicId)).toBe(true);
 	});
 

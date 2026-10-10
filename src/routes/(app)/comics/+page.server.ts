@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		locals.supabase
 			.from('comics')
 			.select(
-				'id, title, owner_id, updated_at, styleProfileId:doc->>styleProfileId, bands:doc->bands, pages:doc->pages, firstPage:doc->pages->0'
+				'id, title, owner_id, updated_at, archived_at, styleProfileId:doc->>styleProfileId, bands:doc->bands, pages:doc->pages, firstPage:doc->pages->0'
 			)
 			.order('updated_at', { ascending: false }),
 		locals.supabase.rpc('shared_comic_owners'),
@@ -29,6 +29,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			id: r.id as string,
 			title: r.title as string,
 			updatedAt: r.updated_at as string,
+			archivedAt: (r.archived_at as string | null) ?? null,
 			pageCount: Array.isArray(r.pages) ? r.pages.length : 0,
 			firstPage: r.firstPage as Page | null,
 			bands: (r.bands as Bands | null) ?? undefined,
@@ -67,8 +68,22 @@ export const actions: Actions = {
 			return fail(404, { error: 'That comic no longer exists.' });
 		}
 	},
+	archive: async ({ request, locals }) => {
+		const id = String((await request.formData()).get('id'));
+		if (!(await new SupabaseComicStore(locals.supabase).archive(id)))
+			return fail(403, { error: 'Only the comic’s owner can archive it.' });
+		return { archived: id };
+	},
+	restore: async ({ request, locals }) => {
+		const id = String((await request.formData()).get('id'));
+		if (!(await new SupabaseComicStore(locals.supabase).restore(id)))
+			return fail(403, { error: 'Only the comic’s owner can restore it.' });
+		return { restored: id };
+	},
+	/** Permanent; the database refuses a comic that is not archived. */
 	delete: async ({ request, locals }) => {
 		const id = String((await request.formData()).get('id'));
-		await new SupabaseComicStore(locals.supabase).delete(id);
+		if (!(await new SupabaseComicStore(locals.supabase).delete(id)))
+			return fail(400, { error: 'Archive a comic before deleting it.' });
 	}
 };

@@ -47,16 +47,16 @@ export class SupabaseComicStore implements ComicStore {
 			? query.not('archived_at', 'is', null).order('archived_at', { ascending: false })
 			: query.is('archived_at', null).order('updated_at', { ascending: false }));
 		if (error) throw fail('list comics', error);
-		return (
-			data as (Omit<Row, 'doc'> & { archived_at: string | null; pages: unknown[] })[]
-		).map((r) => ({
-			id: r.id,
-			title: r.title,
-			rev: r.rev,
-			updatedAt: r.updated_at,
-			pages: Array.isArray(r.pages) ? r.pages.length : 0,
-			...(r.archived_at ? { archivedAt: r.archived_at } : {})
-		}));
+		return (data as (Omit<Row, 'doc'> & { archived_at: string | null; pages: unknown[] })[]).map(
+			(r) => ({
+				id: r.id,
+				title: r.title,
+				rev: r.rev,
+				updatedAt: r.updated_at,
+				pages: Array.isArray(r.pages) ? r.pages.length : 0,
+				...(r.archived_at ? { archivedAt: r.archived_at } : {})
+			})
+		);
 	}
 
 	async get(id: string): Promise<ComicRecord | null> {

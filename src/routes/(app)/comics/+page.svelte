@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import StyleChoices from '$lib/components/StyleChoices.svelte';
 	import PageView from '$lib/components/PageView.svelte';
@@ -20,12 +21,20 @@
 	let localComic = $state<Comic | null>(null);
 	let importing = $state(false);
 	let confirmDelete = $state<string | null>(null);
+	/** The comic just archived, offered for undo. */
+	let archivedNotice = $state<{ id: string; title: string } | null>(null);
 	let renaming = $state<string | null>(null);
 	let creating = $state(false);
 	let newStyle = $state('');
 
-	const mine = $derived(data.comics.filter((c) => !c.sharedBy));
-	const shared = $derived(data.comics.filter((c) => c.sharedBy));
+	const live = $derived(data.comics.filter((c) => !c.archivedAt));
+	const mine = $derived(live.filter((c) => !c.sharedBy));
+	const shared = $derived(live.filter((c) => c.sharedBy));
+	const archived = $derived(
+		data.comics
+			.filter((c) => c.archivedAt)
+			.sort((a, b) => b.archivedAt!.localeCompare(a.archivedAt!))
+	);
 	const lettering = (styleId: string | null) =>
 		data.styles.find((s) => s.id === styleId)?.typography ?? DEFAULT_TYPOGRAPHY;
 
@@ -51,6 +60,45 @@
 		}
 	}
 
+	async function focus(selector: string) {
+		await tick();
+		(
+			document.querySelector<HTMLElement>(selector) ??
+			document.querySelector<HTMLElement>('[data-new-comic]')
+		)?.focus();
+	}
+
+	const archive: (comic: { id: string; title: string }) => SubmitFunction =
+		(comic) =>
+		() =>
+		async ({ result, update }) => {
+			await update();
+			if (result.type !== 'success') return;
+			archivedNotice = comic;
+			await focus('[data-undo]');
+		};
+
+	const restore: (id: string) => SubmitFunction =
+		(id) =>
+		() =>
+		async ({ result, update }) => {
+			await update();
+			if (result.type !== 'success') return;
+			archivedNotice = null;
+			await focus(`[data-comic-link="${id}"]`);
+		};
+
+	const deleteForever: SubmitFunction =
+		() =>
+		async ({ update }) => {
+			await update();
+			confirmDelete = null;
+			await focus('[data-archive-summary]');
+		};
+
+	const day = (iso: string) =>
+		new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
 	const ago = (iso: string) => {
 		const s = (Date.now() - new Date(iso).getTime()) / 1000;
 		if (s < 60) return 'just now';
@@ -67,6 +115,7 @@
 		}
 	}
 	const THUMB = 180;
+	const ARCHIVED_THUMB = 72;
 </script>
 
 <svelte:head><title>My comics — Riverbanks</title></svelte:head>
@@ -96,6 +145,25 @@
 		{#if form?.error}
 			<p class="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{form.error}</p>
 		{/if}
+		{#if archivedNotice}
+			<form
+				method="POST"
+				action="?/restore"
+				class="mb-4 flex items-center gap-3 rounded bg-stone-200 px-3 py-2 text-sm"
+				role="status"
+				use:enhance={restore(archivedNotice.id)}
+			>
+				<input type="hidden" name="id" value={archivedNotice.id} />
+				<span class="flex-1">Archived “{archivedNotice.title}”.</span>
+				<button data-undo class="font-medium underline hover:text-stone-600">Undo</button>
+				<button
+					type="button"
+					class="text-stone-500 hover:text-stone-900"
+					aria-label="Dismiss"
+					onclick={() => (archivedNotice = null)}>×</button
+				>
+			</form>
+		{/if}
 
 		{#if localComic}
 			<div
@@ -119,9 +187,8 @@
 			<p
 				class="rounded border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-stone-500"
 			>
-				No comics yet — start with <strong>New comic</strong>{localComic
-					? ', or import your local one above'
-					: ''}.
+				{archived.length ? 'Nothing here but the archive' : 'No comics yet'} — start with
+				<strong>New comic</strong>{localComic ? ', or import your local one above' : ''}.
 			</p>
 		{:else}
 			<ul class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
@@ -134,6 +201,23 @@
 			<ul class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
 				{#each shared as comic (comic.id)}{@render card(comic)}{/each}
 			</ul>
+		{/if}
+
+		{#if archived.length}
+			<details class="mt-10">
+				<summary
+					data-archive-summary
+					class="cursor-pointer text-lg font-semibold text-stone-600 hover:text-stone-900"
+				>
+					Archived ({archived.length})
+				</summary>
+				<p class="mt-2 mb-4 text-sm text-stone-500">
+					Hidden from your comics and from search, and kept until you delete them.
+				</p>
+				<ul class="space-y-3">
+					{#each archived as comic (comic.id)}{@render archivedRow(comic)}{/each}
+				</ul>
+			</details>
 		{/if}
 	</main>
 </div>
@@ -178,6 +262,7 @@
 	<li class="group">
 		<a
 			href="/comics/{comic.id}"
+			data-comic-link={comic.id}
 			class="block rounded focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none"
 			aria-label="Open {comic.title}"
 		>
@@ -230,16 +315,73 @@
 			>
 			{#if comic.sharedBy}
 				<span class="text-stone-400">Shared by {comic.sharedBy}</span>
-			{:else if confirmDelete === comic.id}
-				<form method="POST" action="?/delete" use:enhance class="inline">
-					<input type="hidden" name="id" value={comic.id} />
-					<button class="font-medium text-red-700">Really delete?</button>
-				</form>
-				<button class="text-stone-500" onclick={() => (confirmDelete = null)}>Cancel</button>
 			{:else}
-				<button class="text-stone-500 hover:text-red-700" onclick={() => (confirmDelete = comic.id)}
-					>Delete</button
-				>
+				<form method="POST" action="?/archive" use:enhance={archive(comic)} class="inline">
+					<input type="hidden" name="id" value={comic.id} />
+					<button class="text-stone-500 hover:text-stone-900" title="Hide it; you can restore it"
+						>Archive</button
+					>
+				</form>
+			{/if}
+		</div>
+	</li>
+{/snippet}
+
+{#snippet archivedRow(comic: (typeof data.comics)[number])}
+	<li class="flex items-start gap-3">
+		<a
+			href="/comics/{comic.id}"
+			data-comic-link={comic.id}
+			class="block shrink-0 rounded focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none"
+			aria-label="Open {comic.title}"
+		>
+			<div
+				class="pointer-events-none overflow-hidden bg-white opacity-70 ring-1 ring-stone-200"
+				style:width="{ARCHIVED_THUMB}px"
+			>
+				{#if comic.firstPage}
+					<PageView
+						page={comic.firstPage}
+						scale={ARCHIVED_THUMB / comic.firstPage.width}
+						typography={lettering(comic.styleProfileId)}
+						bands={bandsFor(comic, comic.firstPage, 0)}
+					/>
+				{/if}
+			</div>
+		</a>
+		<div class="min-w-0 text-sm">
+			<p class="truncate font-medium">{comic.title}</p>
+			<p class="text-xs text-stone-500">
+				{comic.pageCount} page{comic.pageCount === 1 ? '' : 's'} · archived {day(comic.archivedAt!)}
+				{#if comic.sharedBy}· shared by {comic.sharedBy}{/if}
+			</p>
+			{#if !comic.sharedBy}
+				<div class="mt-1 flex gap-2 text-xs">
+					<form method="POST" action="?/restore" use:enhance={restore(comic.id)} class="inline">
+						<input type="hidden" name="id" value={comic.id} />
+						<button class="text-stone-500 hover:text-stone-900">Restore</button>
+					</form>
+					{#if confirmDelete === comic.id}
+						<form method="POST" action="?/delete" use:enhance={deleteForever} class="inline">
+							<input type="hidden" name="id" value={comic.id} />
+							<!-- svelte-ignore a11y_autofocus -->
+							<button autofocus class="font-medium text-red-700">Really delete?</button>
+						</form>
+						<button
+							class="text-stone-500"
+							onclick={() => {
+								confirmDelete = null;
+								focus(`[data-delete-forever="${comic.id}"]`);
+							}}>Cancel</button
+						>
+					{:else}
+						<button
+							data-delete-forever={comic.id}
+							class="text-stone-500 hover:text-red-700"
+							onclick={() => (confirmDelete = comic.id)}>Delete forever</button
+						>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</li>

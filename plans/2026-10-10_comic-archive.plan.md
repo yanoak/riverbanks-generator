@@ -86,7 +86,7 @@ Rejected:
 - [x] Migration: `archived_at`, trigger owner check that skips rev/updated_at, delete policy
 - [x] Store: `list({ archived })`, `records()` filter, `archive`, `restore` (Supabase + memory)
 - [x] MCP: `archive_comic`, `restore_comic`, `list_comics { archived }`, `delete_comic` refusal
-- [ ] Web: Archive button, undo notice, Archived section with Restore and Delete forever
+- [x] Web: Archive button, undo notice, Archived section with Restore and Delete forever
 - [ ] Ship: Yan runs `supabase db push` and deploys
 
 ## UI mockups (ASCII)
@@ -160,6 +160,10 @@ Empty archive: the section is not shown at all.
       integration — `src/lib/persistence/access.int.test.ts`
 
 ## Verification
+
+_Steps 1–5 are automated by keyboard in `e2e/archive.e2e.ts` and passed locally on 2026-10-10.
+Step 6 is covered by `server.test.ts`, and the database rules by the integration tests. Step 7
+and a run on production are left for after the push._
 
 On the deployed app (or `npm run dev` against local Supabase), signed in as the owner:
 

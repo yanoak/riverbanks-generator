@@ -6,6 +6,7 @@ import { createComic } from '$lib/model/factory';
 import { initialState, openDoc } from '$lib/ops/ydoc-store';
 import { invite, listPeople, removePerson } from './sharing';
 import { SupabaseComicStore } from './supabase-store';
+import { saveThumbnail, signThumbnails } from '$lib/thumbnails/storage';
 
 const url = process.env.SUPABASE_TEST_URL;
 const anonKey = process.env.SUPABASE_TEST_PUBLISHABLE_KEY;
@@ -96,6 +97,29 @@ describe.skipIf(!url || !serviceKey)('sharing and access (RLS)', () => {
 		const sneak = await outsider.client.storage.from('assets').upload(`${comicId}/x`, png());
 		expect(sneak.error).not.toBeNull();
 	});
+
+	it('thumbnails: members save and replace them; other assets stay undeletable', async () => {
+		const webp = () => new Blob([new Uint8Array([82, 73, 70, 70])], { type: 'image/webp' });
+		await saveThumbnail(editor.client, comicId, 'aaaa', webp());
+		await saveThumbnail(owner.client, comicId, 'bbbb', webp());
+		const { data } = await editor.client.storage.from('assets').list(comicId, { search: 'thumb-' });
+		expect(data?.map((f) => f.name)).toEqual(['thumb-bbbb.webp']);
+		await saveThumbnail(editor.client, comicId, 'bbbb', webp()); // already there: fine
+
+		const urls = await signThumbnails(owner.client, [
+			{ comicId, key: 'bbbb' },
+			{ comicId: crypto.randomUUID(), key: 'cccc' }
+		]);
+		expect([...urls.keys()]).toEqual([comicId]);
+		expect(await signThumbnails(outsider.client, [{ comicId, key: 'bbbb' }])).toEqual(new Map());
+
+		const { data: gone } = await editor.client.storage.from('assets').remove([`${comicId}/img-1`]);
+		expect(gone).toEqual([]);
+		const outsiderRemove = await outsider.client.storage
+			.from('assets')
+			.remove([`${comicId}/thumb-bbbb.webp`]);
+		expect(outsiderRemove.data).toEqual([]);
+	}, 20_000);
 
 	it('the owner copies a pre-sharing image from their own folder into the comic', async () => {
 		await owner.client.storage.from('assets').upload(`${owner.id}/old-1`, png());

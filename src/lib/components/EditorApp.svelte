@@ -18,6 +18,10 @@
 	import type { StyleSummary } from '$lib/styles/styles';
 	import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 	import type { ModelOption } from '$lib/generation/models';
+	import { beforeNavigate, goto } from '$app/navigation';
+	import { captureThumbnail } from '$lib/thumbnails/capture';
+	import { thumbKey, type ThumbInput } from '$lib/thumbnails/key';
+	import { saveThumbnail, signThumbnails } from '$lib/thumbnails/storage';
 
 	/** A cloud comic (`cloud`, synced live through Yjs) or the local one (`source`). */
 	let {
@@ -116,8 +120,12 @@
 	async function openCloud(doc: CloudDoc) {
 		doc.onstatus = (s) => (saveStatus = s);
 		doc.onlive = (l) => (live = l);
-		doc.onrevoked = () => onrevoked?.();
+		doc.onrevoked = () => {
+			revoked = true;
+			onrevoked?.();
+		};
 		editor.attach(await doc.open());
+		lookup = findThumbnail(doc).catch(() => {});
 		if (sharing) {
 			const presence = new Presence(editor.doc, {
 				id: sharing.userId,
@@ -130,6 +138,102 @@
 		editor.goToPage(initialPage - 1);
 		void doc.connect();
 	}
+
+	// Close-out (plans/2026-10-11_comic-thumbnails.plan.md): leaving the comic saves it and, if
+	// page 1 changed, a fresh thumbnail for My comics, drawn from the hidden stage below.
+	const THUMB_WIDTH = 180;
+	let thumbStage = $state<HTMLElement>();
+	/** The key of the thumbnail known to be stored. */
+	let savedThumb: string | null = null;
+	/** The check for a stored thumbnail, made on open; close-out waits for it. */
+	let lookup: Promise<void> = Promise.resolve();
+	let revoked = false;
+	let closing: Promise<void> | null = null;
+	let leaving = false;
+
+	const thumbInput = (): ThumbInput =>
+		$state.snapshot({
+			page: editor.comic.pages[0],
+			bands: resolveBands(editor.comic, 0),
+			typography
+		}) as ThumbInput;
+
+	async function findThumbnail(doc: CloudDoc) {
+		if (!sharing) return;
+		const key = await thumbKey(thumbInput());
+		const found = await signThumbnails(sharing.supabase, [{ comicId: doc.id, key }]);
+		if (found.size) savedThumb = key;
+	}
+
+	/** A capture of the current page 1, made while editing; close-out only has to upload it. */
+	let prepared: { key: string; blob: Blob } | null = null;
+	let captures: Promise<unknown> = Promise.resolve();
+
+	/** The thumbnail to store, or null if the stored one is current or none could be drawn. */
+	function prepare(): Promise<{ key: string; blob: Blob } | null> {
+		const run = async () => {
+			await lookup;
+			const input = thumbInput();
+			const key = await thumbKey(input);
+			if (key === savedThumb) return null;
+			if (prepared?.key === key) return prepared;
+			const node = thumbStage?.firstElementChild as HTMLElement | null;
+			const blob = node && (await captureThumbnail(node, input.page));
+			// Page 1 may have changed while it was drawn.
+			if (!blob || (await thumbKey(thumbInput())) !== key) return null;
+			return (prepared = { key, blob });
+		};
+		const result = captures.then(run, run); // one capture at a time
+		captures = result.catch(() => {});
+		return result;
+	}
+
+	// Once page 1 has changed and been left alone for a few seconds, draw the thumbnail ahead
+	// of time. Not on open: an unchanged comic may already have one.
+	let openedPage1: string | null = null;
+	$effect(() => {
+		if (!loaded || !cloud) return;
+		const now = JSON.stringify([editor.comic.pages[0], resolveBands(editor.comic, 0), typography]);
+		openedPage1 ??= now;
+		if (now === openedPage1) return;
+		const timer = setTimeout(() => void prepare(), 3000);
+		return () => clearTimeout(timer);
+	});
+
+	function closeOut(): Promise<void> {
+		const doc = cloud;
+		if (!doc || !sharing || !loaded || revoked) return Promise.resolve();
+		const { supabase } = sharing;
+		closing ??= (async () => {
+			const compacting = doc.compact();
+			const thumb = await prepare();
+			if (thumb) {
+				await saveThumbnail(supabase, doc.id, thumb.key, thumb.blob);
+				savedThumb = thumb.key;
+				prepared = null;
+			}
+			await compacting;
+		})()
+			.catch((e) => console.warn('Closing out the comic failed', e))
+			.finally(() => (closing = null));
+		return closing;
+	}
+
+	// Leaving for another page of the app: hold the navigation until the close-out is done (at
+	// most 3 s), because the next page loads its data before the navigation completes.
+	beforeNavigate((nav) => {
+		if (leaving || revoked || !cloud || !nav.to || nav.willUnload) return;
+		if (nav.to.url.pathname === location.pathname) return;
+		nav.cancel();
+		leaving = true;
+		editor.say('Saving…');
+		const to = nav.to.url;
+		const delta = nav.type === 'popstate' ? nav.delta : undefined;
+		void Promise.race([closeOut(), new Promise((r) => setTimeout(r, 3000))]).finally(() => {
+			if (delta) history.go(delta);
+			else void goto(to);
+		});
+	});
 
 	async function openLocal(local: DocumentSource) {
 		const comic = await local.load();
@@ -144,7 +248,7 @@
 			.finally(() => (loaded = true));
 		const onHide = () => {
 			if (document.visibilityState !== 'hidden') return;
-			if (cloud) void cloud.compact();
+			if (cloud) void closeOut();
 			else void autosave.saveNow();
 		};
 		document.addEventListener('visibilitychange', onHide);
@@ -241,6 +345,18 @@
 <!-- Offscreen static render of the current page at 1 unit = 1px, for PNG export. -->
 <div class="export-stage" bind:this={stage} aria-hidden="true">
 	{#if loaded}<PageView page={editor.page} scale={1} {typography} bands={editor.bands} />{/if}
+</div>
+
+<!-- Offscreen page 1 at card size, drawn into the My comics thumbnail on close-out. -->
+<div class="export-stage" bind:this={thumbStage} aria-hidden="true">
+	{#if loaded && cloud && editor.comic.pages[0]}
+		<PageView
+			page={editor.comic.pages[0]}
+			scale={THUMB_WIDTH / editor.comic.pages[0].width}
+			{typography}
+			bands={resolveBands(editor.comic, 0)}
+		/>
+	{/if}
 </div>
 
 <!-- Every page, one per sheet; only visible when printing (Export → PDF). -->

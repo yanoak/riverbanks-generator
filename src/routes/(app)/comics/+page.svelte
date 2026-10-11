@@ -14,6 +14,8 @@
 	import { supabaseAssets } from '$lib/persistence/cloud-assets';
 	import { findLocalComic, importLocalComic } from '$lib/persistence/import-local';
 	import { supabaseBrowser } from '$lib/supabase/browser';
+	import { captureThumbnail } from '$lib/thumbnails/capture';
+	import { saveThumbnail } from '$lib/thumbnails/storage';
 
 	let { data, form } = $props();
 	const supabase = $derived(supabaseBrowser(data.supabase.url, data.supabase.key));
@@ -98,6 +100,22 @@
 
 	const day = (iso: string) =>
 		new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+	// A card with no thumbnail of its current page 1 (edited over MCP, say) is drawn live, then
+	// saved so the next visit shows an image. One at a time, after the page has settled.
+	let drawing = Promise.resolve();
+	function saveDrawn(comic: (typeof data.comics)[number]) {
+		return (node: HTMLElement) => {
+			const { thumbKey, firstPage } = comic;
+			if (!thumbKey || !firstPage) return;
+			drawing = drawing.then(async () => {
+				const view = node.firstElementChild as HTMLElement | null;
+				if (!view?.isConnected) return;
+				const blob = await captureThumbnail(view, firstPage);
+				if (blob) await saveThumbnail(supabase, comic.id, thumbKey, blob).catch(() => {});
+			});
+		};
+	}
 
 	const ago = (iso: string) => {
 		const s = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -270,13 +288,23 @@
 				class="pointer-events-none overflow-hidden bg-white shadow-sm ring-1 ring-stone-200 group-hover:ring-stone-400"
 				style:width="{THUMB}px"
 			>
-				{#if comic.firstPage}
-					<PageView
-						page={comic.firstPage}
-						scale={THUMB / comic.firstPage.width}
-						typography={lettering(comic.styleProfileId)}
-						bands={bandsFor(comic, comic.firstPage, 0)}
+				{#if comic.thumbUrl && comic.firstPage}
+					<img
+						src={comic.thumbUrl}
+						alt=""
+						data-thumb
+						class="block w-full"
+						style:aspect-ratio="{comic.firstPage.width} / {comic.firstPage.height}"
 					/>
+				{:else if comic.firstPage}
+					<div data-live-thumb {@attach saveDrawn(comic)}>
+						<PageView
+							page={comic.firstPage}
+							scale={THUMB / comic.firstPage.width}
+							typography={lettering(comic.styleProfileId)}
+							bands={bandsFor(comic, comic.firstPage, 0)}
+						/>
+					</div>
 				{/if}
 			</div>
 		</a>
@@ -339,7 +367,9 @@
 				class="pointer-events-none overflow-hidden bg-white opacity-70 ring-1 ring-stone-200"
 				style:width="{ARCHIVED_THUMB}px"
 			>
-				{#if comic.firstPage}
+				{#if comic.thumbUrl && comic.firstPage}
+					<img src={comic.thumbUrl} alt="" class="block w-full" />
+				{:else if comic.firstPage}
 					<PageView
 						page={comic.firstPage}
 						scale={ARCHIVED_THUMB / comic.firstPage.width}

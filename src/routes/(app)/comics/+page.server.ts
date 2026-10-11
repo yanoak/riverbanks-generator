@@ -5,6 +5,10 @@ import { mutateComic } from '$lib/ops/ops';
 import { initialState } from '$lib/ops/ydoc-store';
 import { SupabaseComicStore } from '$lib/persistence/supabase-store';
 import { listProfiles, summarize } from '$lib/styles/styles';
+import { bandsFor } from '$lib/model/bands';
+import { thumbKey } from '$lib/thumbnails/key';
+import { signThumbnails } from '$lib/thumbnails/storage';
+import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -23,19 +27,44 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const ownerEmail = new Map(
 		((owners.data ?? []) as { comic_id: string; email: string }[]).map((o) => [o.comic_id, o.email])
 	);
+	const summaries = styles.map(summarize);
+	const rows = (comics.data ?? []).map((r) => ({
+		id: r.id as string,
+		title: r.title as string,
+		updatedAt: r.updated_at as string,
+		archivedAt: (r.archived_at as string | null) ?? null,
+		pageCount: Array.isArray(r.pages) ? r.pages.length : 0,
+		firstPage: r.firstPage as Page | null,
+		bands: (r.bands as Bands | null) ?? undefined,
+		styleProfileId: (r.styleProfileId as string | null) ?? null,
+		/** Set for comics someone else owns and shared with me. */
+		sharedBy: r.owner_id === user?.id ? null : (ownerEmail.get(r.id as string) ?? 'someone')
+	}));
+	// Each card's thumbnail is named by what it shows (plans/2026-10-11_comic-thumbnails.plan.md).
+	const keyed = await Promise.all(
+		rows.map(async (c) => ({
+			comicId: c.id,
+			key: c.firstPage
+				? await thumbKey({
+						page: c.firstPage,
+						bands: bandsFor(c, c.firstPage, 0),
+						typography:
+							summaries.find((s) => s.id === c.styleProfileId)?.typography ?? DEFAULT_TYPOGRAPHY
+					})
+				: null
+		}))
+	);
+	const urls = await signThumbnails(
+		locals.supabase,
+		keyed.filter((k): k is { comicId: string; key: string } => !!k.key)
+	).catch(() => new Map<string, string>());
 	return {
-		styles: styles.map(summarize),
-		comics: (comics.data ?? []).map((r) => ({
-			id: r.id as string,
-			title: r.title as string,
-			updatedAt: r.updated_at as string,
-			archivedAt: (r.archived_at as string | null) ?? null,
-			pageCount: Array.isArray(r.pages) ? r.pages.length : 0,
-			firstPage: r.firstPage as Page | null,
-			bands: (r.bands as Bands | null) ?? undefined,
-			styleProfileId: (r.styleProfileId as string | null) ?? null,
-			/** Set for comics someone else owns and shared with me. */
-			sharedBy: r.owner_id === user?.id ? null : (ownerEmail.get(r.id as string) ?? 'someone')
+		styles: summaries,
+		comics: rows.map((c, i) => ({
+			...c,
+			thumbKey: keyed[i].key,
+			/** Null until a thumbnail of the current page 1 is saved; the card is then drawn live. */
+			thumbUrl: urls.get(c.id) ?? null
 		}))
 	};
 };

@@ -56,7 +56,7 @@ are unchanged.
       keyboard flow and the watermark on the print pages
       — written, not yet run: the e2e config needs the local Supabase stack, whose ports
       another project's stack holds, and the machine's load (~900) made builds take 16 minutes.
-- [ ] Deploy and check
+- [x] Deploy and check: deployed 2026-10-12; Yan confirmed export from the Export menu works on the live site
 
 ## UI mockups (ASCII)
 

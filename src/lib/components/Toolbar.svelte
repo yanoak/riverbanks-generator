@@ -15,12 +15,15 @@
 	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Users from '@lucide/svelte/icons/users';
+	import Stamp from '@lucide/svelte/icons/stamp';
+	import type { WatermarkSetting } from '$lib/export/watermark';
 
 	let {
 		editor,
 		saveStatus,
 		onexportpng,
 		onexportpdf,
+		watermark = $bindable(),
 		onshare,
 		nav
 	}: {
@@ -28,6 +31,8 @@
 		saveStatus: SaveStatus;
 		onexportpng: () => void;
 		onexportpdf: () => void;
+		/** Laid over PNG and PDF exports while on. */
+		watermark: WatermarkSetting;
 		/** Cloud comics: open the Share dialog. */
 		onshare?: () => void;
 		/** Leading slot: back link / account menu. */
@@ -46,6 +51,31 @@
 		const where = n >= 0 ? `page ${n + 1}` : 'elsewhere';
 		const sel = p.selection.length;
 		return `${p.user.name} — ${where}${sel ? `, ${sel} selected` : ''}`;
+	}
+
+	let watermarkOpen = $state(false);
+	let watermarkButton = $state<HTMLButtonElement>();
+	function closeWatermark(refocus = true) {
+		watermarkOpen = false;
+		if (refocus) watermarkButton?.focus();
+	}
+	/** Focus the checkbox on open; close on Escape or a click outside the control. */
+	function watermarkPopover(node: HTMLElement) {
+		node.querySelector<HTMLInputElement>('input')?.focus();
+		const onkey = (e: KeyboardEvent) => {
+			if (e.key !== 'Escape') return;
+			e.stopPropagation();
+			closeWatermark();
+		};
+		const onpointer = (e: PointerEvent) => {
+			if (!node.parentElement?.contains(e.target as Node)) closeWatermark(false);
+		};
+		node.addEventListener('keydown', onkey);
+		document.addEventListener('pointerdown', onpointer, true);
+		return () => {
+			node.removeEventListener('keydown', onkey);
+			document.removeEventListener('pointerdown', onpointer, true);
+		};
 	}
 
 	const SAVE_LABEL: Record<SaveStatus, string> = {
@@ -154,6 +184,43 @@
 	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
 		<FileText size={16} /><span class="max-2xl:sr-only">PDF</span>
 	</button>
+	<div class="relative">
+		<button
+			class="tool"
+			class:bg-sky-100={watermark.on}
+			class:text-sky-800={watermark.on}
+			bind:this={watermarkButton}
+			onclick={() => (watermarkOpen = !watermarkOpen)}
+			aria-expanded={watermarkOpen}
+			aria-haspopup="true"
+			data-watermark-toggle
+			title={watermark.on ? `Exports are watermarked “${watermark.text}”` : 'Watermark exports'}
+		>
+			<Stamp size={16} /><span class="max-2xl:sr-only">Watermark</span>
+		</button>
+		{#if watermarkOpen}
+			<div
+				class="absolute top-full right-0 z-50 mt-1 w-64 space-y-2 rounded border border-stone-200 bg-white p-3 text-sm shadow-lg"
+				role="group"
+				aria-label="Watermark"
+				{@attach watermarkPopover}
+			>
+				<label class="flex items-center gap-2">
+					<input type="checkbox" bind:checked={watermark.on} />
+					Watermark PNG and PDF
+				</label>
+				<label class="block text-xs text-stone-500">
+					Text
+					<input
+						class="mt-1 block w-full rounded border border-stone-300 px-2 py-1 text-sm text-stone-900"
+						bind:value={watermark.text}
+						placeholder="PREVIEW"
+						onkeydown={(e) => e.key === 'Enter' && closeWatermark()}
+					/>
+				</label>
+			</div>
+		{/if}
+	</div>
 	{#if people.length}
 		<ul class="mr-1 flex -space-x-1" aria-label="Also here">
 			{#each people as p (p.user.id)}

@@ -65,10 +65,24 @@
 		document.querySelector<HTMLElement>('[data-share]')?.focus();
 	}
 	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
+	import { readWatermark, writeWatermark, type WatermarkStorage } from '$lib/export/watermark';
+	import Watermark from './Watermark.svelte';
 	import { resolveBands } from '$lib/model/bands';
 	import { formatOf } from '$lib/model/factory';
 
 	let stage = $state<HTMLElement>();
+
+	/** This browser's storage, if it lets us have it (private windows may not). */
+	function storage(): WatermarkStorage | undefined {
+		try {
+			return globalThis.localStorage;
+		} catch {
+			return undefined;
+		}
+	}
+	/** Laid over every PNG and PDF page while on; the editing canvas never shows it. */
+	let watermark = $state(readWatermark(storage()));
+	$effect(() => writeWatermark(storage(), { on: watermark.on, text: watermark.text }));
 
 	async function exportPng() {
 		const node = stage?.firstElementChild as HTMLElement | null;
@@ -344,7 +358,14 @@
 
 <!-- Offscreen static render of the current page at 1 unit = 1px, for PNG export. -->
 <div class="export-stage" bind:this={stage} aria-hidden="true">
-	{#if loaded}<PageView page={editor.page} scale={1} {typography} bands={editor.bands} />{/if}
+	{#if loaded}
+		<div class="relative w-max">
+			<PageView page={editor.page} scale={1} {typography} bands={editor.bands} />
+			{#if watermark.on}
+				<Watermark width={editor.page.width} height={editor.page.height} text={watermark.text} />
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <!-- Offscreen page 1 at card size, drawn into the My comics thumbnail on close-out. -->
@@ -363,7 +384,7 @@
 <div class="print-pages" aria-hidden="true">
 	{#if loaded}
 		{#each editor.comic.pages as page, i (page.id)}
-			<div class="print-page" style:height={sheet.height}>
+			<div class="print-page relative" style:height={sheet.height}>
 				<PageView
 					{page}
 					scale={sheet.px / page.width}
@@ -371,6 +392,15 @@
 					bands={resolveBands(editor.comic, i)}
 					linkable
 				/>
+				{#if watermark.on}
+					<div
+						class="absolute top-0 left-0"
+						style:width="{sheet.px}px"
+						style:aspect-ratio="{page.width} / {page.height}"
+					>
+						<Watermark width={page.width} height={page.height} text={watermark.text} />
+					</div>
+				{/if}
 			</div>
 		{/each}
 	{/if}
@@ -382,6 +412,7 @@
 		{saveStatus}
 		onexportpng={exportPng}
 		onexportpdf={exportPdf}
+		bind:watermark
 		onshare={cloud && sharing ? () => (sharingOpen = true) : undefined}
 		{nav}
 	/>

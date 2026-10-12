@@ -128,4 +128,5 @@ the credits last.
   JPEGs, because the script rasterised the three SVG images (the two maps and a plain cream
   background). SVGs now go in unchanged, as `image/svg+xml`. The comic already held the JPEGs
   under the SVGs' ids, and those can't be replaced, so each SVG gets an id derived from its old
-  one, and `renameImages` points its panel at it.
+  one, and `renameImages` points its panel at it. Yan re-ran with `--replace` (3 uploaded, 203
+  already there); in the editor all three panels load their new ids, served as `image/svg+xml`.

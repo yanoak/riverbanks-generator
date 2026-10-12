@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { createComic } from '$lib/model/factory';
 import type { Comic } from '$lib/model/types';
 import { checkPage } from '$lib/model/invariants';
-import { imageNeeds, imagePage, joinComics, relineHtml, targetWidth } from './web-edition';
+import {
+	imageNeeds,
+	imagePage,
+	joinComics,
+	relineHtml,
+	renameImages,
+	targetWidth
+} from './web-edition';
 
 function act(title: string, pages: number, header: string): Comic {
 	const comic = createComic(title, 'board');
@@ -144,6 +151,24 @@ describe('imageNeeds', () => {
 			{ comicId: 'c1', assetId: 'a', width: 1000 },
 			{ comicId: 'c2', assetId: 'b', width: 1000 }
 		]);
+	});
+});
+
+describe('renameImages', () => {
+	it('repoints only the panels whose image was renamed', () => {
+		const comic = act('One', 1, '');
+		const [a, b] = comic.pages[0].panels;
+		a.image = {
+			assetId: 'map',
+			naturalWidth: 10,
+			naturalHeight: 10,
+			offsetX: 0,
+			offsetY: 0,
+			scale: 1
+		};
+		b.image = { ...a.image, assetId: 'art' };
+		renameImages(comic, new Map([['map', 'map-svg']]));
+		expect([a.image.assetId, b.image.assetId]).toEqual(['map-svg', 'art']);
 	});
 });
 

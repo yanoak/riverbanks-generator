@@ -76,6 +76,15 @@ export function imagePage(assetId: Id, naturalWidth: number, naturalHeight: numb
 	return page;
 }
 
+/** Point panels at other images: `ids` maps an old asset id to its replacement. */
+export function renameImages(comic: Comic, ids: Map<Id, Id>): void {
+	for (const page of comic.pages)
+		for (const panel of page.panels) {
+			const next = panel.image && ids.get(panel.image.assetId);
+			if (next) panel.image!.assetId = next;
+		}
+}
+
 export interface ImageNeed {
 	/** The comic whose folder holds the image. */
 	comicId: Id;

@@ -24,6 +24,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
 	imageNeeds,
 	imagePage,
+	renameImages,
 	joinComics,
 	relineHtml,
 	targetWidth,
@@ -155,6 +156,12 @@ async function retry<T>(
 	}
 }
 
+/** A stable asset id (UUID-shaped) from some content: the same input always gives the same id. */
+function idFrom(content: string | Buffer): string {
+	const h = createHash('sha256').update(content).digest('hex');
+	return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+
 const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 async function main() {
@@ -207,6 +214,19 @@ async function main() {
 			if (!data) throw new Error(`Image ${need.assetId} of ${need.comicId} is missing.`);
 			writeFileSync(original, Buffer.from(await data.arrayBuffer()));
 		}
+		// SVGs (the Sunda maps) go in as they are: sharp at any size, and tiny already. The
+		// target may hold an earlier run's raster under the same id, which can't be replaced, so
+		// an SVG gets an id of its own.
+		const svg = /^\s*(<\?xml[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/.test(
+			readFileSync(original, 'utf8').slice(0, 2048)
+		);
+		if (svg) {
+			const web = join(OUT, 'web', `${need.assetId}.svg`);
+			writeFileSync(web, readFileSync(original));
+			before += statSync(original).size;
+			after += statSync(web).size;
+			return { need, id: idFrom(`svg:${need.assetId}`), web, type: 'image/svg+xml' };
+		}
 		const [w, opaque] = execFileSync('magick', ['identify', '-format', '%w %[opaque]\n', original])
 			.toString()
 			.split('\n')[0]
@@ -227,13 +247,12 @@ async function main() {
 		]);
 		before += statSync(original).size;
 		after += statSync(web).size;
-		return { need, web, type: png ? 'image/png' : 'image/jpeg' };
+		return { need, id: need.assetId, web, type: png ? 'image/png' : 'image/jpeg' };
 	});
 	console.log(`Images: ${mb(before)} → ${mb(after)} at ${pxPerUnit} px per page unit`);
 
 	// The credits, rendered from the PDF onto white.
-	const hash = createHash('sha256').update(readFileSync(CREDITS.pdf)).digest('hex');
-	const creditsId = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+	const creditsId = idFrom(readFileSync(CREDITS.pdf));
 	const credits = join(OUT, 'web', `${creditsId}.jpg`);
 	execFileSync('magick', [
 		'-density',
@@ -258,6 +277,7 @@ async function main() {
 	console.log(`Credits: ${cw} × ${ch}, ${mb(statSync(credits).size)}`);
 	made.push({
 		need: { comicId: target, assetId: creditsId, width: 1000 },
+		id: creditsId,
 		web: credits,
 		type: 'image/jpeg'
 	});
@@ -274,6 +294,10 @@ async function main() {
 			balloon.html = relineHtml(balloon.html, RETITLE[balloon.id]);
 			retitled.add(balloon.id);
 		}
+	renameImages(
+		joined,
+		new Map(made.filter((m) => m.id !== m.need.assetId).map((m) => [m.need.assetId, m.id]))
+	);
 	const missed = Object.keys(RETITLE).filter((id) => !retitled.has(id));
 	if (missed.length) throw new Error(`Lettering to retitle not found: ${missed.join(', ')}`);
 	console.log(`${current.title}: ${joined.pages.length} pages`);
@@ -290,12 +314,12 @@ async function main() {
 		for (const o of page ?? []) present.add(o.name);
 		if ((page ?? []).length < 1000) break;
 	}
-	const missing = made.filter(({ need }) => !present.has(need.assetId));
+	const missing = made.filter(({ id }) => !present.has(id));
 	console.log(`Uploading ${missing.length} images (${made.length - missing.length} already there)`);
-	await pool(missing, 6, async ({ need, web, type }) => {
+	await pool(missing, 6, async ({ id, web, type }) => {
 		// A retry after an upload that landed but lost its reply finds the image there: done.
-		await retry(`Uploading ${need.assetId}`, async () => {
-			const result = await bucket.upload(`${target}/${need.assetId}`, readFileSync(web), {
+		await retry(`Uploading ${id}`, async () => {
+			const result = await bucket.upload(`${target}/${id}`, readFileSync(web), {
 				contentType: type
 			});
 			return /already exists|duplicate/i.test(describe(result.error))

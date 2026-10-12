@@ -124,3 +124,8 @@ the credits last.
     empty comic with a lower `--px-per-unit`, rather than re-running with `--replace`.
   - Any edit made in the compilation itself is lost on a re-run with `--replace`. Make
     lasting changes in the script (`SERIES`, `RETITLE`) or in the source comics.
+- **SVGs kept as vectors (2026-10-12, Yan):** the first PDF had the Sunda maps as blurry
+  JPEGs, because the script rasterised the three SVG images (the two maps and a plain cream
+  background). SVGs now go in unchanged, as `image/svg+xml`. The comic already held the JPEGs
+  under the SVGs' ids, and those can't be replaced, so each SVG gets an id derived from its old
+  one, and `renameImages` points its panel at it.

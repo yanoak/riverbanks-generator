@@ -13,9 +13,9 @@
 	import type { Snippet } from 'svelte';
 
 	import Download from '@lucide/svelte/icons/download';
-	import FileText from '@lucide/svelte/icons/file-text';
 	import Users from '@lucide/svelte/icons/users';
-	import Stamp from '@lucide/svelte/icons/stamp';
+	import Type from '@lucide/svelte/icons/type';
+	import Dropdown from './Dropdown.svelte';
 	import type { WatermarkSetting } from '$lib/export/watermark';
 
 	let {
@@ -51,31 +51,6 @@
 		const where = n >= 0 ? `page ${n + 1}` : 'elsewhere';
 		const sel = p.selection.length;
 		return `${p.user.name} — ${where}${sel ? `, ${sel} selected` : ''}`;
-	}
-
-	let watermarkOpen = $state(false);
-	let watermarkButton = $state<HTMLButtonElement>();
-	function closeWatermark(refocus = true) {
-		watermarkOpen = false;
-		if (refocus) watermarkButton?.focus();
-	}
-	/** Focus the checkbox on open; close on Escape or a click outside the control. */
-	function watermarkPopover(node: HTMLElement) {
-		node.querySelector<HTMLInputElement>('input')?.focus();
-		const onkey = (e: KeyboardEvent) => {
-			if (e.key !== 'Escape') return;
-			e.stopPropagation();
-			closeWatermark();
-		};
-		const onpointer = (e: PointerEvent) => {
-			if (!node.parentElement?.contains(e.target as Node)) closeWatermark(false);
-		};
-		node.addEventListener('keydown', onkey);
-		document.addEventListener('pointerdown', onpointer, true);
-		return () => {
-			node.removeEventListener('keydown', onkey);
-			document.removeEventListener('pointerdown', onpointer, true);
-		};
 	}
 
 	const SAVE_LABEL: Record<SaveStatus, string> = {
@@ -167,60 +142,49 @@
 
 	<div class="mx-2 h-6 w-px bg-stone-200"></div>
 
-	{#each BALLOONS as [type, label, key] (type)}
-		<button class="tool" onclick={() => editor.addBalloon(type)} title="Add {label} ({key})">
-			{label}
-		</button>
-	{/each}
+	<Dropdown title="Add a balloon, caption or sound effect">
+		{#snippet label()}<Type size={16} /><span>Text</span>{/snippet}
+		{#each BALLOONS as [type, label, key] (type)}
+			<button class="item" data-close onclick={() => editor.addBalloon(type)}>
+				{label}<kbd>{key}</kbd>
+			</button>
+		{/each}
+	</Dropdown>
 
 	<div class="flex-1"></div>
 
 	{#if editor.status}
 		<p class="mr-3 text-amber-700" role="status">{editor.status}</p>
 	{/if}
-	<button class="tool" onclick={onexportpng} title="Download this page as PNG (⌘E)">
-		<Download size={16} /><span class="max-2xl:sr-only">PNG</span>
-	</button>
-	<button class="tool" onclick={onexportpdf} title="Print every page, or save as PDF">
-		<FileText size={16} /><span class="max-2xl:sr-only">PDF</span>
-	</button>
-	<div class="relative">
-		<button
-			class="tool"
-			class:bg-sky-100={watermark.on}
-			class:text-sky-800={watermark.on}
-			bind:this={watermarkButton}
-			onclick={() => (watermarkOpen = !watermarkOpen)}
-			aria-expanded={watermarkOpen}
-			aria-haspopup="true"
-			data-watermark-toggle
-			title={watermark.on ? `Exports are watermarked “${watermark.text}”` : 'Watermark exports'}
-		>
-			<Stamp size={16} /><span class="max-2xl:sr-only">Watermark</span>
+	<Dropdown
+		title={watermark.on
+			? `Download or print — watermarked “${watermark.text}”`
+			: 'Download or print'}
+		align="right"
+		active={watermark.on}
+	>
+		{#snippet label()}<Download size={16} /><span>Export</span>{/snippet}
+		<button class="item" data-close="refocus" onclick={onexportpng}>
+			PNG — this page<kbd>⌘E</kbd>
 		</button>
-		{#if watermarkOpen}
-			<div
-				class="absolute top-full right-0 z-50 mt-1 w-64 space-y-2 rounded border border-stone-200 bg-white p-3 text-sm shadow-lg"
-				role="group"
-				aria-label="Watermark"
-				{@attach watermarkPopover}
-			>
-				<label class="flex items-center gap-2">
-					<input type="checkbox" bind:checked={watermark.on} />
-					Watermark PNG and PDF
-				</label>
-				<label class="block text-xs text-stone-500">
-					Text
-					<input
-						class="mt-1 block w-full rounded border border-stone-300 px-2 py-1 text-sm text-stone-900"
-						bind:value={watermark.text}
-						placeholder="PREVIEW"
-						onkeydown={(e) => e.key === 'Enter' && closeWatermark()}
-					/>
-				</label>
-			</div>
-		{/if}
-	</div>
+		<button class="item" data-close="refocus" onclick={onexportpdf}>PDF — every page</button>
+		<div class="my-1 border-t border-stone-200"></div>
+		<div class="w-64 space-y-2 px-3 py-1.5">
+			<label class="flex items-center gap-2">
+				<input type="checkbox" bind:checked={watermark.on} data-watermark-toggle />
+				Watermark PNG and PDF
+			</label>
+			<label class="block text-xs text-stone-500">
+				Text
+				<input
+					type="text"
+					class="mt-1 block w-full rounded border border-stone-300 px-2 py-1 text-sm text-stone-900"
+					bind:value={watermark.text}
+					placeholder="PREVIEW"
+				/>
+			</label>
+		</div>
+	</Dropdown>
 	{#if people.length}
 		<ul class="mr-1 flex -space-x-1" aria-label="Also here">
 			{#each people as p (p.user.id)}
@@ -253,6 +217,12 @@
 
 <style lang="postcss">
 	@reference "../../routes/layout.css";
+	.item {
+		@apply flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left whitespace-nowrap outline-none hover:bg-stone-100 focus-visible:bg-stone-100;
+	}
+	.item kbd {
+		@apply font-sans text-xs text-stone-400;
+	}
 	.tool {
 		@apply inline-flex h-8 shrink-0 items-center gap-1.5 rounded px-2 whitespace-nowrap hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-transparent;
 	}

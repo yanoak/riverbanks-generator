@@ -115,7 +115,8 @@ test('a non-contiguous merge is refused with a reason', async ({ page }) => {
 
 test('a caption becomes a tilted pennant from the inspector, and back', async ({ page }) => {
 	await openEditor(page, '/local');
-	await page.getByRole('button', { name: 'Caption', exact: true }).click();
+	await page.getByRole('button', { name: 'Text', exact: true }).click();
+	await page.getByRole('button', { name: /^Caption/ }).click();
 	await page.keyboard.press('Escape');
 
 	const inspector = page.getByRole('complementary', { name: 'Inspector' });

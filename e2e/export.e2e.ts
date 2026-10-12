@@ -50,7 +50,8 @@ test('exports the current page as a 2× PNG with its image and lettering', async
 	await page.keyboard.press('Escape');
 
 	const download = page.waitForEvent('download');
-	await page.getByRole('button', { name: 'PNG' }).click();
+	await page.getByRole('button', { name: 'Export', exact: true }).click();
+	await page.getByRole('button', { name: /^PNG/ }).click();
 	const file = await download;
 	expect(file.suggestedFilename()).toBe('untitled-comic-page-1.png');
 	const path = test.info().outputPath('page-1.png');
@@ -69,4 +70,39 @@ test('prints every page on its own sheet for PDF', async ({ page, browserName })
 	const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
 	const pages = pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? [];
 	expect(pages).toHaveLength(3);
+});
+
+test('the Export menu works from the keyboard', async ({ page }) => {
+	await openEditor(page, '/local');
+	const exportButton = page.getByRole('button', { name: 'Export', exact: true });
+	await exportButton.focus();
+	await page.keyboard.press('Enter');
+	await expect(exportButton).toHaveAttribute('aria-expanded', 'true');
+	await expect(page.getByRole('button', { name: /^PNG/ })).toBeFocused();
+	await page.keyboard.press('ArrowDown');
+	await expect(page.getByRole('button', { name: /^PDF/ })).toBeFocused();
+	await page.keyboard.press('ArrowUp');
+	await page.keyboard.press('ArrowUp');
+	await expect(page.getByRole('checkbox', { name: 'Watermark PNG and PDF' })).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect(exportButton).toHaveAttribute('aria-expanded', 'false');
+	await expect(exportButton).toBeFocused();
+});
+
+test('a watermark goes on every printed page, and stays on after a reload', async ({ page }) => {
+	await openEditor(page, '/local');
+	await page.getByRole('button', { name: 'Add page' }).click();
+	const marks = page.locator('.print-pages [data-watermark]');
+	await expect(marks).toHaveCount(0);
+
+	await page.getByRole('button', { name: 'Export', exact: true }).click();
+	await page.getByRole('checkbox', { name: 'Watermark PNG and PDF' }).check();
+	await page.getByRole('textbox', { name: 'Text', exact: true }).fill('DRAFT');
+	await page.keyboard.press('Enter');
+	await expect(marks).toHaveCount(2);
+	await expect(marks.first()).toHaveText('DRAFT');
+	await expect(page.locator('main [data-watermark]')).toHaveCount(0);
+
+	await page.reload();
+	await expect(page.locator('.print-pages [data-watermark]').first()).toHaveText('DRAFT');
 });

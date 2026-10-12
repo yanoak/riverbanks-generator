@@ -35,3 +35,6 @@ supabase/signing_keys.json
 
 # Riverbanks studio material (from cosmolocalcnx; names people, local only, never pushed)
 /riverbanks/
+
+# Web edition images (scripts/web-edition.ts)
+/content/web-edition/

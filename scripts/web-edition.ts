@@ -44,7 +44,7 @@ const TITLES = '91f9a6f0-9c54-42f2-aa3e-43d9752d2c11'; // Riverbanks: Title Boar
  * Prologue and Act One, so Act One's divider goes after it. The Epilogue has no divider.
  */
 const SERIES: [string, number[]?][] = [
-	[TITLES, [1, 2]],
+	[TITLES, [2, 1]], // the premiere poster first (Yan, 2026-10-12)
 	[PAO, [1]],
 	[TITLES, [3]],
 	[PAO, [2, 3, 4, 5]],

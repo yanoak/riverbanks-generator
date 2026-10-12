@@ -1,8 +1,8 @@
 ---
 slug: 2026-10-12_web-edition-pdf
-status: active
+status: done
 started: 2026-10-12
-finished:
+finished: 2026-10-12
 issue:
 ---
 
@@ -85,7 +85,7 @@ PDF of web size.
 - [x] Yan re-runs with `--replace` (after the upload fixes); checked: 47 pages, the posters
       (1–2), the dividers in the source's colours and font, the retitles (17, 24) centred and
       inside the page, and the credits (47) edge to edge and legible
-- [ ] Export the PDF from the editor and note its size
+- [x] Export the PDF from the editor and note its size: 35.6 MB, 47 A1 pages
 
 ## Test list (TDD)
 
@@ -108,3 +108,19 @@ PDF of web size.
 - Export the PDF from the editor, then check its size and that it reads well on screen.
 
 ## Outcome
+
+Done. *Compilation Lo Res* (`e3368ea0`) holds the 47-page web edition. Yan exported it from the
+editor as `Compilation Lo Res — Riverbanks.pdf`: **35.6 MB**, 47 pages at A1 (594 × 841 mm).
+A contact sheet of every page shows no blank panels, the dividers in place, both retitles, and
+the credits last.
+
+- **Images:** 205 images went from 982.7 MB of originals to 25.1 MB at 1.6 px per page unit,
+  plus the 0.6 MB credits board. JPEG overhead and the vector lettering make up the rest of the
+  PDF.
+- **Poster order:** Yan swapped the posters in the editor afterwards, so the premiere poster
+  opens the book. The script follows that order, so a re-run keeps it.
+- **For next time:**
+  - A smaller PDF needs new images, since a comic's images can't be replaced. Fill a fresh
+    empty comic with a lower `--px-per-unit`, rather than re-running with `--replace`.
+  - Any edit made in the compilation itself is lost on a re-run with `--replace`. Make
+    lasting changes in the script (`SERIES`, `RETITLE`) or in the source comics.

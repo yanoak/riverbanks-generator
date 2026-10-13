@@ -64,7 +64,11 @@ the export. The choices persist per browser.
       dialog's close event: Chrome holds that event back in a hidden tab, and that blocked the
       first build's download. e2e updated in `e2e/export.e2e.ts` but not run: the e2e config
       needs the local Supabase stack, which is still blocked by a port clash.
-- [ ] Deploy and check on the live site; B5 PDF of the compilation for Sam
+- [x] Deploy and check on the live site. Yan deployed (dpl_D6stQW3hQAYamAjPCaN2nGC7QW6H). On
+      riverbanks-generator.vercel.app, with `window.print` stubbed: Export opens the modal focused
+      on PDF, lists the four papers, and B5 + Download writes `@page { size: 176mm 250mm }`, sizes
+      all 51 sheets 176 × 250 mm, calls print once, persists B5 and refocuses Export.
+- [ ] B5 PDF of the compilation for Sam: Yan saves it from Chrome's print dialog
 
 ## UI mockups (ASCII)
 

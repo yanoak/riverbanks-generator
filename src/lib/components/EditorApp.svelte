@@ -14,7 +14,7 @@
 	import { Presence } from '$lib/collab/presence.svelte';
 	import { colorFor, displayName } from '$lib/collab/hold';
 	import type { DocumentSource } from '$lib/persistence/source';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, tick, type Snippet } from 'svelte';
 	import type { StyleSummary } from '$lib/styles/styles';
 	import { DEFAULT_TYPOGRAPHY } from '$lib/typography/typography';
 	import type { ModelOption } from '$lib/generation/models';
@@ -65,8 +65,21 @@
 		document.querySelector<HTMLElement>('[data-share]')?.focus();
 	}
 	import { downloadDataUrl, pageToPng, slug } from '$lib/export/png';
-	import { readWatermark, writeWatermark, type WatermarkStorage } from '$lib/export/watermark';
+	import {
+		readWatermark,
+		writeWatermark,
+		type WatermarkSetting,
+		type WatermarkStorage
+	} from '$lib/export/watermark';
+	import {
+		fitPage,
+		readExportPrefs,
+		sheetFor,
+		writeExportPrefs,
+		type ExportPrefs
+	} from '$lib/export/paper';
 	import Watermark from './Watermark.svelte';
+	import ExportDialog from './ExportDialog.svelte';
 	import { resolveBands } from '$lib/model/bands';
 	import { formatOf } from '$lib/model/factory';
 
@@ -82,7 +95,27 @@
 	}
 	/** Laid over every PNG and PDF page while on; the editing canvas never shows it. */
 	let watermark = $state(readWatermark(storage()));
-	$effect(() => writeWatermark(storage(), { on: watermark.on, text: watermark.text }));
+	$effect(() =>
+		writeWatermark(storage(), { on: watermark.on, text: watermark.text, style: watermark.style })
+	);
+	/** The last download choice: format and paper size. */
+	let exportPrefs = $state(readExportPrefs(storage()));
+	$effect(() =>
+		writeExportPrefs(storage(), { format: exportPrefs.format, paper: exportPrefs.paper })
+	);
+
+	let exportOpen = $state(false);
+	function closeExport() {
+		exportOpen = false;
+		document.querySelector<HTMLElement>('[data-export]')?.focus();
+	}
+	async function download(prefs: ExportPrefs, mark: WatermarkSetting) {
+		exportPrefs = prefs;
+		watermark = mark;
+		await tick(); // let the print pages and @page rule take the new sheet and watermark
+		if (prefs.format === 'png') await exportPng();
+		else exportPdf();
+	}
 
 	async function exportPng() {
 		const node = stage?.firstElementChild as HTMLElement | null;
@@ -104,11 +137,10 @@
 
 	const editor = new Editor();
 
-	/** The printed sheet, from the first page's shape: A1 for boards, else US comic trim. */
+	/** The printed sheet: the chosen paper, or for Original the first page's shape (A1 for
+	    boards, else US comic trim). Each page is fitted inside it and centred. */
 	const sheet = $derived(
-		editor.comic.pages[0] && formatOf(editor.comic.pages[0]) === 'board'
-			? { width: '594mm', height: '841mm', px: (594 / 25.4) * 96 }
-			: { width: '6.625in', height: '10.25in', px: 6.625 * 96 }
+		sheetFor(exportPrefs.paper, editor.comic.pages[0] ? formatOf(editor.comic.pages[0]) : null)
 	);
 
 	// @page can't take a CSS variable, so the print stylesheet's sheet size is written here.
@@ -362,7 +394,12 @@
 		<div class="relative w-max">
 			<PageView page={editor.page} scale={1} {typography} bands={editor.bands} />
 			{#if watermark.on}
-				<Watermark width={editor.page.width} height={editor.page.height} text={watermark.text} />
+				<Watermark
+					width={editor.page.width}
+					height={editor.page.height}
+					text={watermark.text}
+					style={watermark.style}
+				/>
 			{/if}
 		</div>
 	{/if}
@@ -384,23 +421,31 @@
 <div class="print-pages" aria-hidden="true">
 	{#if loaded}
 		{#each editor.comic.pages as page, i (page.id)}
-			<div class="print-page relative" style:height={sheet.height}>
-				<PageView
-					{page}
-					scale={sheet.px / page.width}
-					{typography}
-					bands={resolveBands(editor.comic, i)}
-					linkable
-				/>
-				{#if watermark.on}
-					<div
-						class="absolute top-0 left-0"
-						style:width="{sheet.px}px"
-						style:aspect-ratio="{page.width} / {page.height}"
-					>
-						<Watermark width={page.width} height={page.height} text={watermark.text} />
-					</div>
-				{/if}
+			{@const fit = fitPage(sheet, page)}
+			<div class="print-page relative" style:width={sheet.width} style:height={sheet.height}>
+				<div
+					class="absolute"
+					style:left="{fit.left}px"
+					style:top="{fit.top}px"
+					style:width="{page.width * fit.scale}px"
+					style:height="{page.height * fit.scale}px"
+				>
+					<PageView
+						{page}
+						scale={fit.scale}
+						{typography}
+						bands={resolveBands(editor.comic, i)}
+						linkable
+					/>
+					{#if watermark.on}
+						<Watermark
+							width={page.width}
+							height={page.height}
+							text={watermark.text}
+							style={watermark.style}
+						/>
+					{/if}
+				</div>
 			</div>
 		{/each}
 	{/if}
@@ -410,12 +455,22 @@
 	<Toolbar
 		{editor}
 		{saveStatus}
-		onexportpng={exportPng}
-		onexportpdf={exportPdf}
-		bind:watermark
+		onexport={() => (exportOpen = true)}
+		{watermark}
 		onshare={cloud && sharing ? () => (sharingOpen = true) : undefined}
 		{nav}
 	/>
+	{#if exportOpen}
+		<ExportDialog
+			title={editor.comic.title}
+			pageCount={editor.comic.pages.length}
+			pageNumber={editor.pageIndex + 1}
+			prefs={exportPrefs}
+			{watermark}
+			onclose={closeExport}
+			ondownload={download}
+		/>
+	{/if}
 	{#if sharingOpen && cloud && sharing}
 		<ShareDialog
 			supabase={sharing.supabase}

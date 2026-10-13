@@ -21,6 +21,33 @@ describe('watermarkLayout', () => {
 	it('draws nothing for blank text', () => {
 		expect(watermarkLayout(1000, 1416, '')).toBeNull();
 		expect(watermarkLayout(1000, 1416, '   ')).toBeNull();
+		expect(watermarkLayout(1000, 1416, ' ', 'edge')).toBeNull();
+	});
+
+	it('is diagonal unless told otherwise', () => {
+		expect(watermarkLayout(1000, 1416, 'PREVIEW')).toEqual(
+			watermarkLayout(1000, 1416, 'PREVIEW', 'diagonal')
+		);
+	});
+});
+
+describe('watermarkLayout, edge style', () => {
+	it('runs small and tracked down the right margin, centred on the page height', () => {
+		const edge = watermarkLayout(1000, 1416, 'PREVIEW', 'edge')!;
+		expect(edge.angle).toBe(90);
+		expect(edge.y).toBe(708);
+		expect(edge.x).toBeGreaterThan(970);
+		expect(edge.x).toBeLessThan(1000);
+		expect(edge.fontSize).toBeLessThanOrEqual(1000 * 0.018);
+		expect(edge.letterSpacing).toBeGreaterThan(0);
+	});
+
+	it('shrinks long text to stay within the middle of the margin', () => {
+		const long = 'PREVIEW COPY — RIVERBANKS — SEAPUNK STUDIOS — NOT FOR SALE';
+		const edge = watermarkLayout(1000, 1416, long, 'edge')!;
+		const length = long.length * edge.fontSize * (0.65 + edge.letterSpacing);
+		expect(length).toBeLessThanOrEqual(1416 * 0.6 + 1e-6);
+		expect(edge.fontSize).toBeLessThan(watermarkLayout(1000, 1416, 'PREVIEW', 'edge')!.fontSize);
 	});
 });
 
@@ -36,12 +63,20 @@ function memory(): WatermarkStorage & { data: Map<string, string> } {
 describe('readWatermark / writeWatermark', () => {
 	it('round-trips the setting', () => {
 		const storage = memory();
-		writeWatermark(storage, { on: true, text: 'DRAFT' });
-		expect(readWatermark(storage)).toEqual({ on: true, text: 'DRAFT' });
+		writeWatermark(storage, { on: true, text: 'DRAFT', style: 'diagonal' });
+		expect(readWatermark(storage)).toEqual({ on: true, text: 'DRAFT', style: 'diagonal' });
+	});
+
+	it('reads a setting saved before styles existed, or with an unknown style, as edge', () => {
+		const old = memory();
+		old.data.set('riverbanks:watermark', JSON.stringify({ on: true, text: 'DRAFT' }));
+		expect(readWatermark(old)).toEqual({ on: true, text: 'DRAFT', style: 'edge' });
+		old.data.set('riverbanks:watermark', JSON.stringify({ on: true, text: 'X', style: 'tiled' }));
+		expect(readWatermark(old)).toEqual({ on: true, text: 'X', style: 'edge' });
 	});
 
 	it('reads as off with PREVIEW when missing, malformed or unavailable', () => {
-		const off = { on: false, text: 'PREVIEW' };
+		const off = { on: false, text: 'PREVIEW', style: 'edge' } as const;
 		expect(readWatermark(memory())).toEqual(off);
 		const bad = memory();
 		bad.data.set('riverbanks:watermark', '{nope');

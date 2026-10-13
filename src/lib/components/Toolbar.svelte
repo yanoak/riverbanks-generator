@@ -21,17 +21,16 @@
 	let {
 		editor,
 		saveStatus,
-		onexportpng,
-		onexportpdf,
-		watermark = $bindable(),
+		onexport,
+		watermark,
 		onshare,
 		nav
 	}: {
 		editor: Editor;
 		saveStatus: SaveStatus;
-		onexportpng: () => void;
-		onexportpdf: () => void;
-		/** Laid over PNG and PDF exports while on. */
+		/** Open the download options. */
+		onexport: () => void;
+		/** Laid over PNG and PDF exports while on; tints the Export button. */
 		watermark: WatermarkSetting;
 		/** Cloud comics: open the Share dialog. */
 		onshare?: () => void;
@@ -156,35 +155,18 @@
 	{#if editor.status}
 		<p class="mr-3 text-amber-700" role="status">{editor.status}</p>
 	{/if}
-	<Dropdown
+	<button
+		class="tool"
+		class:bg-sky-100={watermark.on}
+		class:text-sky-800={watermark.on}
+		data-export
+		onclick={onexport}
 		title={watermark.on
 			? `Download or print — watermarked “${watermark.text}”`
 			: 'Download or print'}
-		align="right"
-		active={watermark.on}
 	>
-		{#snippet label()}<Download size={16} /><span>Export</span>{/snippet}
-		<button class="item" data-close="refocus" onclick={onexportpng}>
-			PNG — this page<kbd>⌘E</kbd>
-		</button>
-		<button class="item" data-close="refocus" onclick={onexportpdf}>PDF — every page</button>
-		<div class="my-1 border-t border-stone-200"></div>
-		<div class="w-64 space-y-2 px-3 py-1.5">
-			<label class="flex items-center gap-2">
-				<input type="checkbox" bind:checked={watermark.on} data-watermark-toggle />
-				Watermark PNG and PDF
-			</label>
-			<label class="block text-xs text-stone-500">
-				Text
-				<input
-					type="text"
-					class="mt-1 block w-full rounded border border-stone-300 px-2 py-1 text-sm text-stone-900"
-					bind:value={watermark.text}
-					placeholder="PREVIEW"
-				/>
-			</label>
-		</div>
-	</Dropdown>
+		<Download size={16} /><span>Export</span>
+	</button>
 	{#if people.length}
 		<ul class="mr-1 flex -space-x-1" aria-label="Also here">
 			{#each people as p (p.user.id)}

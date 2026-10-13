@@ -555,12 +555,22 @@
 						>
 					{/if}
 				</span>
-				<input
-					class="w-32 min-w-0 rounded border border-stone-300 px-2 py-0.5"
-					data-band-slot={slot}
-					value={text[slot]}
-					onchange={(e) => editor.setBandText(band, slot, e.currentTarget.value)}
-				/>
+				{#if band === 'footer' && slot === 'center'}
+					<!-- Two lines, e.g. the page number over the site; an input would drop the break. -->
+					<textarea
+						class="w-32 min-w-0 resize-none rounded border border-stone-300 px-2 py-0.5"
+						rows="2"
+						data-band-slot={slot}
+						value={text[slot]}
+						onchange={(e) => editor.setBandText(band, slot, e.currentTarget.value)}></textarea>
+				{:else}
+					<input
+						class="w-32 min-w-0 rounded border border-stone-300 px-2 py-0.5"
+						data-band-slot={slot}
+						value={text[slot]}
+						onchange={(e) => editor.setBandText(band, slot, e.currentTarget.value)}
+					/>
+				{/if}
 			</label>
 		{/each}
 		<div class="mt-3 grid gap-2">

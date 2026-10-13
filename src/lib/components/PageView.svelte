@@ -528,14 +528,14 @@
 	{@const qr = href ? qrMatrix(href) : null}
 	{@const qrSide = Math.min(bottom * 0.72, 150)}
 	<div
-		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] content-end items-baseline gap-6"
+		class="band footer absolute inset-x-0 bottom-0 grid grid-cols-[1fr_auto_1fr] content-end items-baseline-last gap-6"
 		style:height="{bottom}px"
 		style:--band="{bottom}px"
 		style:padding-inline="{Math.min(bottom * 0.07, 6)}px"
 		style:padding-bottom="{Math.min(bottom * 0.09, 8)}px"
 	>
 		<span class="text-left">{bands?.footer.left}</span>
-		<span class="small text-center">{bands?.footer.center}</span>
+		<span class="small center text-center">{bands?.footer.center}</span>
 		<span class="flex items-baseline justify-end gap-[0.6em] text-right">
 			<span>{bands?.footer.right}</span>
 			{#if qr}
@@ -686,6 +686,11 @@
 		/* Rubik Pixels has no bold, and a synthesised one fills the pixel gaps; a thin stroke
 		   thickens the letters and keeps the texture (0.03em already fills it in). */
 		-webkit-text-stroke: 0.02em currentColor;
+	}
+	/* A line break in the centre slot starts a new line (the page number over the site); the
+	   names at either end sit on its last line. */
+	.footer .center {
+		white-space: pre-line;
 	}
 	.footer .small,
 	.qr .small {
